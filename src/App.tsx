@@ -9,6 +9,10 @@ import Transactions from "./pages/Transactions";
 import Ledger from "./pages/Ledger";
 import Analytics from "./pages/Analytics";
 import More from "./pages/More";
+import Users from "./pages/Users";
+import Settings from "./pages/Settings";
+import Subscription from "./pages/Subscription";
+import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +30,10 @@ const App = () => (
           <Route path="/ledger" element={<Ledger />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/more" element={<More />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/subscription" element={<Subscription />} />
+          <Route path="/help" element={<Help />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
