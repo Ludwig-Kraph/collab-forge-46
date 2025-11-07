@@ -14,16 +14,262 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mpesa_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: Database["public"]["Enums"]["mpesa_account_type"]
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          account_type: Database["public"]["Enums"]["mpesa_account_type"]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: Database["public"]["Enums"]["mpesa_account_type"]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          organization_id: string | null
+          phone_number: string
+          pin_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+          organization_id?: string | null
+          phone_number: string
+          pin_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          organization_id?: string | null
+          phone_number?: string
+          pin_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          free_stk_pushes_remaining: number
+          id: string
+          is_active: boolean
+          max_stk_pushes: number | null
+          max_users: number
+          started_at: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          used_stk_pushes: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          free_stk_pushes_remaining?: number
+          id?: string
+          is_active?: boolean
+          max_stk_pushes?: number | null
+          max_users?: number
+          started_at?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          used_stk_pushes?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          free_stk_pushes_remaining?: number
+          id?: string
+          is_active?: boolean
+          max_stk_pushes?: number | null
+          max_users?: number
+          started_at?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          used_stk_pushes?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string
+          description: string | null
+          id: string
+          mpesa_account_id: string
+          mpesa_receipt_number: string | null
+          phone_number: string
+          status: string
+          transaction_date: string
+          transaction_id: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          mpesa_account_id: string
+          mpesa_receipt_number?: string | null
+          phone_number: string
+          status?: string
+          transaction_date?: string
+          transaction_id: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          mpesa_account_id?: string
+          mpesa_receipt_number?: string | null
+          phone_number?: string
+          status?: string
+          transaction_date?: string
+          transaction_id?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_mpesa_account_id_fkey"
+            columns: ["mpesa_account_id"]
+            isOneToOne: false
+            referencedRelation: "mpesa_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "user" | "viewer"
+      mpesa_account_type: "till" | "paybill" | "pochi"
+      subscription_tier:
+        | "free_trial"
+        | "basic"
+        | "standard"
+        | "professional"
+        | "enterprise"
+        | "corporate"
+        | "government"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +396,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "user", "viewer"],
+      mpesa_account_type: ["till", "paybill", "pochi"],
+      subscription_tier: [
+        "free_trial",
+        "basic",
+        "standard",
+        "professional",
+        "enterprise",
+        "corporate",
+        "government",
+      ],
+    },
   },
 } as const
