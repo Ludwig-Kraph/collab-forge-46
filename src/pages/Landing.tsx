@@ -13,6 +13,7 @@ import {
   Check
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const tiers = [
   {
@@ -78,7 +79,7 @@ export default function Landing() {
       <section className="container py-20 md:py-32">
         <div className="mx-auto max-w-3xl text-center space-y-6">
           <Badge variant="secondary" className="mb-4">
-            Powered by MPESA
+            🚀 Now in Beta - Join Early Adopters
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
             Streamline Your{' '}
@@ -86,17 +87,20 @@ export default function Landing() {
               MPESA Payments
             </span>
           </h1>
-          <p className="text-xl text-muted-foreground">
-            Trigger STK push payments, automatically capture transactions, and manage your digital ledger - all in one place.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Trigger STK push payments, automatically capture transactions, and manage your digital ledger - all in one powerful platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" onClick={() => navigate('/auth')}>
+            <Button size="lg" onClick={() => navigate('/auth')} className="shadow-elegant">
               Start Free Trial
             </Button>
             <Button size="lg" variant="outline" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
               Learn More
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground">
+            ✨ No credit card required • 3 free STK pushes included
+          </p>
         </div>
       </section>
 
@@ -175,29 +179,32 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section className="container py-20">
+      <section id="pricing" className="container py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Choose Your Plan
+            Simple, Transparent Pricing
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Start with our free trial and upgrade as you grow
+            Start with our free trial and upgrade as you grow. No hidden fees.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {tiers.map((tier) => (
-            <Card key={tier.name} className={tier.popular ? 'border-primary shadow-lg' : ''}>
+            <Card key={tier.name} className={cn(
+              'relative',
+              tier.popular && 'border-primary shadow-elegant scale-105'
+            )}>
               <CardHeader>
                 {tier.popular && (
-                  <Badge className="w-fit mb-2">Most Popular</Badge>
+                  <Badge className="w-fit mb-2 shadow-glow">⭐ Most Popular</Badge>
                 )}
-                <CardTitle>{tier.name}</CardTitle>
+                <CardTitle className="text-xl">{tier.name}</CardTitle>
                 <div className="mt-4">
                   <span className="text-3xl font-bold">{tier.price}</span>
-                  {tier.period && <span className="text-muted-foreground">{tier.period}</span>}
+                  {tier.period && <span className="text-muted-foreground text-sm">{tier.period}</span>}
                 </div>
-                <CardDescription className="mt-2">{tier.description}</CardDescription>
+                <CardDescription className="mt-2 h-12">{tier.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
