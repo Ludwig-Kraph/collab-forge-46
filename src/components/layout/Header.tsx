@@ -1,4 +1,4 @@
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin, userRole } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -83,7 +83,15 @@ const Header = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">My Account</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">My Account</p>
+                    {isAdmin && (
+                      <Badge variant="default" className="ml-2 text-xs">
+                        <Shield className="mr-1 h-3 w-3" />
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">{user?.phone}</p>
                 </div>
               </DropdownMenuLabel>
