@@ -10,8 +10,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Search, MessageCircle, Book, Video, Mail, Phone } from "lucide-react";
+import { Search, MessageCircle, Book, Video, Mail, Phone, FileText } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const faqCategories = [
@@ -78,6 +79,7 @@ const faqCategories = [
 ];
 
 const Help = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -112,7 +114,22 @@ const Help = () => {
         </div>
 
         {/* Quick Links */}
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
+        <div className="mb-8 grid gap-4 md:grid-cols-4">
+          <Card 
+            className="transition-smooth hover:shadow-elegant cursor-pointer"
+            onClick={() => navigate('/how-to')}
+          >
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">How to Guide</h3>
+                <p className="text-sm text-muted-foreground">Registration & Setup</p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="transition-smooth hover:shadow-elegant cursor-pointer">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">

@@ -22,6 +22,7 @@ const Users = lazy(() => import("./pages/Users"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
+const HowTo = lazy(() => import("./pages/HowTo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+            <Route path="/how-to" element={<ProtectedRoute><HowTo /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
               </Routes>
