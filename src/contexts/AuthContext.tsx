@@ -17,6 +17,8 @@ interface AuthContextType {
   verifyOTP: (phone: string, token: string) => Promise<{ error: any }>;
   resendOTP: (phone: string) => Promise<{ error: any }>;
   createRBACUser: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any, user: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
+  updateProfile: (fullName: string, phoneNumber?: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -245,6 +247,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password Updated",
+        description: "Your password has been changed successfully.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
+  const updateProfile = async (fullName: string, phoneNumber?: string) => {
+    try {
+      if (!user) throw new Error("No user logged in");
+
+      // Update auth metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+
+      if (authError) throw authError;
+
+      // Update profile table
+      const updateData: any = { full_name: fullName };
+      if (phoneNumber) updateData.phone_number = phoneNumber;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      toast({
+        title: "Profile Updated",
+        description: "Your profile information has been updated successfully.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -260,6 +324,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         verifyOTP,
         resendOTP,
         createRBACUser,
+        updatePassword,
+        updateProfile,
       }}
     >
       {children}
