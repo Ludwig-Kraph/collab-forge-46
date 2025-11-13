@@ -10,9 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, Bell, Shield, Smartphone, CreditCard, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Settings = () => {
+  const { user, updatePassword, updateProfile, isSuperAdmin } = useAuth();
   const [notificationSettings, setNotificationSettings] = useState({
     email: true,
     sms: true,
@@ -20,12 +23,68 @@ const Settings = () => {
     marketing: false,
   });
 
-  const handleSaveProfile = () => {
-    toast.success("Profile updated successfully");
+  const [profileData, setProfileData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name, phone_number, email')
+          .eq('id', user.id)
+          .single();
+
+        if (data) {
+          setProfileData({
+            fullName: data.full_name || '',
+            phoneNumber: data.phone_number || '',
+            email: data.email || user.email || '',
+          });
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    setLoading(true);
+    const { error } = await updateProfile(profileData.fullName, profileData.phoneNumber);
+    setLoading(false);
+    if (!error) {
+      toast.success("Profile updated successfully");
+    }
   };
 
-  const handleSaveSecurity = () => {
-    toast.success("Security settings updated");
+  const handleSavePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await updatePassword(passwordData.newPassword);
+    setLoading(false);
+    
+    if (!error) {
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+    }
   };
 
   return (
@@ -68,33 +127,49 @@ const Settings = () => {
 
                 <Separator />
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" defaultValue="John" />
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input 
+                      id="fullName" 
+                      value={profileData.fullName}
+                      onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" defaultValue="Doe" />
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={profileData.email}
+                      disabled
+                    />
+                    <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input 
+                      id="phone" 
+                      type="tel" 
+                      value={profileData.phoneNumber}
+                      onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
+                    />
+                  </div>
+
+                  {isSuperAdmin && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                      <Badge variant="default" className="mb-2">Super Admin</Badge>
+                      <p className="text-sm text-muted-foreground">
+                        You have full access to the M-Leja Control Panel
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" defaultValue="john.doe@example.com" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" defaultValue="+254 712 345 678" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="business">Business Name</Label>
-                  <Input id="business" defaultValue="Acme Stores Ltd" />
-                </div>
-
-                <Button onClick={handleSaveProfile}>Save Changes</Button>
+                <Button onClick={handleSaveProfile} disabled={loading}>
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -243,20 +318,31 @@ const Settings = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current-pin">Current PIN</Label>
-                    <Input id="current-pin" type="password" placeholder="Enter current PIN" />
+                    <Label htmlFor="new-password">New Password</Label>
+                    <Input 
+                      id="new-password" 
+                      type="password" 
+                      placeholder="Enter new password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-pin">New PIN</Label>
-                    <Input id="new-pin" type="password" placeholder="Enter new PIN" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-pin">Confirm New PIN</Label>
-                    <Input id="confirm-pin" type="password" placeholder="Confirm new PIN" />
+                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                    <Input 
+                      id="confirm-password" 
+                      type="password" 
+                      placeholder="Confirm new password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    />
                   </div>
                 </div>
 
-                <Button onClick={handleSaveSecurity}>Update PIN</Button>
+                <Button onClick={handleSavePassword} disabled={loading}>
+                  {loading ? "Updating..." : "Update Password"}
+                </Button>
 
                 <Separator />
 
