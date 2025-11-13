@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 const Header = () => {
-  const { user, signOut, isAdmin, userRole } = useAuth();
+  const { user, signOut, isAdmin, isSuperAdmin, userRole } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -102,6 +102,11 @@ const Header = () => {
               <DropdownMenuItem asChild>
                 <Link to="/subscription">Subscription</Link>
               </DropdownMenuItem>
+              {isSuperAdmin && (
+                <DropdownMenuItem asChild>
+                  <Link to="/control-panel">Control Panel</Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild>
                 <Link to="/help">Help & Support</Link>
               </DropdownMenuItem>
