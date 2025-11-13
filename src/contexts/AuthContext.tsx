@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
 
       setUserRole(data.role);
-      setIsAdmin(data.role === 'admin' || data.role === 'super_admin');
+      setIsAdmin(data.role === 'admin' || data.role === 'super_admin' || data.role === 'corporate_admin');
       setIsSuperAdmin(data.role === 'super_admin');
     } catch (error) {
       console.error('Error fetching user role:', error);
