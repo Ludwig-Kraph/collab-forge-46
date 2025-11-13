@@ -9,12 +9,14 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   userRole: string | null;
   signUp: (phone: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (phone: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   verifyOTP: (phone: string, token: string) => Promise<{ error: any }>;
   resendOTP: (phone: string) => Promise<{ error: any }>;
+  createRBACUser: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any, user: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -72,11 +75,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
 
       setUserRole(data.role);
-      setIsAdmin(data.role === 'admin');
+      setIsAdmin(data.role === 'admin' || data.role === 'super_admin');
+      setIsSuperAdmin(data.role === 'super_admin');
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole(null);
       setIsAdmin(false);
+      setIsSuperAdmin(false);
     }
   };
 
@@ -193,6 +198,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      setIsSuperAdmin(false);
+      setUserRole(null);
+
       toast({
         title: "Logged out",
         description: "You have been logged out successfully.",
@@ -206,6 +217,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const createRBACUser = async (email: string, password: string, fullName: string, role: string) => {
+    try {
+      const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName,
+          is_rbac_user: true
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert([{ user_id: data.user.id, role: role as any }]);
+
+        if (roleError) throw roleError;
+      }
+
+      return { error: null, user: data.user };
+    } catch (error: any) {
+      return { error, user: null };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -213,12 +252,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         loading,
         isAdmin,
+        isSuperAdmin,
         userRole,
         signUp,
         signIn,
         signOut,
         verifyOTP,
         resendOTP,
+        createRBACUser,
       }}
     >
       {children}

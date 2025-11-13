@@ -18,7 +18,10 @@ const Transactions = lazy(() => import("./pages/Transactions"));
 const Ledger = lazy(() => import("./pages/Ledger"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const More = lazy(() => import("./pages/More"));
-const Users = lazy(() => import("./pages/Users"));
+import { AdminRoute } from '@/components/auth/AdminRoute';
+import { SuperAdminRoute } from '@/components/auth/SuperAdminRoute';
+import Users from '@/pages/Users';
+import ControlPanel from '@/pages/ControlPanel';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -49,7 +52,8 @@ const App = () => (
             <Route path="/ledger" element={<ProtectedRoute><Ledger /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/more" element={<ProtectedRoute><More /></ProtectedRoute>} />
-            <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+            <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
+            <Route path="/control-panel" element={<SuperAdminRoute><ControlPanel /></SuperAdminRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
