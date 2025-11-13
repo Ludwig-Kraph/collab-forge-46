@@ -11,12 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Users, Shield, Building2, Code, Plus, Trash2, Edit } from 'lucide-react';
+import { Users, Shield, Building2, Code, Plus, Edit } from 'lucide-react';
 
 interface RBACUser {
   id: string;
   full_name: string;
-  email: string;
+  email: string | null;
   role: string;
   created_at: string;
   is_rbac_user: boolean;
@@ -34,7 +34,7 @@ const ControlPanel = () => {
     role: 'developer'
   });
 
-  const roleIcons = {
+  const roleIcons: Record<string, any> = {
     super_admin: Shield,
     developer: Code,
     corporate_admin: Building2,
@@ -128,39 +128,40 @@ const ControlPanel = () => {
       title: 'Corporate Admins',
       value: users.filter(u => u.role === 'corporate_admin').length,
       icon: Building2,
-      description: 'Corporate administrators'
+      description: 'Corporate accounts'
     },
     {
       title: 'Super Admins',
       value: users.filter(u => u.role === 'super_admin').length,
       icon: Shield,
-      description: 'System administrators'
+      description: 'Super admin accounts'
     }
   ];
 
   return (
     <Layout>
-      <div className="container mx-auto p-4 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="container px-4 py-8">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">M-Leja Control Panel</h1>
-            <p className="text-muted-foreground">Super Admin Control Center</p>
+            <p className="text-muted-foreground">Manage super admin, developer, and corporate accounts</p>
           </div>
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Create RBAC User
+                Create Account
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create New RBAC User</DialogTitle>
+                <DialogTitle>Create RBAC Account</DialogTitle>
                 <DialogDescription>
-                  Create a new user with specific role-based access control permissions
+                  Create a new privileged account with specific role access.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
                   <Input
@@ -175,7 +176,7 @@ const ControlPanel = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="user@example.com"
+                    placeholder="john@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
@@ -193,14 +194,12 @@ const ControlPanel = () => {
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
                   <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                    <SelectTrigger>
+                    <SelectTrigger id="role">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="developer">Developer</SelectItem>
                       <SelectItem value="corporate_admin">Corporate Admin</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
                     </SelectContent>
                   </Select>
@@ -210,17 +209,18 @@ const ControlPanel = () => {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleCreateUser}>Create User</Button>
+                <Button onClick={handleCreateUser}>Create Account</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, index) => {
+        {/* Stats Cards */}
+        <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <Card key={index}>
+              <Card key={stat.title}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                   <Icon className="h-4 w-4 text-muted-foreground" />
@@ -234,49 +234,67 @@ const ControlPanel = () => {
           })}
         </div>
 
+        {/* Users Table */}
         <Card>
           <CardHeader>
-            <CardTitle>RBAC Users</CardTitle>
-            <CardDescription>Manage all role-based access control users in the system</CardDescription>
+            <CardTitle>RBAC Accounts</CardTitle>
+            <CardDescription>Manage all privileged system accounts</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">Loading users...</div>
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-2"></div>
+                  <p className="text-muted-foreground">Loading accounts...</p>
+                </div>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No accounts found</h3>
+                <p className="text-muted-foreground mb-4">Create your first RBAC account to get started</p>
+                <Button onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Account
+                </Button>
+              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => {
-                    const RoleIcon = roleIcons[user.role as keyof typeof roleIcons] || Users;
-                    return (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.full_name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant={roleBadgeVariants[user.role]} className="gap-1">
-                            <RoleIcon className="h-3 w-3" />
-                            {user.role.replace('_', ' ')}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => {
+                      const Icon = roleIcons[user.role] || Users;
+                      return (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.full_name}</TableCell>
+                          <TableCell>{user.email || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Badge variant={roleBadgeVariants[user.role] || 'outline'} className="gap-1">
+                              <Icon className="h-3 w-3" />
+                              {user.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
