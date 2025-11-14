@@ -63,13 +63,13 @@ export default function Onboarding() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('registration_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      setRequests((data || []) as RegistrationRequest[]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -90,7 +90,7 @@ export default function Onboarding() {
       // In production, this would call MPESA Daraja API
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('mpesa_credential_validations')
         .insert({
           registration_request_id: request.id,
@@ -124,7 +124,7 @@ export default function Onboarding() {
     if (!selectedRequest) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('registration_requests')
         .update({
           status: 'approved',
@@ -165,7 +165,7 @@ export default function Onboarding() {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('registration_requests')
         .update({
           status: 'rejected',
