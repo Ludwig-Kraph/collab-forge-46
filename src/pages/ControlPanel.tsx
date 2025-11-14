@@ -231,9 +231,13 @@ export default function ControlPanel() {
                     <Activity className="mr-2 h-4 w-4" />
                     Client Onboarding Queue
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <AlertTriangle className="mr-2 h-4 w-4" />
-                    Create System Alert
+                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/support'}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Support Tickets
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
+                    <Activity className="mr-2 h-4 w-4" />
+                    Team Communication
                   </Button>
                 </div>
               </AdminCard>
