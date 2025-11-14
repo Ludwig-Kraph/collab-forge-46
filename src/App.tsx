@@ -22,6 +22,8 @@ import { AdminRoute } from '@/components/auth/AdminRoute';
 import { SuperAdminRoute } from '@/components/auth/SuperAdminRoute';
 import Users from '@/pages/Users';
 import ControlPanel from '@/pages/ControlPanel';
+import Accounts from '@/pages/control-panel/Accounts';
+import Onboarding from '@/pages/control-panel/Onboarding';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -54,6 +56,8 @@ const App = () => (
             <Route path="/more" element={<ProtectedRoute><More /></ProtectedRoute>} />
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/control-panel" element={<SuperAdminRoute><ControlPanel /></SuperAdminRoute>} />
+            <Route path="/control-panel/accounts" element={<SuperAdminRoute><Accounts /></SuperAdminRoute>} />
+            <Route path="/control-panel/onboarding" element={<SuperAdminRoute><Onboarding /></SuperAdminRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
