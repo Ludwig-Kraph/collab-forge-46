@@ -9,8 +9,14 @@ import {
   HelpCircle,
   Shield,
   CreditCard as Subscription,
-  BookMarked
+  BookMarked,
+  ChevronDown,
+  UserCog,
+  UserPlus,
+  MessageSquare,
+  Wrench
 } from "lucide-react";
+import React from "react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,8 +30,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -33,6 +47,15 @@ const mainItems = [
   { title: "Transactions", url: "/transactions", icon: Receipt },
   { title: "Ledger", url: "/ledger", icon: BookOpen },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
+];
+
+const controlPanelItems = [
+  { title: "Dashboard", url: "/control-panel", icon: Home },
+  { title: "Accounts", url: "/control-panel/accounts", icon: UserCog },
+  { title: "Onboarding", url: "/control-panel/onboarding", icon: UserPlus },
+  { title: "Support", url: "/control-panel/support", icon: MessageSquare },
+  { title: "System Settings", url: "/control-panel/system-settings", icon: Wrench },
+  { title: "Communication", url: "/control-panel/communication", icon: MessageSquare },
 ];
 
 const settingsItems = [
@@ -50,6 +73,14 @@ export function AppSidebar() {
 
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => currentPath === path;
+  const isControlPanelActive = currentPath.startsWith("/control-panel");
+  const [isControlPanelOpen, setIsControlPanelOpen] = React.useState(isControlPanelActive);
+
+  React.useEffect(() => {
+    if (isControlPanelActive) {
+      setIsControlPanelOpen(true);
+    }
+  }, [isControlPanelActive]);
 
   return (
     <Sidebar>
@@ -103,18 +134,42 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 )}
                 {isSuperAdmin && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/control-panel")}>
-                      <NavLink 
-                        to="/control-panel" 
-                        className="hover:bg-muted/50" 
-                        activeClassName="bg-muted text-primary font-medium"
-                      >
-                        <Shield className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                        {!isCollapsed && <span>Control Panel</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <Collapsible
+                    open={isControlPanelOpen}
+                    onOpenChange={setIsControlPanelOpen}
+                    className="group/collapsible"
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton isActive={isControlPanelActive}>
+                          <Shield className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
+                          {!isCollapsed && <span>Control Panel</span>}
+                          {!isCollapsed && (
+                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {controlPanelItems.map((item) => (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                                <NavLink 
+                                  to={item.url}
+                                  end
+                                  className="hover:bg-muted/50" 
+                                  activeClassName="bg-muted text-primary font-medium"
+                                >
+                                  <item.icon className="mr-2 h-4 w-4" />
+                                  {!isCollapsed && <span>{item.title}</span>}
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
                 )}
               </SidebarMenu>
             </SidebarGroupContent>
