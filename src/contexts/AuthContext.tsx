@@ -239,6 +239,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .insert([{ user_id: data.user.id, role: role as any }]);
 
         if (roleError) throw roleError;
+
+        // Log audit event
+        await supabase.rpc('log_audit_event', {
+          _action: 'create_rbac_user',
+          _entity_type: 'user',
+          _entity_id: data.user.id,
+          _changes: { role, email, full_name: fullName },
+          _ip_address: null,
+          _user_agent: navigator.userAgent
+        });
       }
 
       return { error: null, user: data.user };
