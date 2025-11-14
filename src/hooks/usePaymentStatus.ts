@@ -44,7 +44,7 @@ export const usePaymentStatus = (paymentRequestId?: string) => {
 
     // Subscribe to real-time updates
     const channel = (supabase as any)
-      .channel('payment-status')
+      .channel(`payment-status-${paymentRequestId}`)
       .on(
         'postgres_changes',
         {
@@ -54,6 +54,7 @@ export const usePaymentStatus = (paymentRequestId?: string) => {
           filter: `id=eq.${paymentRequestId}`,
         },
         (payload: any) => {
+          console.log('Real-time payment update:', payload.new);
           setPaymentStatus(payload.new as PaymentRequest);
         }
       )

@@ -22,7 +22,7 @@ const Payment = () => {
   const { initiatePayment, loading: paymentLoading } = useMpesaPayment();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [paymentRequestId, setPaymentRequestId] = useState<string | null>(null);
-  const { paymentStatus } = usePaymentStatus(paymentRequestId || undefined);
+  const { paymentStatus, loading: statusLoading } = usePaymentStatus(paymentRequestId || undefined);
   const [mpesaAccounts, setMpesaAccounts] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
@@ -101,6 +101,11 @@ const Payment = () => {
 
     if (result) {
       setPaymentRequestId(result.paymentRequestId);
+      
+      toast({
+        title: "Payment Request Sent",
+        description: "Waiting for customer to complete payment on their phone...",
+      });
       
       // Reset form
       setFormData({
@@ -281,6 +286,114 @@ const Payment = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* Real-time Payment Status Display */}
+        {paymentStatus && (
+          <Card className={`border-2 transition-all duration-300 ${
+            paymentStatus.status === 'completed' ? 'border-green-500 bg-green-50 dark:bg-green-950' :
+            paymentStatus.status === 'failed' ? 'border-red-500 bg-red-50 dark:bg-red-950' :
+            'border-yellow-500 bg-yellow-50 dark:bg-yellow-950 animate-pulse'
+          }`}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {paymentStatus.status === 'completed' && (
+                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                )}
+                {paymentStatus.status === 'failed' && (
+                  <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                )}
+                {paymentStatus.status === 'pending' && (
+                  <div className="relative">
+                    <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                    {statusLoading && (
+                      <Loader2 className="h-4 w-4 text-yellow-600 dark:text-yellow-400 animate-spin absolute -right-1 -top-1" />
+                    )}
+                  </div>
+                )}
+                {paymentStatus.status === 'pending' ? 'Waiting for Payment...' : 
+                 paymentStatus.status === 'completed' ? 'Payment Successful!' :
+                 'Payment Failed'}
+              </CardTitle>
+              <CardDescription>
+                {paymentStatus.status === 'pending' && 'Customer will receive STK push on their phone'}
+                {paymentStatus.status === 'completed' && 'Payment completed successfully'}
+                {paymentStatus.status === 'failed' && 'Payment was not completed'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status:</span>
+                <Badge 
+                  variant={
+                    paymentStatus.status === 'completed' ? 'default' : 
+                    paymentStatus.status === 'failed' ? 'destructive' : 
+                    'secondary'
+                  }
+                  className="animate-in fade-in"
+                >
+                  {paymentStatus.status.toUpperCase()}
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Amount:</span>
+                <span className="font-semibold text-lg">KES {paymentStatus.amount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Phone:</span>
+                <span className="font-mono text-sm">{paymentStatus.customer_phone}</span>
+              </div>
+              {paymentStatus.description && (
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Description:</span>
+                  <span className="text-sm">{paymentStatus.description}</span>
+                </div>
+              )}
+              {paymentStatus.result_desc && (
+                <div className="flex flex-col gap-1 p-3 bg-background/50 rounded-md">
+                  <span className="text-muted-foreground font-medium">Result:</span>
+                  <span className="text-sm">{paymentStatus.result_desc}</span>
+                </div>
+              )}
+              {paymentStatus.completed_at && (
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Completed:</span>
+                  <span className="text-sm">
+                    {new Date(paymentStatus.completed_at).toLocaleString()}
+                  </span>
+                </div>
+              )}
+              
+              {paymentStatus.status === 'pending' && (
+                <div className="pt-4 border-t">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Monitoring payment status in real-time...</span>
+                  </div>
+                </div>
+              )}
+
+              {paymentStatus.status === 'completed' && (
+                <Button 
+                  onClick={() => setPaymentRequestId(null)}
+                  className="w-full mt-4"
+                  variant="outline"
+                >
+                  Start New Payment
+                </Button>
+              )}
+
+              {paymentStatus.status === 'failed' && (
+                <Button 
+                  onClick={() => setPaymentRequestId(null)}
+                  className="w-full mt-4"
+                  variant="outline"
+                >
+                  Try Again
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Confirmation Dialog */}
         <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>

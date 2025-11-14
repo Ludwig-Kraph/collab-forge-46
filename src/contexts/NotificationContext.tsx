@@ -28,7 +28,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!user) return;
 
-    // Listen for transaction events to create notifications
+    // Listen for transaction and payment request events
     const channel = supabase
       .channel('notification-updates')
       .on(
@@ -51,6 +51,41 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           };
           
           setNotifications((prev) => [newNotification, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'payment_requests',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const payment = payload.new as any;
+          
+          // Only notify on status changes to completed or failed
+          if (payment.status === 'completed') {
+            const notification: Notification = {
+              id: `payment-${payment.id}`,
+              title: 'Payment Completed',
+              message: `Customer paid KES ${payment.amount}. Transaction successful!`,
+              type: 'success',
+              read: false,
+              created_at: new Date().toISOString(),
+            };
+            setNotifications((prev) => [notification, ...prev]);
+          } else if (payment.status === 'failed') {
+            const notification: Notification = {
+              id: `payment-${payment.id}`,
+              title: 'Payment Failed',
+              message: payment.result_desc || `Payment of KES ${payment.amount} was not completed.`,
+              type: 'error',
+              read: false,
+              created_at: new Date().toISOString(),
+            };
+            setNotifications((prev) => [notification, ...prev]);
+          }
         }
       )
       .subscribe();
