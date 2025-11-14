@@ -82,13 +82,13 @@ export default function Communication() {
 
   const fetchChannels = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAny
         .from('communication_channels')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setChannels(data || []);
+      setChannels((data || []) as Channel[]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -100,7 +100,7 @@ export default function Communication() {
 
   const fetchMessages = async (channelId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAny
         .from('channel_messages')
         .select(`
           *,
@@ -112,7 +112,7 @@ export default function Communication() {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages((data || []) as Message[]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -124,7 +124,7 @@ export default function Communication() {
 
   const handleCreateChannel = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAny
         .from('communication_channels')
         .insert({
           ...newChannel,
@@ -137,12 +137,12 @@ export default function Communication() {
 
       // Add creator as channel member
       if (data) {
-        await supabase
+        await supabaseAny
           .from('channel_members')
           .insert({
             channel_id: data.id,
             user_id: user?.id,
-            role: 'admin'
+            is_moderator: true
           });
       }
 
@@ -172,7 +172,7 @@ export default function Communication() {
     if (!newMessage.trim() || !selectedChannel) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await supabaseAny
         .from('channel_messages')
         .insert({
           channel_id: selectedChannel.id,
@@ -194,11 +194,12 @@ export default function Communication() {
 
   const handleJoinChannel = async (channelId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await supabaseAny
         .from('channel_members')
         .insert({
           channel_id: channelId,
-          user_id: user?.id
+          user_id: user?.id,
+          is_moderator: false
         });
 
       if (error) throw error;

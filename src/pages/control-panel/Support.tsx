@@ -68,13 +68,13 @@ export default function Support() {
   const fetchTickets = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('support_tickets')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTickets(data || []);
+      setTickets((data || []) as SupportTicket[]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -88,15 +88,16 @@ export default function Support() {
 
   const handleCreateTicket = async () => {
     try {
-      // Generate ticket number
-      const { data: ticketNumberData } = await supabase
-        .rpc('generate_ticket_number');
+      // Generate ticket number (temporary - until function exists)
+      const ticketNumber = `TKT-${Date.now()}`;
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('support_tickets')
         .insert({
           ...newTicket,
-          ticket_number: ticketNumberData || `TKT-${Date.now()}`
+          ticket_number: ticketNumber,
+          status: 'open',
+          created_by: user?.id
         });
 
       if (error) throw error;
@@ -126,7 +127,7 @@ export default function Support() {
 
   const handleAssignTicket = async (ticketId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('support_tickets')
         .update({ assigned_to: user?.id, status: 'in_progress' })
         .eq('id', ticketId);
@@ -150,7 +151,7 @@ export default function Support() {
 
   const handleResolveTicket = async (ticketId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('support_tickets')
         .update({
           status: 'resolved',
