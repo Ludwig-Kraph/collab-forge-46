@@ -14,6 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          changes: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: unknown
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      cashier_metrics: {
+        Row: {
+          created_at: string | null
+          date: string | null
+          failed_transactions: number | null
+          id: string
+          outlet_id: string | null
+          successful_transactions: number | null
+          total_amount: number | null
+          transactions_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string | null
+          failed_transactions?: number | null
+          id?: string
+          outlet_id?: string | null
+          successful_transactions?: number | null
+          total_amount?: number | null
+          transactions_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string | null
+          failed_transactions?: number | null
+          id?: string
+          outlet_id?: string | null
+          successful_transactions?: number | null
+          total_amount?: number | null
+          transactions_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cashier_metrics_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "outlets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          created_at: string | null
+          department_type: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          department_type: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          department_type?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          department_id: string | null
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          invited_by: string
+          organization_id: string
+          outlet_id: string | null
+          role: string
+          status: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          invitation_token: string
+          invited_by: string
+          organization_id: string
+          outlet_id?: string | null
+          role: string
+          status?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          department_id?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invited_by?: string
+          organization_id?: string
+          outlet_id?: string | null
+          role?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "outlets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mpesa_accounts: {
         Row: {
           account_name: string
@@ -71,29 +259,98 @@ export type Database = {
         }
         Relationships: []
       }
+      outlets: {
+        Row: {
+          classification: string
+          county: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          location: string
+          mpesa_account_id: string | null
+          name: string
+          organization_id: string
+          outlet_type: string
+          subcounty: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          classification: string
+          county?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location: string
+          mpesa_account_id?: string | null
+          name: string
+          organization_id: string
+          outlet_type: string
+          subcounty?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          classification?: string
+          county?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string
+          mpesa_account_id?: string | null
+          name?: string
+          organization_id?: string
+          outlet_type?: string
+          subcounty?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outlets_mpesa_account_id_fkey"
+            columns: ["mpesa_account_id"]
+            isOneToOne: false
+            referencedRelation: "mpesa_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outlets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          account_status: string | null
           created_at: string
+          email: string | null
           full_name: string
           id: string
+          is_rbac_user: boolean | null
           organization_id: string | null
           phone_number: string
           pin_hash: string | null
           updated_at: string
         }
         Insert: {
+          account_status?: string | null
           created_at?: string
+          email?: string | null
           full_name: string
           id: string
+          is_rbac_user?: boolean | null
           organization_id?: string | null
           phone_number: string
           pin_hash?: string | null
           updated_at?: string
         }
         Update: {
+          account_status?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
+          is_rbac_user?: boolean | null
           organization_id?: string | null
           phone_number?: string
           pin_hash?: string | null
@@ -105,6 +362,70 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_departments: {
+        Row: {
+          created_at: string | null
+          department_id: string
+          id: string
+          is_manager: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department_id: string
+          id?: string
+          is_manager?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          department_id?: string
+          id?: string
+          is_manager?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_departments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_outlets: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          outlet_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          outlet_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          outlet_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_outlets_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "outlets"
             referencedColumns: ["id"]
           },
         ]
@@ -151,6 +472,39 @@ export type Database = {
           updated_at?: string
           used_stk_pushes?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          is_resolved: boolean
+          message: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          message: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          message?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
         }
         Relationships: []
       }
@@ -259,9 +613,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_audit_event: {
+        Args: {
+          _action: string
+          _changes?: Json
+          _entity_id?: string
+          _entity_type: string
+          _ip_address?: unknown
+          _user_agent?: string
+        }
+        Returns: string
+      }
+      super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "manager" | "user" | "viewer"
+      app_role:
+        | "admin"
+        | "manager"
+        | "user"
+        | "viewer"
+        | "super_admin"
+        | "developer"
+        | "corporate_admin"
       mpesa_account_type: "till" | "paybill" | "pochi"
       subscription_tier:
         | "free_trial"
@@ -398,7 +772,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "manager", "user", "viewer"],
+      app_role: [
+        "admin",
+        "manager",
+        "user",
+        "viewer",
+        "super_admin",
+        "developer",
+        "corporate_admin",
+      ],
       mpesa_account_type: ["till", "paybill", "pochi"],
       subscription_tier: [
         "free_trial",
