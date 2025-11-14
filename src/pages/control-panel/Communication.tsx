@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Hash, Lock, Send, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+const supabaseAny = supabase as any;
+
 interface Channel {
   id: string;
   name: string;
@@ -57,7 +59,7 @@ export default function Communication() {
       fetchMessages(selectedChannel.id);
 
       // Subscribe to real-time messages
-      const channel = supabase
+      const channel = supabaseAny
         .channel(`channel_${selectedChannel.id}_messages`)
         .on('postgres_changes',
           {
@@ -73,7 +75,7 @@ export default function Communication() {
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        supabaseAny.removeChannel(channel);
       };
     }
   }, [selectedChannel]);
