@@ -135,6 +135,302 @@ export type Database = {
           },
         ]
       }
+      government_audit_trails: {
+        Row: {
+          action: string
+          changes: Json | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          government_entity_id: string
+          id: string
+          ip_address: unknown
+          is_compliant: boolean | null
+          official_id: string
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          government_entity_id: string
+          id?: string
+          ip_address?: unknown
+          is_compliant?: boolean | null
+          official_id: string
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          government_entity_id?: string
+          id?: string
+          ip_address?: unknown
+          is_compliant?: boolean | null
+          official_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "government_audit_trails_government_entity_id_fkey"
+            columns: ["government_entity_id"]
+            isOneToOne: false
+            referencedRelation: "government_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "government_audit_trails_official_id_fkey"
+            columns: ["official_id"]
+            isOneToOne: false
+            referencedRelation: "government_officials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      government_compliance_reports: {
+        Row: {
+          compliance_score: number | null
+          created_at: string | null
+          generated_at: string | null
+          generated_by: string | null
+          government_entity_id: string
+          id: string
+          issues_found: number | null
+          report_period: string
+          report_type: string
+          total_expenditure: number | null
+          total_revenue: number | null
+        }
+        Insert: {
+          compliance_score?: number | null
+          created_at?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          government_entity_id: string
+          id?: string
+          issues_found?: number | null
+          report_period: string
+          report_type: string
+          total_expenditure?: number | null
+          total_revenue?: number | null
+        }
+        Update: {
+          compliance_score?: number | null
+          created_at?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          government_entity_id?: string
+          id?: string
+          issues_found?: number | null
+          report_period?: string
+          report_type?: string
+          total_expenditure?: number | null
+          total_revenue?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "government_compliance_reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "government_officials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "government_compliance_reports_government_entity_id_fkey"
+            columns: ["government_entity_id"]
+            isOneToOne: false
+            referencedRelation: "government_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      government_entities: {
+        Row: {
+          county_name: string | null
+          created_at: string | null
+          entity_code: string
+          entity_name: string
+          entity_type: Database["public"]["Enums"]["government_level"]
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          county_name?: string | null
+          created_at?: string | null
+          entity_code: string
+          entity_name: string
+          entity_type: Database["public"]["Enums"]["government_level"]
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          county_name?: string | null
+          created_at?: string | null
+          entity_code?: string
+          entity_name?: string
+          entity_type?: Database["public"]["Enums"]["government_level"]
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      government_officials: {
+        Row: {
+          access_level: number | null
+          appointed_at: string | null
+          can_be_blocked: boolean | null
+          created_at: string | null
+          government_entity_id: string
+          id: string
+          is_super_admin: boolean | null
+          office_title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_level?: number | null
+          appointed_at?: string | null
+          can_be_blocked?: boolean | null
+          created_at?: string | null
+          government_entity_id: string
+          id?: string
+          is_super_admin?: boolean | null
+          office_title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_level?: number | null
+          appointed_at?: string | null
+          can_be_blocked?: boolean | null
+          created_at?: string | null
+          government_entity_id?: string
+          id?: string
+          is_super_admin?: boolean | null
+          office_title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "government_officials_government_entity_id_fkey"
+            columns: ["government_entity_id"]
+            isOneToOne: false
+            referencedRelation: "government_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      government_revenue_streams: {
+        Row: {
+          collected_amount: number | null
+          created_at: string | null
+          fiscal_year: string
+          government_entity_id: string
+          id: string
+          stream_category: string
+          stream_name: string
+          target_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          collected_amount?: number | null
+          created_at?: string | null
+          fiscal_year: string
+          government_entity_id: string
+          id?: string
+          stream_category: string
+          stream_name: string
+          target_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          collected_amount?: number | null
+          created_at?: string | null
+          fiscal_year?: string
+          government_entity_id?: string
+          id?: string
+          stream_category?: string
+          stream_name?: string
+          target_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "government_revenue_streams_government_entity_id_fkey"
+            columns: ["government_entity_id"]
+            isOneToOne: false
+            referencedRelation: "government_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inter_governmental_communications: {
+        Row: {
+          created_at: string | null
+          from_entity_id: string
+          from_official_id: string
+          id: string
+          is_encrypted: boolean | null
+          is_read: boolean | null
+          message: string
+          priority: string | null
+          subject: string
+          to_entity_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          from_entity_id: string
+          from_official_id: string
+          id?: string
+          is_encrypted?: boolean | null
+          is_read?: boolean | null
+          message: string
+          priority?: string | null
+          subject: string
+          to_entity_id: string
+        }
+        Update: {
+          created_at?: string | null
+          from_entity_id?: string
+          from_official_id?: string
+          id?: string
+          is_encrypted?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          priority?: string | null
+          subject?: string
+          to_entity_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inter_governmental_communications_from_entity_id_fkey"
+            columns: ["from_entity_id"]
+            isOneToOne: false
+            referencedRelation: "government_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inter_governmental_communications_from_official_id_fkey"
+            columns: ["from_official_id"]
+            isOneToOne: false
+            referencedRelation: "government_officials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inter_governmental_communications_to_entity_id_fkey"
+            columns: ["to_entity_id"]
+            isOneToOne: false
+            referencedRelation: "government_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           accepted_at: string | null
@@ -636,6 +932,7 @@ export type Database = {
         | "super_admin"
         | "developer"
         | "corporate_admin"
+      government_level: "national" | "county"
       mpesa_account_type: "till" | "paybill" | "pochi"
       subscription_tier:
         | "free_trial"
@@ -781,6 +1078,7 @@ export const Constants = {
         "developer",
         "corporate_admin",
       ],
+      government_level: ["national", "county"],
       mpesa_account_type: ["till", "paybill", "pochi"],
       subscription_tier: [
         "free_trial",
