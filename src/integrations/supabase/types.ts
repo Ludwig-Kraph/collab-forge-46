@@ -615,6 +615,65 @@ export type Database = {
           },
         ]
       }
+      payment_requests: {
+        Row: {
+          amount: number
+          checkout_request_id: string | null
+          completed_at: string | null
+          created_at: string
+          customer_phone: string
+          description: string | null
+          id: string
+          merchant_request_id: string | null
+          mpesa_account_id: string
+          result_code: string | null
+          result_desc: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          checkout_request_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_phone: string
+          description?: string | null
+          id?: string
+          merchant_request_id?: string | null
+          mpesa_account_id: string
+          result_code?: string | null
+          result_desc?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          checkout_request_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_phone?: string
+          description?: string | null
+          id?: string
+          merchant_request_id?: string | null
+          mpesa_account_id?: string
+          result_code?: string | null
+          result_desc?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_requests_mpesa_account_id_fkey"
+            columns: ["mpesa_account_id"]
+            isOneToOne: false
+            referencedRelation: "mpesa_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_status: string | null

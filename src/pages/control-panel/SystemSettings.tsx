@@ -28,24 +28,39 @@ export default function SystemSettings() {
     try {
       setLoading(true);
 
-      // Note: In production, these should be updated via Supabase CLI or dashboard
-      // This is for demonstration purposes
-      toast({
-        title: "Update Credentials",
-        description: "MPESA credentials should be updated via Supabase Dashboard → Project Settings → Edge Functions → Manage secrets",
-      });
+      // Validate all fields are filled
+      if (!mpesaCredentials.consumerKey || !mpesaCredentials.consumerSecret || 
+          !mpesaCredentials.passkey || !mpesaCredentials.shortcode) {
+        toast({
+          title: "Validation Error",
+          description: "All MPESA credential fields are required",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      // You can call an edge function here to update secrets securely
       const { data, error } = await supabase.functions.invoke('update-mpesa-secrets', {
         body: mpesaCredentials
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "MPESA credentials updated successfully",
-      });
+      if (data?.success) {
+        toast({
+          title: "Credentials Update Initiated",
+          description: data.message || "Please update the secrets in Supabase Dashboard to complete the process",
+        });
+
+        // Clear the form for security
+        setMpesaCredentials({
+          consumerKey: '',
+          consumerSecret: '',
+          passkey: '',
+          shortcode: ''
+        });
+      } else {
+        throw new Error(data?.error || "Failed to update credentials");
+      }
 
     } catch (error: any) {
       toast({
