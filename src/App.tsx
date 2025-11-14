@@ -27,6 +27,7 @@ import Accounts from '@/pages/control-panel/Accounts';
 import Onboarding from '@/pages/control-panel/Onboarding';
 import Support from '@/pages/control-panel/Support';
 import Communication from '@/pages/control-panel/Communication';
+import SystemSettings from '@/pages/control-panel/SystemSettings';
 import SubscriptionOutlets from '@/pages/subscription/Outlets';
 import SubscriptionStaff from '@/pages/subscription/Staff';
 import SubscriptionDepartments from '@/pages/subscription/Departments';
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/control-panel/onboarding" element={<SuperAdminRoute><Onboarding /></SuperAdminRoute>} />
             <Route path="/control-panel/support" element={<SuperAdminRoute><Support /></SuperAdminRoute>} />
             <Route path="/control-panel/communication" element={<SuperAdminRoute><Communication /></SuperAdminRoute>} />
+            <Route path="/control-panel/settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
             <Route path="/subscription/staff" element={<AdminRoute><SubscriptionStaff /></AdminRoute>} />
             <Route path="/subscription/departments" element={<AdminRoute><SubscriptionDepartments /></AdminRoute>} />

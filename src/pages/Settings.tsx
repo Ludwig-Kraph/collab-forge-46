@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Bell, Shield, Smartphone, CreditCard, Trash2 } from "lucide-react";
+import { User, Bell, Shield, Smartphone, CreditCard, Trash2, Wallet, Plus, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,6 +35,8 @@ const Settings = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [mpesaAccounts, setMpesaAccounts] = useState<any[]>([]);
+  const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -56,7 +58,22 @@ const Settings = () => {
     };
 
     fetchProfile();
+    fetchMpesaAccounts();
   }, [user]);
+
+  const fetchMpesaAccounts = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('mpesa_accounts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (data) {
+      setMpesaAccounts(data);
+    }
+  };
 
   const handleSaveProfile = async () => {
     setLoading(true);
@@ -96,9 +113,10 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="accounts">Accounts</TabsTrigger>
+            <TabsTrigger value="mpesa">MPESA</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
@@ -180,44 +198,85 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5" />
+                  Payment Methods
+                </CardTitle>
+                <CardDescription>Manage your payment methods and billing</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Payment methods coming soon...</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* MPESA Accounts */}
+          <TabsContent value="mpesa" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5" />
                   Linked MPESA Accounts
                 </CardTitle>
                 <CardDescription>Manage your connected Till, Paybill, and Pochi la Biashara numbers</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { type: "Till Number", number: "****5678", status: "active", primary: true },
-                  { type: "Paybill", number: "****1234", status: "active", primary: false },
-                  { type: "Pochi la Biashara", number: "****9012", status: "inactive", primary: false },
-                ].map((account, index) => (
-                  <div key={index} className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <CreditCard className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{account.type}</p>
-                          {account.primary && (
-                            <Badge variant="default" className="text-xs">Primary</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{account.number}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={account.status === "active" ? "default" : "outline"}>
-                        {account.status}
-                      </Badge>
-                      <Button variant="ghost" size="sm">Edit</Button>
-                    </div>
+                {mpesaAccounts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No MPESA accounts linked yet</p>
+                    <p className="text-sm">Add your Till, Paybill, or Pochi la Biashara to get started</p>
                   </div>
-                ))}
+                ) : (
+                  mpesaAccounts.map((account) => (
+                    <div key={account.id} className="flex items-center justify-between rounded-lg border p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                          <CreditCard className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{account.account_name}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {account.account_type.toUpperCase()}
+                            </Badge>
+                            <button
+                              onClick={() => setShowCredentials({ ...showCredentials, [account.id]: !showCredentials[account.id] })}
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                            >
+                              {showCredentials[account.id] ? (
+                                <>
+                                  <EyeOff className="h-3 w-3" />
+                                  {account.account_number}
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="h-3 w-3" />
+                                  ****{account.account_number.slice(-4)}
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={account.is_active ? "default" : "outline"}>
+                          {account.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                )}
 
                 <Separator className="my-4" />
 
-                <Button variant="outline" className="w-full">
-                  + Add New Account
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.location.href = '/auth?step=mpesa'}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New MPESA Account
                 </Button>
               </CardContent>
             </Card>
