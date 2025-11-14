@@ -45,11 +45,11 @@ const queryClient = new QueryClient();
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <Sonner />
       <BrowserRouter>
         <AuthProvider>
           <NotificationProvider>
+            <Toaster />
+            <Sonner />
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-screen">
                 <LoadingSpinner />
