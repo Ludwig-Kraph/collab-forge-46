@@ -30,6 +30,10 @@ import SubscriptionOutlets from '@/pages/subscription/Outlets';
 import SubscriptionStaff from '@/pages/subscription/Staff';
 import SubscriptionDepartments from '@/pages/subscription/Departments';
 import CashierDashboard from '@/pages/CashierDashboard';
+import GovLanding from '@/pages/government/GovLanding';
+import NationalDashboard from '@/pages/government/NationalDashboard';
+import CountyDashboard from '@/pages/government/CountyDashboard';
+import InterGovernmental from '@/pages/government/InterGovernmental';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -70,6 +74,10 @@ const App = () => (
             <Route path="/subscription/staff" element={<AdminRoute><SubscriptionStaff /></AdminRoute>} />
             <Route path="/subscription/departments" element={<AdminRoute><SubscriptionDepartments /></AdminRoute>} />
             <Route path="/cashier-dashboard" element={<ProtectedRoute><CashierDashboard /></ProtectedRoute>} />
+            <Route path="/gov" element={<GovLanding />} />
+            <Route path="/gov/national" element={<ProtectedRoute><NationalDashboard /></ProtectedRoute>} />
+            <Route path="/gov/county" element={<ProtectedRoute><CountyDashboard /></ProtectedRoute>} />
+            <Route path="/gov/cross-gov" element={<ProtectedRoute><InterGovernmental /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
