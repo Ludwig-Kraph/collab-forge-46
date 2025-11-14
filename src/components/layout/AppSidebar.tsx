@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { 
   Home, 
   CreditCard, 
@@ -16,7 +17,6 @@ import {
   MessageSquare,
   Wrench
 } from "lucide-react";
-import React from "react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -74,9 +74,9 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => currentPath === path;
   const isControlPanelActive = currentPath.startsWith("/control-panel");
-  const [isControlPanelOpen, setIsControlPanelOpen] = React.useState(isControlPanelActive);
+  const [isControlPanelOpen, setIsControlPanelOpen] = useState(isControlPanelActive);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isControlPanelActive) {
       setIsControlPanelOpen(true);
     }
