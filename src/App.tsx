@@ -26,6 +26,10 @@ import Accounts from '@/pages/control-panel/Accounts';
 import Onboarding from '@/pages/control-panel/Onboarding';
 import Support from '@/pages/control-panel/Support';
 import Communication from '@/pages/control-panel/Communication';
+import SubscriptionOutlets from '@/pages/subscription/Outlets';
+import SubscriptionStaff from '@/pages/subscription/Staff';
+import SubscriptionDepartments from '@/pages/subscription/Departments';
+import CashierDashboard from '@/pages/CashierDashboard';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -62,6 +66,10 @@ const App = () => (
             <Route path="/control-panel/onboarding" element={<SuperAdminRoute><Onboarding /></SuperAdminRoute>} />
             <Route path="/control-panel/support" element={<SuperAdminRoute><Support /></SuperAdminRoute>} />
             <Route path="/control-panel/communication" element={<SuperAdminRoute><Communication /></SuperAdminRoute>} />
+            <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
+            <Route path="/subscription/staff" element={<AdminRoute><SubscriptionStaff /></AdminRoute>} />
+            <Route path="/subscription/departments" element={<AdminRoute><SubscriptionDepartments /></AdminRoute>} />
+            <Route path="/cashier-dashboard" element={<ProtectedRoute><CashierDashboard /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
