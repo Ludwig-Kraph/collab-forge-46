@@ -223,6 +223,10 @@ export default function ControlPanel() {
                 icon={Shield}
               >
                 <div className="space-y-2 mt-4">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/settings'}>
+                    <Server className="mr-2 h-4 w-4" />
+                    System Settings
+                  </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/accounts'}>
                     <Users className="mr-2 h-4 w-4" />
                     Manage RBAC Accounts
