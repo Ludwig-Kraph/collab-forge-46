@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "@radix-ui/react-tooltip"],
-    preserveSymlinks: true,
   },
   optimizeDeps: {
     include: [

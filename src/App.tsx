@@ -9,6 +9,7 @@ import { lazy, Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import("./pages/Landing"));
@@ -48,7 +49,8 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <BrowserRouter>
+        <TooltipProvider delayDuration={0}>
+          <BrowserRouter>
           <AuthProvider>
             <NotificationProvider>
               <Toaster />
@@ -90,9 +92,10 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </NotificationProvider>
-        </AuthProvider>
-      </BrowserRouter>
+            </NotificationProvider>
+          </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
