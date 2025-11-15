@@ -19,31 +19,46 @@ export const usePaymentStatus = (paymentRequestId?: string) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user || !paymentRequestId) return;
+    if (!user || !paymentRequestId) {
+      setPaymentStatus(null);
+      return;
+    }
+
+    let isSubscribed = true;
 
     const fetchStatus = async () => {
+      if (!isSubscribed) return;
+      
       setLoading(true);
       try {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from('payment_requests')
           .select('*')
           .eq('id', paymentRequestId)
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (error) throw error;
-        setPaymentStatus(data as PaymentRequest);
+        if (error) {
+          console.error('Failed to fetch payment status:', error);
+          return;
+        }
+        
+        if (isSubscribed) {
+          setPaymentStatus(data as PaymentRequest);
+        }
       } catch (error) {
         console.error('Failed to fetch payment status:', error);
       } finally {
-        setLoading(false);
+        if (isSubscribed) {
+          setLoading(false);
+        }
       }
     };
 
     fetchStatus();
 
     // Subscribe to real-time updates
-    const channel = (supabase as any)
+    const channel = supabase
       .channel(`payment-status-${paymentRequestId}`)
       .on(
         'postgres_changes',
@@ -54,14 +69,17 @@ export const usePaymentStatus = (paymentRequestId?: string) => {
           filter: `id=eq.${paymentRequestId}`,
         },
         (payload: any) => {
-          console.log('Real-time payment update:', payload.new);
-          setPaymentStatus(payload.new as PaymentRequest);
+          if (isSubscribed) {
+            console.log('Real-time payment update:', payload.new);
+            setPaymentStatus(payload.new as PaymentRequest);
+          }
         }
       )
       .subscribe();
 
     return () => {
-      (supabase as any).removeChannel(channel);
+      isSubscribed = false;
+      supabase.removeChannel(channel);
     };
   }, [user, paymentRequestId]);
 

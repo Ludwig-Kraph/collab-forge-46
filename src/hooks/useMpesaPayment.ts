@@ -22,14 +22,34 @@ export const useMpesaPayment = () => {
   const initiatePayment = async (params: InitiatePaymentParams): Promise<PaymentResponse | null> => {
     setLoading(true);
     try {
+      // Validate params before sending
+      if (!params.mpesaAccountId || !params.customerPhone || !params.amount) {
+        throw new Error('Missing required payment parameters');
+      }
+
+      if (params.amount < 10) {
+        throw new Error('Minimum payment amount is KES 10');
+      }
+
       const { data, error } = await supabase.functions.invoke('mpesa-stk-push', {
         body: params,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw new Error(error.message || 'Failed to connect to payment service');
+      }
+
+      if (!data) {
+        throw new Error('No response from payment service');
+      }
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to initiate payment');
+      }
+
+      if (!data.data?.paymentRequestId) {
+        throw new Error('Invalid response from payment service');
       }
 
       toast({
@@ -40,9 +60,17 @@ export const useMpesaPayment = () => {
       return data.data;
     } catch (error: any) {
       console.error('Payment initiation error:', error);
+      
+      let errorMessage = 'Failed to initiate payment';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
       toast({
         title: 'Payment Failed',
-        description: error.message || 'Failed to initiate payment',
+        description: errorMessage,
         variant: 'destructive',
       });
       return null;
