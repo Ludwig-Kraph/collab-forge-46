@@ -38,6 +38,8 @@ const Payment = () => {
     mpesaAccount: "",
   });
 
+  const [isFormValid, setIsFormValid] = useState(false);
+
   // Fetch user's MPESA accounts
   useEffect(() => {
     const fetchMpesaAccounts = async () => {
@@ -48,11 +50,27 @@ const Payment = () => {
 
       if (!error && data) {
         setMpesaAccounts(data);
+        
+        // Show warning if no accounts found
+        if (data.length === 0) {
+          toast({
+            title: "No MPESA Accounts",
+            description: "Please add an MPESA account in Settings before making payments.",
+            variant: "destructive",
+          });
+        }
+      } else if (error) {
+        console.error('Error fetching MPESA accounts:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load MPESA accounts. Please refresh the page.",
+          variant: "destructive",
+        });
       }
     };
 
     fetchMpesaAccounts();
-  }, []);
+  }, [toast]);
 
   const validateForm = () => {
     const newErrors = {
@@ -78,8 +96,35 @@ const Payment = () => {
     }
 
     setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error);
+    const isValid = !Object.values(newErrors).some(error => error);
+    setIsFormValid(isValid);
+    return isValid;
   };
+
+  // Validate form whenever formData changes
+  useEffect(() => {
+    const newErrors = {
+      phoneNumber: "",
+      amount: "",
+      mpesaAccount: "",
+    };
+
+    if (formData.phoneNumber && !/^(?:\+254|254|0)?[17]\d{8}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Please enter a valid Kenyan phone number";
+    }
+
+    if (formData.amount > 0 && formData.amount < 10) {
+      newErrors.amount = "Minimum amount is KES 10";
+    }
+
+    setErrors(newErrors);
+    
+    const isValid = formData.phoneNumber !== "" && 
+                    formData.amount >= 10 && 
+                    formData.mpesaAccount !== "" &&
+                    !Object.values(newErrors).some(error => error);
+    setIsFormValid(isValid);
+  }, [formData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +136,9 @@ const Payment = () => {
 
   const handleConfirmPayment = async () => {
     setShowConfirmDialog(false);
+
+    // Clear previous payment status before initiating new payment
+    setPaymentRequestId(null);
 
     const result = await initiatePayment({
       mpesaAccountId: formData.mpesaAccount,
@@ -112,6 +160,11 @@ const Payment = () => {
         phoneNumber: "",
         amount: 0,
         description: "",
+        mpesaAccount: "",
+      });
+      setErrors({
+        phoneNumber: "",
+        amount: "",
         mpesaAccount: "",
       });
     }
@@ -186,8 +239,8 @@ const Payment = () => {
                     <SelectValue placeholder="Select MPESA account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mpesaAccounts.length === 0 ? (
-                      <div className="p-2 text-sm text-muted-foreground">
+              {mpesaAccounts.length === 0 ? (
+                      <div className="p-2 text-sm text-destructive">
                         No MPESA accounts found. Please add one in Settings.
                       </div>
                     ) : (
@@ -269,7 +322,7 @@ const Payment = () => {
                 type="submit"
                 className="w-full" 
                 size="lg" 
-                disabled={!validateForm() || paymentLoading}
+                disabled={!isFormValid || paymentLoading || mpesaAccounts.length === 0}
               >
                 {paymentLoading ? (
                   <>
