@@ -79,7 +79,7 @@ export default function Landing() {
       <section className="container py-20 md:py-32">
         <div className="mx-auto max-w-3xl text-center space-y-6">
           <Badge variant="secondary" className="mb-4">
-            🚀 Now in Beta - Join Early Adopters
+            🏛️ Official Prototype
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
             Streamline Your{' '}
