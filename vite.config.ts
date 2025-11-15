@@ -13,22 +13,14 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      react: path.resolve(__dirname, "node_modules/react"),
-      "react/jsx-runtime": path.resolve(__dirname, "node_modules/react/jsx-runtime.js"),
-      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-      "react-dom/client": path.resolve(__dirname, "node_modules/react-dom/client"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+    dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
     include: [
-      "react", 
-      "react-dom", 
-      "react/jsx-runtime",
       "@tanstack/react-query",
       "@radix-ui/react-tooltip",
     ],
-    force: true,
   },
   build: {
     commonjsOptions: {
