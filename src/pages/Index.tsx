@@ -6,9 +6,12 @@ import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle } from "lu
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { DemoAccountBadge } from "@/components/layout/DemoAccountBadge";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { isDemoAccount } = useAuth();
 
   // Mock data for demonstration
   const recentTransactions = [
@@ -25,6 +28,9 @@ const Index = () => {
   return (
     <Layout>
       <div className="container px-4 py-6">
+        {/* Demo Account Badge */}
+        {isDemoAccount && <DemoAccountBadge />}
+        
         {/* Welcome Section */}
         <div className="mb-6">
           <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>

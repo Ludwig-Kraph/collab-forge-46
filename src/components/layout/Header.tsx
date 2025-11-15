@@ -14,9 +14,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { DemoAccountBadge } from "./DemoAccountBadge";
 
 const Header = () => {
-  const { user, signOut, isAdmin, isSuperAdmin, userRole } = useAuth();
+  const { user, signOut, isAdmin, isSuperAdmin, userRole, isDemoAccount } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -43,6 +44,8 @@ const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {isDemoAccount && <DemoAccountBadge variant="badge" />}
+          
           <NotificationCenter />
 
           {/* User Avatar */}
