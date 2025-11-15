@@ -150,13 +150,21 @@ serve(async (req) => {
       throw new Error('Failed to save payment request');
     }
 
-    // Update subscription STK push count
-    const { error: subError } = await supabaseClient.rpc('decrement_stk_pushes', {
+    // Update subscription STK push count (skip for Super Admins)
+    const { data: isSuperAdmin } = await supabaseClient.rpc('is_super_admin', {
       _user_id: user.id,
     });
 
-    if (subError) {
-      console.error('Failed to update subscription:', subError);
+    if (!isSuperAdmin) {
+      const { error: subError } = await supabaseClient.rpc('decrement_stk_pushes', {
+        _user_id: user.id,
+      });
+
+      if (subError) {
+        console.error('Failed to update subscription:', subError);
+      }
+    } else {
+      console.log('Super Admin: Skipping STK push count decrement');
     }
 
     return new Response(

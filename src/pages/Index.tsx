@@ -31,7 +31,7 @@ interface SubscriptionData {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isDemoAccount, user } = useAuth();
+  const { isDemoAccount, user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
@@ -50,16 +50,19 @@ const Index = () => {
     try {
       setLoading(true);
 
-      // Fetch subscription data
-      const { data: subData, error: subError } = await supabase
-        .from('subscriptions')
-        .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
-        .eq('user_id', user?.id)
-        .eq('is_active', true)
-        .single();
+      // Super Admins don't have subscription limits
+      if (!isSuperAdmin) {
+        // Fetch subscription data
+        const { data: subData, error: subError } = await supabase
+          .from('subscriptions')
+          .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
+          .eq('user_id', user?.id)
+          .eq('is_active', true)
+          .single();
 
-      if (subError && subError.code !== 'PGRST116') throw subError;
-      setSubscription(subData);
+        if (subError && subError.code !== 'PGRST116') throw subError;
+        setSubscription(subData);
+      }
 
       // Fetch recent transactions
       const { data: transData, error: transError } = await supabase
@@ -124,7 +127,7 @@ const Index = () => {
           <p className="text-muted-foreground">Welcome back! Here's your business overview</p>
         </div>
 
-        {subscription && subscription.tier === 'free_trial' && (
+        {!isSuperAdmin && subscription && subscription.tier === 'free_trial' && (
           <Card className="mb-6 border-accent/50 bg-accent/5">
             <CardContent className="flex items-start gap-3 pt-6">
               <AlertCircle className="h-5 w-5 text-accent" />
@@ -183,29 +186,31 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-accent/20 shadow-elegant">
-            <CardHeader className="pb-3">
-              <CardDescription>Subscription</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <p className="mb-1 text-2xl font-bold">{tierName}</p>
-                {subscription && subscription.max_stk_pushes && (
-                  <>
-                    <p className="mb-2 text-sm text-muted-foreground">
-                      {subscription.used_stk_pushes} / {subscription.max_stk_pushes} used
+          {!isSuperAdmin && (
+            <Card className="border-accent/20 shadow-elegant">
+              <CardHeader className="pb-3">
+                <CardDescription>Subscription</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <p className="mb-1 text-2xl font-bold">{tierName}</p>
+                  {subscription && subscription.max_stk_pushes && (
+                    <>
+                      <p className="mb-2 text-sm text-muted-foreground">
+                        {subscription.used_stk_pushes} / {subscription.max_stk_pushes} used
+                      </p>
+                      <Progress value={usagePercent} className="h-2" />
+                    </>
+                  )}
+                  {subscription && !subscription.max_stk_pushes && (
+                    <p className="text-sm text-muted-foreground">
+                      {freePushes} free pushes remaining
                     </p>
-                    <Progress value={usagePercent} className="h-2" />
-                  </>
-                )}
-                {subscription && !subscription.max_stk_pushes && (
-                  <p className="text-sm text-muted-foreground">
-                    {freePushes} free pushes remaining
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <Card className="shadow-elegant">
