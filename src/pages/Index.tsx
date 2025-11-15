@@ -82,11 +82,11 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-mono-numbers text-3xl font-bold text-secondary">
-                    KES {(13500).toLocaleString()}
+                    KES {monthlyRevenue.toLocaleString()}
                   </p>
-                  <p className="mt-1 flex items-center text-xs text-green-600">
+                  <p className="mt-1 flex items-center text-xs text-muted-foreground">
                     <TrendingUp className="mr-1 h-3 w-3" />
-                    +12.5% from last month
+                    Total revenue this month
                   </p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
