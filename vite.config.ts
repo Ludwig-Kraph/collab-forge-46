@@ -13,8 +13,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
-    dedupe: ["react", "react-dom"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
   optimizeDeps: {
     include: [
@@ -24,5 +26,11 @@ export default defineConfig(({ mode }) => ({
       "@tanstack/react-query",
       "@radix-ui/react-tooltip",
     ],
+    force: true,
+  },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
   },
 }));
