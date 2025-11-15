@@ -11,6 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   userRole: string | null;
+  isDemoAccount: boolean;
   signUp: (phone: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (phone: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -23,6 +24,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const DEMO_PHONE = '+254000000000';
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -30,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isDemoAccount, setIsDemoAccount] = useState(false);
   
 
   useEffect(() => {
@@ -68,6 +72,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone_number')
+        .eq('id', userId)
+        .single();
+
+      // Check if this is the demo account
+      setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
+
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -328,6 +341,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAdmin,
         isSuperAdmin,
         userRole,
+        isDemoAccount,
         signUp,
         signIn,
         signOut,
