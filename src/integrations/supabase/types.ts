@@ -634,6 +634,45 @@ export type Database = {
           },
         ]
       }
+      mpesa_credentials: {
+        Row: {
+          consumer_key: string | null
+          consumer_secret: string | null
+          created_at: string | null
+          environment: string | null
+          id: string
+          is_active: boolean | null
+          passkey: string | null
+          shortcode: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          consumer_key?: string | null
+          consumer_secret?: string | null
+          created_at?: string | null
+          environment?: string | null
+          id?: string
+          is_active?: boolean | null
+          passkey?: string | null
+          shortcode?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          consumer_key?: string | null
+          consumer_secret?: string | null
+          created_at?: string | null
+          environment?: string | null
+          id?: string
+          is_active?: boolean | null
+          passkey?: string | null
+          shortcode?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           created_at: string
@@ -1115,6 +1154,30 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       ticket_responses: {
         Row: {
           created_at: string | null
@@ -1206,6 +1269,36 @@ export type Database = {
           },
         ]
       }
+      user_devices: {
+        Row: {
+          created_at: string | null
+          device_fingerprint: string
+          device_name: string
+          id: string
+          is_active: boolean | null
+          last_active_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_fingerprint: string
+          device_name: string
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_fingerprint?: string
+          device_name?: string
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1254,6 +1347,11 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_government_official: { Args: { _user_id: string }; Returns: boolean }
+      is_government_super_admin: {
+        Args: { _user_id: string }
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }

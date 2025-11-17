@@ -10,64 +10,54 @@ M-Leja is a Progressive Web Application (PWA) designed to streamline MPESA payme
 - **Multi-User Support**: Role-based access control for teams
 - **Government Integration**: Specialized framework for national and county operations
 - **Control Panel**: Administrative system for platform-wide management
+- **Cookie Consent**: GDPR and Kenya Data Protection Act compliance
+- **Device Management**: Revoke access from specific devices
+- **Custom MPESA Credentials**: Per-account MPESA Daraja API configuration
 
-## Development
+## Self-Hosting Installation Guide
 
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- npm or yarn
-- Supabase account
+- npm, yarn, or bun
+- Supabase account (for backend services)
+- MPESA Daraja API credentials (Live environment recommended)
 
-### Getting Started
+### Step 1: Clone and Install
 
-1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd m-leja
+npm install  # or yarn install / bun install
 ```
 
-2. Install dependencies:
+### Step 2: Supabase Setup
+
+1. Create a new Supabase project at [supabase.com](https://supabase.com)
+2. Run all database migrations from `supabase/migrations/` in order
+3. Set up authentication providers (Email/Phone)
+4. Configure Row Level Security (RLS) policies as defined in migrations
+
+### Step 3: Environment Configuration
+
+Update `src/integrations/supabase/client.ts` with your Supabase credentials
+
+### Step 4: MPESA Daraja API Setup
+
+**IMPORTANT**: Only use MPESA Daraja Live credentials. Sandbox is not supported.
+
+Configure in Supabase Edge Functions secrets
+
+### Step 5: Edge Functions Deployment
+
+Deploy Supabase Edge Functions using Supabase CLI
+
+### Step 6: Build and Deploy
+
 ```bash
-npm install
+npm run dev  # Development
+npm run build  # Production
 ```
-
-3. Set up environment variables:
-Create a `.env` file with your Supabase credentials
-
-4. Run the development server:
-```bash
-npm run dev
-```
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-## Tech Stack
-
-- **Frontend**: React, TypeScript, Tailwind CSS, Vite
-- **Backend**: Supabase (Database, Authentication, Edge Functions)
-- **APIs**: MPESA Daraja API
-- **PWA**: Service Workers, Offline Support
-
-## Project Structure
-
-```
-src/
-├── components/       # Reusable UI components
-├── pages/           # Application pages
-├── contexts/        # React contexts (Auth, etc.)
-├── hooks/           # Custom React hooks
-├── integrations/    # External service integrations
-└── utils/           # Utility functions
-```
-
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ## Security
 

@@ -85,6 +85,7 @@ const Settings = () => {
 
   const handleSaveProfile = async () => {
     setLoading(true);
+    // Don't allow phone number changes
     const { error } = await updateProfile(profileData.fullName, profileData.phoneNumber);
     setLoading(false);
     if (!error) {
@@ -205,8 +206,7 @@ const Settings = () => {
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
-                    <Button variant="outline" size="sm">Change Photo</Button>
-                    <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max size 2MB.</p>
+                    <p className="text-sm text-muted-foreground">Profile photo is managed by system</p>
                   </div>
                 </div>
 
@@ -238,8 +238,10 @@ const Settings = () => {
                       id="phone" 
                       type="tel" 
                       value={profileData.phoneNumber}
-                      onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
+                      disabled
+                      className="bg-muted cursor-not-allowed"
                     />
+                    <p className="text-xs text-muted-foreground">Phone number cannot be changed for security reasons</p>
                   </div>
 
                   {isSuperAdmin && (

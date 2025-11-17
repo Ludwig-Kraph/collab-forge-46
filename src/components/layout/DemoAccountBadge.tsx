@@ -4,9 +4,12 @@ import { Badge } from "@/components/ui/badge";
 
 interface DemoAccountBadgeProps {
   variant?: "banner" | "badge";
+  isDemoAccount?: boolean;
 }
 
-export const DemoAccountBadge = ({ variant = "banner" }: DemoAccountBadgeProps) => {
+export const DemoAccountBadge = ({ variant = "banner", isDemoAccount = false }: DemoAccountBadgeProps) => {
+  if (!isDemoAccount) return null;
+
   if (variant === "badge") {
     return (
       <Badge 
