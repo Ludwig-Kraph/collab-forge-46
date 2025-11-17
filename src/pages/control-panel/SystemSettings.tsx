@@ -122,8 +122,9 @@ export default function SystemSettings() {
         </div>
 
         <Tabs defaultValue="mpesa" className="space-y-6">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="mpesa">MPESA Credentials</TabsTrigger>
+            <TabsTrigger value="daraja">Daraja API Secrets</TabsTrigger>
             <TabsTrigger value="api">API Settings</TabsTrigger>
             <TabsTrigger value="system">System Config</TabsTrigger>
           </TabsList>
@@ -274,6 +275,103 @@ export default function SystemSettings() {
                   <li>Configure callback URL in Daraja Portal: <code className="text-xs bg-muted px-1 py-0.5 rounded">{window.location.origin}/mpesa/callback</code></li>
                   <li>Test the connection using the button above</li>
                 </ol>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Daraja API Secrets Tab */}
+          <TabsContent value="daraja">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  M-Pesa Daraja API Secrets
+                </CardTitle>
+                <CardDescription>
+                  Update MPESA Daraja API secrets from Sandbox to Live environment
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Important:</strong> These credentials are highly sensitive. After updating, 
+                    you must manually update the secrets in Supabase Dashboard under Edge Functions → Secrets.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="daraja-consumer-key">Consumer Key</Label>
+                    <Input
+                      id="daraja-consumer-key"
+                      type="password"
+                      placeholder="Enter MPESA Consumer Key"
+                      value={mpesaCredentials.consumerKey}
+                      onChange={(e) => setMpesaCredentials({ ...mpesaCredentials, consumerKey: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="daraja-consumer-secret">Consumer Secret</Label>
+                    <Input
+                      id="daraja-consumer-secret"
+                      type="password"
+                      placeholder="Enter MPESA Consumer Secret"
+                      value={mpesaCredentials.consumerSecret}
+                      onChange={(e) => setMpesaCredentials({ ...mpesaCredentials, consumerSecret: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="daraja-passkey">Passkey</Label>
+                    <Input
+                      id="daraja-passkey"
+                      type="password"
+                      placeholder="Enter MPESA Passkey"
+                      value={mpesaCredentials.passkey}
+                      onChange={(e) => setMpesaCredentials({ ...mpesaCredentials, passkey: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="daraja-shortcode">Shortcode</Label>
+                    <Input
+                      id="daraja-shortcode"
+                      placeholder="Enter MPESA Shortcode"
+                      value={mpesaCredentials.shortcode}
+                      onChange={(e) => setMpesaCredentials({ ...mpesaCredentials, shortcode: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={handleUpdateMpesaCredentials} 
+                    disabled={loading}
+                    className="gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {loading ? "Updating..." : "Update Secrets"}
+                  </Button>
+                </div>
+
+                <Alert>
+                  <AlertDescription>
+                    <strong>Next Steps:</strong>
+                    <ol className="mt-2 space-y-1 list-decimal list-inside">
+                      <li>Go to Supabase Dashboard → Project Settings → Edge Functions</li>
+                      <li>Update the following secrets with your new credentials:</li>
+                      <ul className="ml-6 mt-1 space-y-1 list-disc list-inside text-sm">
+                        <li><code className="bg-muted px-1 rounded">MPESA_CONSUMER_KEY</code></li>
+                        <li><code className="bg-muted px-1 rounded">MPESA_CONSUMER_SECRET</code></li>
+                        <li><code className="bg-muted px-1 rounded">MPESA_PASSKEY</code></li>
+                        <li><code className="bg-muted px-1 rounded">MPESA_SHORTCODE</code></li>
+                      </ul>
+                      <li>Redeploy your edge functions to use the new credentials</li>
+                    </ol>
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
           </TabsContent>

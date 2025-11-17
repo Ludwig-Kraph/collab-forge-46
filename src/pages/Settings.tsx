@@ -389,12 +389,12 @@ const Settings = () => {
                           <SelectContent>
                             <SelectItem value="till">Till Number</SelectItem>
                             <SelectItem value="paybill">Paybill Number</SelectItem>
-                            <SelectItem value="pochi">Pochi la Biashara</SelectItem>
+                            <SelectItem value="pochi" disabled>Pochi la Biashara (Under Construction)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="account_number">Account Number</Label>
+                        <Label htmlFor="account_number">Account Number (Store Number)</Label>
                         <Input
                           id="account_number"
                           placeholder="e.g., 123456"

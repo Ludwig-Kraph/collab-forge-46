@@ -22,9 +22,9 @@ const HowTo = () => {
               <UserPlus className="w-4 h-4" />
               Registration
             </TabsTrigger>
-            <TabsTrigger value="pochi" className="gap-2">
+            <TabsTrigger value="pochi" className="gap-2" disabled>
               <Wallet className="w-4 h-4" />
-              Pochi
+              Pochi (Under Construction)
             </TabsTrigger>
             <TabsTrigger value="till" className="gap-2">
               <Store className="w-4 h-4" />
@@ -188,86 +188,17 @@ const HowTo = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <Wallet className="w-6 h-6 text-primary" />
-                  Pochi la Biashara Integration
+                  Pochi la Biashara Integration (Under Construction)
                 </CardTitle>
                 <CardDescription>
-                  How to integrate your Pochi la Biashara with M-Leja
+                  This feature is currently under construction and will be available soon
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="bg-muted rounded-lg p-6 space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Step-by-Step Integration Process</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">1</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Navigate to Settings</p>
-                        <p className="text-sm text-muted-foreground">Go to your M-Leja dashboard and click on "Settings" from the menu</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">2</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Select "M-PESA Accounts"</p>
-                        <p className="text-sm text-muted-foreground">Click on "M-PESA Accounts" tab to manage your linked accounts</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">3</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Click "Add New Account"</p>
-                        <p className="text-sm text-muted-foreground">Select the option to add a new M-PESA account</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">4</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Choose "Pochi la Biashara"</p>
-                        <p className="text-sm text-muted-foreground">Select Pochi la Biashara from the account type options</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">5</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Enter Your Pochi Phone Number</p>
-                        <p className="text-sm text-muted-foreground">Input your registered Pochi la Biashara phone number (format: +254XXXXXXXXX)</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">6</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Add Account Name</p>
-                        <p className="text-sm text-muted-foreground">Provide a friendly name for easy identification (e.g., "Main Pochi Account")</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Badge className="mt-0.5">7</Badge>
-                      <div>
-                        <p className="font-medium text-foreground">Verify & Save</p>
-                        <p className="text-sm text-muted-foreground">Click "Save" to link your Pochi account. You can now trigger STK push payments to this account</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                  <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                    Important Notes
-                  </h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Ensure your Pochi la Biashara is active and registered with Safaricom</li>
-                    <li>• You must have STK Push enabled on your Pochi account</li>
-                    <li>• Transaction fees apply as per Safaricom's Pochi la Biashara rates</li>
-                    <li>• All transactions will be recorded in your M-Leja ledger automatically</li>
-                  </ul>
+                <div className="bg-muted rounded-lg p-6">
+                  <p className="text-muted-foreground text-center">
+                    Pochi la Biashara integration is coming soon. Please use Till or Paybill in the meantime.
+                  </p>
                 </div>
               </CardContent>
             </Card>

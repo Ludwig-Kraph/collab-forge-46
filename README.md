@@ -1,73 +1,78 @@
-# Welcome to your Lovable project
+# M-Leja - MPESA Payment Management System
 
-## Project info
+M-Leja is a Progressive Web Application (PWA) designed to streamline MPESA payment operations for businesses and government agencies.
 
-**URL**: https://lovable.dev/projects/866fefa0-7f3d-4e04-be7c-3900fd6d9275
+## Features
 
-## How can I edit this code?
+- **STK Push Payments**: Trigger payment requests to Till and Paybill numbers
+- **Transaction Management**: Automatic capture and organization of MPESA transactions
+- **Digital Ledger**: Comprehensive financial tracking and analytics
+- **Multi-User Support**: Role-based access control for teams
+- **Government Integration**: Specialized framework for national and county operations
+- **Control Panel**: Administrative system for platform-wide management
 
-There are several ways of editing your application.
+## Development
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/866fefa0-7f3d-4e04-be7c-3900fd6d9275) and start prompting.
+- Node.js (v18 or higher)
+- npm or yarn
+- Supabase account
 
-Changes made via Lovable will be committed automatically to this repo.
+### Getting Started
 
-**Use your preferred IDE**
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd m-leja
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Install dependencies:
+```bash
+npm install
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. Set up environment variables:
+Create a `.env` file with your Supabase credentials
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Run the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Build for Production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run build
+```
 
-**Use GitHub Codespaces**
+## Tech Stack
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Frontend**: React, TypeScript, Tailwind CSS, Vite
+- **Backend**: Supabase (Database, Authentication, Edge Functions)
+- **APIs**: MPESA Daraja API
+- **PWA**: Service Workers, Offline Support
 
-## What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+```
+src/
+├── components/       # Reusable UI components
+├── pages/           # Application pages
+├── contexts/        # React contexts (Auth, etc.)
+├── hooks/           # Custom React hooks
+├── integrations/    # External service integrations
+└── utils/           # Utility functions
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deployment
 
-## How can I deploy this project?
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
-Simply open [Lovable](https://lovable.dev/projects/866fefa0-7f3d-4e04-be7c-3900fd6d9275) and click on Share -> Publish.
+## Security
 
-## Can I connect a custom domain to my Lovable project?
+See [SECURITY.md](SECURITY.md) for security policies and vulnerability reporting.
 
-Yes, you can!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Proprietary - All rights reserved
