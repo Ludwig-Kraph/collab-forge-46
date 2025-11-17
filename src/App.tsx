@@ -29,6 +29,7 @@ import Support from '@/pages/control-panel/Support';
 import Communication from '@/pages/control-panel/Communication';
 import SystemSettings from '@/pages/control-panel/SystemSettings';
 import Government from '@/pages/control-panel/Government';
+import SubscriptionControl from '@/pages/control-panel/SubscriptionControl';
 import SubscriptionOutlets from '@/pages/subscription/Outlets';
 import SubscriptionStaff from '@/pages/subscription/Staff';
 import SubscriptionDepartments from '@/pages/subscription/Departments';
@@ -41,6 +42,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
 const HowTo = lazy(() => import("./pages/HowTo"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -74,6 +76,7 @@ const App = () => (
             <Route path="/control-panel/onboarding" element={<SuperAdminRoute><Onboarding /></SuperAdminRoute>} />
             <Route path="/control-panel/support" element={<SuperAdminRoute><Support /></SuperAdminRoute>} />
             <Route path="/control-panel/communication" element={<SuperAdminRoute><Communication /></SuperAdminRoute>} />
+            <Route path="/control-panel/subscriptions" element={<SuperAdminRoute><SubscriptionControl /></SuperAdminRoute>} />
             <Route path="/control-panel/settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/control-panel/government" element={<SuperAdminRoute><Government /></SuperAdminRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
@@ -87,6 +90,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/how-to" element={<ProtectedRoute><HowTo /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

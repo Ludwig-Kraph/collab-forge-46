@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -250,8 +250,17 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t py-8">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 M-Leja. All rights reserved.</p>
+        <div className="container">
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              © 2024 M-Leja. All rights reserved.
+            </p>
+            <div className="flex gap-4 justify-center text-sm">
+              <Link to="/help" className="hover:underline text-muted-foreground">Help Center</Link>
+              <Link to="/how-to" className="hover:underline text-muted-foreground">How To Guide</Link>
+              <Link to="/cookie-policy" className="hover:underline text-muted-foreground">Cookie Policy</Link>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
