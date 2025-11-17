@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  Smartphone, 
   Shield, 
   Zap, 
   TrendingUp, 
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/m-leja-logo.png';
 
 const tiers = [
   {
@@ -65,8 +65,8 @@ export default function Landing() {
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Smartphone className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="M-Leja Logo" className="h-10 w-auto" />
             <span className="text-xl font-bold">M-Leja</span>
           </div>
           <Button onClick={() => navigate('/auth')}>
@@ -118,7 +118,7 @@ export default function Landing() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <Smartphone className="h-12 w-12 text-primary mb-4" />
+              <Zap className="h-12 w-12 text-primary mb-4" />
               <CardTitle>STK Push Integration</CardTitle>
               <CardDescription>
                 Trigger payment requests directly to your Till, Paybill, or Pochi numbers

@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Bell, Shield, Smartphone, CreditCard, Trash2, Wallet, Plus, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -37,6 +39,12 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
   const [mpesaAccounts, setMpesaAccounts] = useState<any[]>([]);
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
+  const [showAddAccountDialog, setShowAddAccountDialog] = useState(false);
+  const [newAccount, setNewAccount] = useState({
+    account_name: '',
+    account_number: '',
+    account_type: 'till' as 'till' | 'paybill' | 'pochi',
+  });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -102,6 +110,57 @@ const Settings = () => {
     if (!error) {
       setPasswordData({ newPassword: '', confirmPassword: '' });
     }
+  };
+
+  const handleAddMpesaAccount = async () => {
+    if (!newAccount.account_name || !newAccount.account_number) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (!/^\d{5,10}$/.test(newAccount.account_number)) {
+      toast.error("Account number must be 5-10 digits");
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase
+      .from('mpesa_accounts')
+      .insert({
+        user_id: user!.id,
+        account_name: newAccount.account_name,
+        account_number: newAccount.account_number,
+        account_type: newAccount.account_type,
+        is_active: true,
+      });
+
+    setLoading(false);
+
+    if (error) {
+      toast.error("Failed to add MPESA account");
+      console.error(error);
+      return;
+    }
+
+    toast.success("MPESA account added successfully");
+    setShowAddAccountDialog(false);
+    setNewAccount({ account_name: '', account_number: '', account_type: 'till' });
+    fetchMpesaAccounts();
+  };
+
+  const handleToggleAccount = async (accountId: string, currentStatus: boolean) => {
+    const { error } = await supabase
+      .from('mpesa_accounts')
+      .update({ is_active: !currentStatus })
+      .eq('id', accountId);
+
+    if (error) {
+      toast.error("Failed to update account status");
+      return;
+    }
+
+    toast.success(currentStatus ? "Account deactivated" : "Account activated");
+    fetchMpesaAccounts();
   };
 
   return (
@@ -260,9 +319,15 @@ const Settings = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={account.is_active ? "default" : "outline"}>
-                          {account.is_active ? "Active" : "Inactive"}
-                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleAccount(account.id, account.is_active)}
+                        >
+                          <Badge variant={account.is_active ? "default" : "outline"}>
+                            {account.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </Button>
                       </div>
                     </div>
                   ))
@@ -270,14 +335,64 @@ const Settings = () => {
 
                 <Separator className="my-4" />
 
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => window.location.href = '/auth?step=mpesa'}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New MPESA Account
-                </Button>
+                <Dialog open={showAddAccountDialog} onOpenChange={setShowAddAccountDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New MPESA Account
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add MPESA Account</DialogTitle>
+                      <DialogDescription>
+                        Link your Till, Paybill, or Pochi la Biashara number
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="account_name">Account Name</Label>
+                        <Input
+                          id="account_name"
+                          placeholder="e.g., Main Till, Branch Paybill"
+                          value={newAccount.account_name}
+                          onChange={(e) => setNewAccount({ ...newAccount, account_name: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="account_type">Account Type</Label>
+                        <Select
+                          value={newAccount.account_type}
+                          onValueChange={(value: 'till' | 'paybill' | 'pochi') =>
+                            setNewAccount({ ...newAccount, account_type: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="till">Till Number</SelectItem>
+                            <SelectItem value="paybill">Paybill Number</SelectItem>
+                            <SelectItem value="pochi">Pochi la Biashara</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="account_number">Account Number</Label>
+                        <Input
+                          id="account_number"
+                          placeholder="e.g., 123456"
+                          value={newAccount.account_number}
+                          onChange={(e) => setNewAccount({ ...newAccount, account_number: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground">5-10 digits</p>
+                      </div>
+                      <Button onClick={handleAddMpesaAccount} disabled={loading} className="w-full">
+                        {loading ? "Adding..." : "Add Account"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </TabsContent>
