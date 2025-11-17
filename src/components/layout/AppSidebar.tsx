@@ -15,7 +15,8 @@ import {
   UserCog,
   UserPlus,
   MessageSquare,
-  Wrench
+  Wrench,
+  DollarSign
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -54,6 +55,7 @@ const controlPanelItems = [
   { title: "Accounts", url: "/control-panel/accounts", icon: UserCog },
   { title: "Onboarding", url: "/control-panel/onboarding", icon: UserPlus },
   { title: "Support", url: "/control-panel/support", icon: MessageSquare },
+  { title: "Subscriptions", url: "/control-panel/subscriptions", icon: DollarSign },
   { title: "System Settings", url: "/control-panel/system-settings", icon: Wrench },
   { title: "Communication", url: "/control-panel/communication", icon: MessageSquare },
 ];
