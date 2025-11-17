@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Smartphone, Shield, Zap, ArrowLeft } from 'lucide-react';
 import { RegistrationWizard } from '@/components/auth/RegistrationWizard';
 import { WelcomeModal } from '@/components/onboarding/WelcomeModal';
+import logo from '@/assets/m-leja-logo.png';
 
 export default function Auth() {
   const { user, signIn } = useAuth();
@@ -75,10 +76,8 @@ export default function Auth() {
         <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
           {/* Left side - Branding */}
           <div className="hidden md:block space-y-6">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                M-Leja
-              </h1>
+            <div className="space-y-4">
+              <img src={logo} alt="M-Leja" className="h-16 w-auto" />
               <p className="text-xl text-muted-foreground">
                 Streamline your MPESA payment operations
               </p>

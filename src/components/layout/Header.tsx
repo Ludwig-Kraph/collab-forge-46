@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DemoAccountBadge } from "./DemoAccountBadge";
+import logo from '@/assets/m-leja-logo.png';
 
 const Header = () => {
   const { user, signOut, isAdmin, isSuperAdmin, userRole, isDemoAccount } = useAuth();
@@ -35,10 +36,7 @@ const Header = () => {
           </div>
 
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
-              <span className="text-lg font-bold text-primary-foreground">M</span>
-            </div>
-            <span className="hidden text-lg font-bold sm:inline-block">M-Leja</span>
+            <img src={logo} alt="M-Leja" className="h-8 w-auto" />
           </Link>
         </div>
 
