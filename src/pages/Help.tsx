@@ -14,6 +14,8 @@ import { Search, MessageCircle, Book, Video, Mail, Phone, FileText } from "lucid
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const faqCategories = [
   {
@@ -80,6 +82,7 @@ const faqCategories = [
 
 const Help = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -97,9 +100,29 @@ const Help = () => {
     ),
   }));
 
-  const handleSubmitContact = (e: React.FormEvent) => {
+  const handleSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Support request submitted! We'll get back to you within 24 hours.");
+    
+    if (!user) {
+      toast.error("Please login to submit a support ticket");
+      return;
+    }
+
+    const { error } = await supabase
+      .from('support_tickets')
+      .insert({
+        user_id: user.id,
+        subject: formData.subject,
+        description: formData.message,
+        priority: 'normal',
+      });
+
+    if (error) {
+      toast.error("Failed to create support ticket");
+      return;
+    }
+
+    toast.success("Support ticket created successfully! Our team will respond soon.");
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
 
@@ -209,8 +232,8 @@ const Help = () => {
           {/* Contact Form */}
           <Card>
             <CardHeader>
-              <CardTitle>Contact Support</CardTitle>
-              <CardDescription>Send us a message and we'll respond within 24 hours</CardDescription>
+              <CardTitle>Submit Support Ticket</CardTitle>
+              <CardDescription>Create a ticket and track your support request</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmitContact} className="space-y-4">
@@ -253,7 +276,7 @@ const Help = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full">
-                  Send Message
+                  Create Support Ticket
                 </Button>
               </form>
             </CardContent>

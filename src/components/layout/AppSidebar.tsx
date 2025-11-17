@@ -57,6 +57,7 @@ const controlPanelItems = [
   { title: "Support", url: "/control-panel/support", icon: MessageSquare },
   { title: "Subscriptions", url: "/control-panel/subscriptions", icon: DollarSign },
   { title: "System Settings", url: "/control-panel/system-settings", icon: Wrench },
+  { title: "MPESA API Settings", url: "/control-panel/system-settings#mpesa", icon: CreditCard },
   { title: "Communication", url: "/control-panel/communication", icon: MessageSquare },
 ];
 
