@@ -13,6 +13,7 @@ import { Check, ArrowRight, ArrowLeft, Smartphone, CreditCard, Crown } from 'luc
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const tiers = [
   { value: 'free_trial', label: 'Free Trial', description: '3 free STK pushes', icon: Smartphone },
@@ -83,10 +84,14 @@ export function RegistrationWizard({ onComplete, onCancel }: RegistrationWizardP
     setLoading(false);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (!termsAccepted) return;
+    
+    // Don't navigate away yet - user needs to add MPESA account first
+    toast.success("Registration Complete! Please add your MPESA account to start using M-Leja");
+    
     onComplete();
-    navigate('/dashboard');
+    // Navigation will be handled after MPESA account is added
   };
 
   return (
