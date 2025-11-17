@@ -141,11 +141,11 @@ export function AppSidebar() {
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton isActive={isControlPanelActive}>
-                          <Shield className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                          {!isCollapsed && <span>Control Panel</span>}
+                        <SidebarMenuButton isActive={isControlPanelActive} className="bg-primary/5 hover:bg-primary/10 data-[state=open]:bg-primary/10">
+                          <Shield className={isCollapsed ? "h-5 w-5 text-primary" : "mr-3 h-5 w-5 text-primary"} />
+                          {!isCollapsed && <span className="font-medium">Control Panel</span>}
                           {!isCollapsed && (
-                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                            <ChevronDown className="ml-auto h-4 w-4 text-primary transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                           )}
                         </SidebarMenuButton>
                       </CollapsibleTrigger>

@@ -166,9 +166,17 @@ const Settings = () => {
   return (
     <Layout>
       <div className="container max-w-4xl px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Settings</h1>
+            <p className="text-muted-foreground">Manage your account settings and preferences</p>
+          </div>
+          {isSuperAdmin && (
+            <Badge variant="default" className="bg-primary text-primary-foreground">
+              <Shield className="h-3 w-3 mr-1" />
+              Super Admin
+            </Badge>
+          )}
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
@@ -274,8 +282,16 @@ const Settings = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Wallet className="h-5 w-5" />
                   Linked MPESA Accounts
+                  {isSuperAdmin && (
+                    <Badge variant="outline" className="ml-2">Unlimited Access</Badge>
+                  )}
                 </CardTitle>
-                <CardDescription>Manage your connected Till, Paybill, and Pochi la Biashara numbers</CardDescription>
+                <CardDescription>
+                  {isSuperAdmin 
+                    ? "Super Admin: Full access to all MPESA features with no limits"
+                    : "Manage your connected Till, Paybill, and Pochi la Biashara numbers"
+                  }
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {mpesaAccounts.length === 0 ? (
