@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   TrendingUp,
   Clock,
-  Server
+  Server,
+  Building2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -242,6 +243,10 @@ export default function ControlPanel() {
                   <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
                     <Activity className="mr-2 h-4 w-4" />
                     Team Communication
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/government'}>
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Government Entities
                   </Button>
                 </div>
               </AdminCard>

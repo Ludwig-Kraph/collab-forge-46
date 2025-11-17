@@ -97,6 +97,68 @@ export type Database = {
           },
         ]
       }
+      channel_messages: {
+        Row: {
+          channel_id: string | null
+          created_at: string | null
+          id: string
+          message: string
+          user_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          user_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "communication_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_channels: {
+        Row: {
+          channel_type: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_private: boolean | null
+          name: string
+        }
+        Insert: {
+          channel_type: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          name: string
+        }
+        Update: {
+          channel_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           created_at: string | null
@@ -531,6 +593,47 @@ export type Database = {
         }
         Relationships: []
       }
+      mpesa_credential_validations: {
+        Row: {
+          created_at: string | null
+          id: string
+          registration_request_id: string | null
+          status: string
+          test_amount: number | null
+          test_phone_number: string | null
+          validated_by: string | null
+          validation_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          registration_request_id?: string | null
+          status: string
+          test_amount?: number | null
+          test_phone_number?: string | null
+          validated_by?: string | null
+          validation_type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          registration_request_id?: string | null
+          status?: string
+          test_amount?: number | null
+          test_phone_number?: string | null
+          validated_by?: string | null
+          validation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpesa_credential_validations_registration_request_id_fkey"
+            columns: ["registration_request_id"]
+            isOneToOne: false
+            referencedRelation: "registration_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -759,6 +862,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registration_requests: {
+        Row: {
+          business_name: string
+          business_type: string
+          contact_person: string
+          created_at: string | null
+          email: string
+          id: string
+          mpesa_account_number: string
+          mpesa_account_type: string
+          notes: string | null
+          phone_number: string
+          requested_tier: string
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_name: string
+          business_type: string
+          contact_person: string
+          created_at?: string | null
+          email: string
+          id?: string
+          mpesa_account_number: string
+          mpesa_account_type: string
+          notes?: string | null
+          phone_number: string
+          requested_tier: string
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          contact_person?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          mpesa_account_number?: string
+          mpesa_account_type?: string
+          notes?: string | null
+          phone_number?: string
+          requested_tier?: string
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       staff_departments: {
         Row: {
