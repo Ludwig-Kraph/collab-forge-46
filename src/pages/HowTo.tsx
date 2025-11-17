@@ -3,14 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { UserPlus, Wallet, Store, Building2, CheckCircle2, ArrowRight } from "lucide-react";
-
-import registrationStep1 from "@/assets/guide-registration-step1.png";
-import registrationStep2 from "@/assets/guide-registration-step2.png";
-import registrationStep3 from "@/assets/guide-registration-step3.png";
-import pochiIntegration from "@/assets/guide-pochi-integration.png";
-import tillIntegration from "@/assets/guide-till-integration.png";
-import paybillIntegration from "@/assets/guide-paybill-integration.png";
+import { UserPlus, Wallet, Store, Building2, CheckCircle2, ArrowRight, PhoneCall, Mail, Key, CreditCard } from "lucide-react";
 
 const HowTo = () => {
   return (
@@ -62,32 +55,27 @@ const HowTo = () => {
                     <Badge variant="default" className="text-lg px-4 py-2">Step 1</Badge>
                     <h3 className="text-xl font-semibold text-foreground">Enter Your Details</h3>
                   </div>
-                  <div className="bg-muted rounded-lg p-6">
-                    <img 
-                      src={registrationStep1} 
-                      alt="Registration Step 1 - Account Details" 
-                      className="w-full rounded-md shadow-lg mb-4"
-                    />
-                    <ul className="space-y-2 text-muted-foreground">
+                  <div className="bg-muted rounded-lg p-6 space-y-3">
+                    <ul className="space-y-3 text-muted-foreground">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Navigate to the registration page from the landing screen</span>
+                        <span>Navigate to the <strong>Registration</strong> page from the landing screen</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Enter your full name as it appears on official documents</span>
+                        <span>Enter your <strong>full name</strong> as it appears on official documents</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Provide your Kenyan phone number in the format +254XXXXXXXXX</span>
+                        <span>Provide your <strong>Kenyan phone number</strong> in format: +254XXXXXXXXX</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Create a strong password (minimum 8 characters with letters and numbers)</span>
+                        <span>Create a <strong>secure password</strong> (minimum 8 characters with uppercase, lowercase, and numbers)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Click "Continue" to proceed to verification</span>
+                        <span>Provide your <strong>email address</strong> for account recovery and notifications</span>
                       </li>
                     </ul>
                   </div>
@@ -101,28 +89,23 @@ const HowTo = () => {
                     <Badge variant="default" className="text-lg px-4 py-2">Step 2</Badge>
                     <h3 className="text-xl font-semibold text-foreground">Verify Your Phone Number</h3>
                   </div>
-                  <div className="bg-muted rounded-lg p-6">
-                    <img 
-                      src={registrationStep2} 
-                      alt="Registration Step 2 - OTP Verification" 
-                      className="w-full rounded-md shadow-lg mb-4"
-                    />
-                    <ul className="space-y-2 text-muted-foreground">
+                  <div className="bg-muted rounded-lg p-6 space-y-3">
+                    <ul className="space-y-3 text-muted-foreground">
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>You will receive an OTP (One-Time Password) via SMS to your phone</span>
+                        <PhoneCall className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span>You will receive an <strong>OTP (One-Time Password)</strong> via SMS to your registered phone number</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Key className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Enter the <strong>6-digit verification code</strong> in the OTP input field</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Enter the 6-digit code in the verification boxes</span>
+                        <span>Click <strong>"Verify"</strong> to confirm your phone number</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>If you don't receive the code, click "Resend OTP" after 60 seconds</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>The system will automatically verify and proceed to the next step</span>
+                        <ArrowRight className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span>If you don't receive the code, click <strong>"Resend OTP"</strong> after 60 seconds</span>
                       </li>
                     </ul>
                   </div>

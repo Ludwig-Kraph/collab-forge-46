@@ -28,6 +28,8 @@ import Onboarding from '@/pages/control-panel/Onboarding';
 import Support from '@/pages/control-panel/Support';
 import Communication from '@/pages/control-panel/Communication';
 import SystemSettings from '@/pages/control-panel/SystemSettings';
+import Government from '@/pages/control-panel/Government';
+import Government from '@/pages/control-panel/Government';
 import SubscriptionOutlets from '@/pages/subscription/Outlets';
 import SubscriptionStaff from '@/pages/subscription/Staff';
 import SubscriptionDepartments from '@/pages/subscription/Departments';
