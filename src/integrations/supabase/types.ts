@@ -677,39 +677,78 @@ export type Database = {
       profiles: {
         Row: {
           account_status: string | null
+          avatar_type: string | null
+          block_reason: string | null
+          blocked_at: string | null
+          blocked_by: string | null
           created_at: string
           email: string | null
+          flag_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
           full_name: string
+          government_coat_of_arms_url: string | null
           id: string
+          is_blocked: boolean | null
+          is_flagged: boolean | null
           is_rbac_user: boolean | null
+          is_verified: boolean | null
           organization_id: string | null
           phone_number: string
           pin_hash: string | null
+          subscription_tier: string | null
           updated_at: string
+          verification_badge_color: string | null
         }
         Insert: {
           account_status?: string | null
+          avatar_type?: string | null
+          block_reason?: string | null
+          blocked_at?: string | null
+          blocked_by?: string | null
           created_at?: string
           email?: string | null
+          flag_reason?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
           full_name: string
+          government_coat_of_arms_url?: string | null
           id: string
+          is_blocked?: boolean | null
+          is_flagged?: boolean | null
           is_rbac_user?: boolean | null
+          is_verified?: boolean | null
           organization_id?: string | null
           phone_number: string
           pin_hash?: string | null
+          subscription_tier?: string | null
           updated_at?: string
+          verification_badge_color?: string | null
         }
         Update: {
           account_status?: string | null
+          avatar_type?: string | null
+          block_reason?: string | null
+          blocked_at?: string | null
+          blocked_by?: string | null
           created_at?: string
           email?: string | null
+          flag_reason?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
           full_name?: string
+          government_coat_of_arms_url?: string | null
           id?: string
+          is_blocked?: boolean | null
+          is_flagged?: boolean | null
           is_rbac_user?: boolean | null
+          is_verified?: boolean | null
           organization_id?: string | null
           phone_number?: string
           pin_hash?: string | null
+          subscription_tier?: string | null
           updated_at?: string
+          verification_badge_color?: string | null
         }
         Relationships: [
           {
@@ -789,9 +828,11 @@ export type Database = {
         Row: {
           created_at: string
           expires_at: string | null
+          expiry_notified: boolean | null
           free_stk_pushes_remaining: number
           id: string
           is_active: boolean
+          last_notification_date: string | null
           max_stk_pushes: number | null
           max_users: number
           started_at: string
@@ -803,9 +844,11 @@ export type Database = {
         Insert: {
           created_at?: string
           expires_at?: string | null
+          expiry_notified?: boolean | null
           free_stk_pushes_remaining?: number
           id?: string
           is_active?: boolean
+          last_notification_date?: string | null
           max_stk_pushes?: number | null
           max_users?: number
           started_at?: string
@@ -817,9 +860,11 @@ export type Database = {
         Update: {
           created_at?: string
           expires_at?: string | null
+          expiry_notified?: boolean | null
           free_stk_pushes_remaining?: number
           id?: string
           is_active?: boolean
+          last_notification_date?: string | null
           max_stk_pushes?: number | null
           max_users?: number
           started_at?: string
@@ -829,6 +874,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          created_at: string | null
+          description: string
+          id: string
+          organization_id: string | null
+          priority: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          organization_id?: string | null
+          priority?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          organization_id?: string | null
+          priority?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_alerts: {
         Row: {
@@ -862,6 +960,41 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      ticket_responses: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_staff_response: boolean | null
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_staff_response?: boolean | null
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_staff_response?: boolean | null
+          message?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_responses_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
@@ -992,6 +1125,14 @@ export type Database = {
         | "super_admin"
         | "developer"
         | "corporate_admin"
+        | "cashier"
+        | "sales_agent"
+        | "supervisor"
+        | "assistant_manager"
+        | "senior_manager"
+        | "cfo"
+        | "director"
+        | "ceo"
       government_level: "national" | "county"
       mpesa_account_type: "till" | "paybill" | "pochi"
       subscription_tier:
@@ -1137,6 +1278,14 @@ export const Constants = {
         "super_admin",
         "developer",
         "corporate_admin",
+        "cashier",
+        "sales_agent",
+        "supervisor",
+        "assistant_manager",
+        "senior_manager",
+        "cfo",
+        "director",
+        "ceo",
       ],
       government_level: ["national", "county"],
       mpesa_account_type: ["till", "paybill", "pochi"],
