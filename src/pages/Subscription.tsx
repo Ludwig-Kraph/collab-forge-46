@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Check, Crown, Zap, Building2, Globe, ArrowRight } from "lucide-react";
+import { Check, Crown, Zap, Building2, Globe, ArrowRight, Shield, Infinity } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const tiers = [
   {
@@ -71,6 +72,7 @@ const billingHistory = [
 ];
 
 const Subscription = () => {
+  const { isSuperAdmin } = useAuth();
   const currentUsage = {
     stkPushes: 342,
     stkPushesLimit: 500,
@@ -82,6 +84,148 @@ const Subscription = () => {
     toast.success(`Upgrade to ${tierName} initiated`);
   };
 
+  // Super Admin view
+  if (isSuperAdmin) {
+    return (
+      <Layout>
+        <div className="container px-4 py-8">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Subscription</h1>
+            <p className="text-muted-foreground">Super Admin - Unlimited Access</p>
+          </div>
+
+          {/* Super Admin Plan Card */}
+          <Card className="mb-8 border-primary bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-6 w-6 text-primary" />
+                    Super Admin Plan
+                  </CardTitle>
+                  <CardDescription>Unlimited access to all features</CardDescription>
+                </div>
+                <Badge variant="default" className="bg-primary">
+                  <Infinity className="h-4 w-4 mr-1" />
+                  Unlimited
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-4">
+                  <div>
+                    <div className="mb-2 flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">STK Pushes</span>
+                      <span className="font-mono font-medium flex items-center gap-1">
+                        <Infinity className="h-4 w-4" />
+                        Unlimited
+                      </span>
+                    </div>
+                    <Progress value={100} className="bg-primary/20" />
+                  </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Users</span>
+                      <span className="font-mono font-medium flex items-center gap-1">
+                        <Infinity className="h-4 w-4" />
+                        Unlimited
+                      </span>
+                    </div>
+                    <Progress value={100} className="bg-primary/20" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col justify-center space-y-2 rounded-lg bg-background/50 p-4">
+                  <p className="text-sm font-medium">Super Admin Features:</p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary" />
+                      Unlimited STK pushes
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary" />
+                      Unlimited users
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary" />
+                      Full Control Panel access
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary" />
+                      Complete system management
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary" />
+                      All enterprise features
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="rounded-lg bg-muted/50 p-4">
+                <p className="text-sm text-muted-foreground">
+                  As a Super Admin, you have unrestricted access to all M-Leja features and the Control Panel.
+                  This account is not subject to any subscription limits or billing.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Available Plans for Reference */}
+          <div className="mb-6">
+            <h2 className="mb-2 text-2xl font-bold">Available Plans</h2>
+            <p className="text-muted-foreground">View subscription tiers available to regular users</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {tiers.map((tier) => (
+              <Card
+                key={tier.name}
+                className={tier.popular ? "border-primary shadow-lg" : ""}
+              >
+                {tier.popular && (
+                  <div className="bg-primary px-3 py-1 text-center text-sm font-medium text-primary-foreground">
+                    Most Popular
+                  </div>
+                )}
+                <CardHeader>
+                  <div className="mb-2 flex items-center justify-between">
+                    <tier.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>{tier.name}</CardTitle>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold">
+                      {tier.price === "Custom" ? tier.price : `KES ${tier.price}`}
+                    </span>
+                    {tier.price !== "Custom" && (
+                      <span className="text-sm text-muted-foreground">/month</span>
+                    )}
+                  </div>
+                  <CardDescription>{tier.users}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-2">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4 text-primary" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Regular user view
   return (
     <Layout>
       <div className="container px-4 py-8">
@@ -119,7 +263,7 @@ const Subscription = () => {
 
                 <div>
                   <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Active Users</span>
+                    <span className="text-muted-foreground">Users</span>
                     <span className="font-mono font-medium">
                       {currentUsage.users} / {currentUsage.usersLimit}
                     </span>
@@ -128,106 +272,111 @@ const Subscription = () => {
                 </div>
               </div>
 
-              <div className="space-y-2 rounded-lg bg-secondary/20 p-4">
-                <p className="text-sm text-muted-foreground">Next billing date</p>
-                <p className="text-2xl font-bold font-mono">Jan 01, 2025</p>
-                <p className="text-sm text-muted-foreground">Amount: KES 5,000</p>
-                <Button variant="outline" size="sm" className="mt-2 w-full">
-                  Update Payment Method
-                </Button>
+              <div className="flex flex-col justify-center space-y-2 rounded-lg bg-muted p-4">
+                <p className="text-sm font-medium">Next billing date</p>
+                <p className="text-2xl font-bold">Jan 1, 2025</p>
+                <p className="text-sm text-muted-foreground">KES 5,000/month</p>
               </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Want to increase your limits?</p>
+                <p className="text-sm text-muted-foreground">Upgrade to a higher tier for more features</p>
+              </div>
+              <Button>Upgrade Plan</Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Available Plans */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-2xl font-bold">Available Plans</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {tiers.map((tier) => {
-              const Icon = tier.icon;
-              return (
-                <Card
-                  key={tier.name}
-                  className={`relative ${tier.current ? "border-primary shadow-elegant" : ""} ${
-                    tier.popular ? "ring-2 ring-primary" : ""
-                  }`}
-                >
-                  {tier.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge variant="default">Most Popular</Badge>
-                    </div>
+        <div className="mb-6">
+          <h2 className="mb-2 text-2xl font-bold">Available Plans</h2>
+          <p className="text-muted-foreground">Choose the plan that best fits your needs</p>
+        </div>
+
+        <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {tiers.map((tier) => (
+            <Card
+              key={tier.name}
+              className={`${tier.current ? "border-primary shadow-lg" : ""} ${
+                tier.popular ? "border-primary" : ""
+              }`}
+            >
+              {tier.popular && (
+                <div className="bg-primary px-3 py-1 text-center text-sm font-medium text-primary-foreground">
+                  Most Popular
+                </div>
+              )}
+              <CardHeader>
+                <div className="mb-2 flex items-center justify-between">
+                  <tier.icon className="h-6 w-6 text-primary" />
+                  {tier.current && <Badge variant="outline">Current</Badge>}
+                </div>
+                <CardTitle>{tier.name}</CardTitle>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold">
+                    {tier.price === "Custom" ? tier.price : `KES ${tier.price}`}
+                  </span>
+                  {tier.price !== "Custom" && (
+                    <span className="text-sm text-muted-foreground">/month</span>
                   )}
-                  <CardHeader>
-                    <Icon className={`h-8 w-8 ${tier.current ? "text-primary" : "text-muted-foreground"}`} />
-                    <CardTitle className="mt-4">{tier.name}</CardTitle>
-                    <CardDescription>{tier.users}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-3xl font-bold font-mono">
-                        {tier.price !== "Custom" && "KES "}
-                        {tier.price}
-                      </span>
-                      {tier.price !== "Custom" && <span className="text-muted-foreground">/month</span>}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 mb-6">
-                      {tier.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    {tier.current ? (
-                      <Button variant="outline" className="w-full" disabled>
-                        Current Plan
-                      </Button>
-                    ) : (
-                      <Button
-                        variant={tier.popular ? "default" : "outline"}
-                        className="w-full"
-                        onClick={() => handleUpgrade(tier.name)}
-                      >
-                        {tier.price === "Custom" ? "Contact Sales" : "Upgrade"}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                </div>
+                <CardDescription>{tier.users}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-2">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant={tier.current ? "outline" : "default"}
+                  className="w-full"
+                  disabled={tier.current}
+                  onClick={() => handleUpgrade(tier.name)}
+                >
+                  {tier.current ? "Current Plan" : "Upgrade"}
+                  {!tier.current && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Billing History */}
         <Card>
           <CardHeader>
             <CardTitle>Billing History</CardTitle>
-            <CardDescription>View and download your past invoices</CardDescription>
+            <CardDescription>View your past invoices and payment records</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {billingHistory.map((bill, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between py-3">
-                    <div>
-                      <p className="font-medium">{bill.date}</p>
-                      <p className="text-sm text-muted-foreground">{bill.invoice}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-mono font-medium">{bill.amount}</p>
-                        <Badge variant="outline" className="text-xs">
-                          {bill.status}
-                        </Badge>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        Download
-                      </Button>
-                    </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-4 border-b pb-2 text-sm font-medium">
+                <div>Date</div>
+                <div>Amount</div>
+                <div>Status</div>
+                <div>Invoice</div>
+              </div>
+              {billingHistory.map((record) => (
+                <div key={record.invoice} className="grid grid-cols-4 gap-4 text-sm">
+                  <div className="text-muted-foreground">{record.date}</div>
+                  <div className="font-medium">{record.amount}</div>
+                  <div>
+                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                      {record.status}
+                    </Badge>
                   </div>
-                  {index < billingHistory.length - 1 && <Separator />}
+                  <div>
+                    <Button variant="link" size="sm" className="h-auto p-0">
+                      Download
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -12,13 +12,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useMpesaPayment } from "@/hooks/useMpesaPayment";
 import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Send, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Loader2, ArrowLeft, Send, CheckCircle, XCircle, Clock, Shield, Infinity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Payment = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isSuperAdmin } = useAuth();
   const { initiatePayment, loading: paymentLoading } = useMpesaPayment();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [paymentRequestId, setPaymentRequestId] = useState<string | null>(null);
@@ -173,14 +175,23 @@ const Payment = () => {
   return (
     <Layout>
       <div className="container max-w-2xl px-4 py-6">
-        <Button 
-          variant="ghost" 
-          className="mb-4 gap-2"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button 
+            variant="ghost" 
+            className="gap-2"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          {isSuperAdmin && (
+            <Badge variant="default" className="bg-primary text-primary-foreground">
+              <Shield className="h-3 w-3 mr-1" />
+              Super Admin
+              <Infinity className="h-3 w-3 ml-1" />
+            </Badge>
+          )}
+        </div>
 
         <Card>
           <CardHeader>
