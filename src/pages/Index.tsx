@@ -111,9 +111,10 @@ const Index = () => {
     }
   };
 
-  const freePushes = subscription?.free_stk_pushes_remaining || 0;
+  const freePushes = subscription?.free_stk_pushes_remaining;
   const tierName = subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
-  const usagePercent = subscription?.max_stk_pushes 
+  const isUnlimited = freePushes === null || subscription?.max_stk_pushes === null;
+  const usagePercent = !isUnlimited && subscription?.max_stk_pushes 
     ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
     : 0;
 
@@ -194,17 +195,21 @@ const Index = () => {
               <CardContent>
                 <div>
                   <p className="mb-1 text-2xl font-bold">{tierName}</p>
-                  {subscription && subscription.max_stk_pushes && (
+                  {isUnlimited ? (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Wallet className="h-4 w-4" />
+                      ∞ Unlimited Access
+                    </p>
+                  ) : subscription && subscription.max_stk_pushes ? (
                     <>
                       <p className="mb-2 text-sm text-muted-foreground">
                         {subscription.used_stk_pushes} / {subscription.max_stk_pushes} used
                       </p>
                       <Progress value={usagePercent} className="h-2" />
                     </>
-                  )}
-                  {subscription && !subscription.max_stk_pushes && (
+                  ) : (
                     <p className="text-sm text-muted-foreground">
-                      {freePushes} free pushes remaining
+                      {freePushes || 0} free pushes remaining
                     </p>
                   )}
                 </div>

@@ -6,10 +6,10 @@ interface Subscription {
   id: string;
   user_id: string;
   tier: string;
-  max_users: number;
+  max_users: number | null;
   max_stk_pushes: number | null;
   used_stk_pushes: number;
-  free_stk_pushes_remaining: number;
+  free_stk_pushes_remaining: number | null;
   is_active: boolean;
   expires_at: string | null;
   period: string;
