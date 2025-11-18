@@ -16,7 +16,8 @@ import {
   UserPlus,
   MessageSquare,
   Wrench,
-  DollarSign
+  DollarSign,
+  Key
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -57,13 +58,14 @@ const controlPanelItems = [
   { title: "Support", url: "/control-panel/support", icon: MessageSquare },
   { title: "Government", url: "/control-panel/government", icon: Shield },
   { title: "Subscriptions", url: "/control-panel/subscriptions", icon: DollarSign },
+  { title: "M-Pesa Daraja", url: "/mpesa-daraja", icon: Key },
   { title: "System Settings", url: "/control-panel/system-settings", icon: Wrench },
-  { title: "MPESA API Settings", url: "/control-panel/system-settings#mpesa", icon: CreditCard },
   { title: "Communication", url: "/control-panel/communication", icon: MessageSquare },
 ];
 
 const settingsItems = [
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "M-Pesa Daraja", url: "/mpesa-daraja", icon: Key },
   { title: "Subscription", url: "/subscription", icon: Subscription },
   { title: "Help", url: "/help", icon: HelpCircle },
   { title: "How To Guide", url: "/how-to", icon: BookMarked },

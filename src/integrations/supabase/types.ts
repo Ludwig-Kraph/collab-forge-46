@@ -673,6 +673,56 @@ export type Database = {
         }
         Relationships: []
       }
+      mpesa_daraja_configs: {
+        Row: {
+          consumer_key: string
+          consumer_secret: string
+          created_at: string | null
+          environment: string
+          id: string
+          is_active: boolean | null
+          mpesa_account_id: string
+          passkey: string
+          shortcode: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          consumer_key: string
+          consumer_secret: string
+          created_at?: string | null
+          environment?: string
+          id?: string
+          is_active?: boolean | null
+          mpesa_account_id: string
+          passkey: string
+          shortcode: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          consumer_key?: string
+          consumer_secret?: string
+          created_at?: string | null
+          environment?: string
+          id?: string
+          is_active?: boolean | null
+          mpesa_account_id?: string
+          passkey?: string
+          shortcode?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpesa_daraja_configs_mpesa_account_id_fkey"
+            columns: ["mpesa_account_id"]
+            isOneToOne: true
+            referencedRelation: "mpesa_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -1017,6 +1067,57 @@ export type Database = {
           },
         ]
       }
+      subscription_tiers: {
+        Row: {
+          created_at: string | null
+          currency: string
+          description: string | null
+          features: Json | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          is_period_enabled: boolean | null
+          max_stk_pushes: number | null
+          max_users: number | null
+          name: string
+          period: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          features?: Json | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_period_enabled?: boolean | null
+          max_stk_pushes?: number | null
+          max_users?: number | null
+          name: string
+          period?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          features?: Json | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_period_enabled?: boolean | null
+          max_stk_pushes?: number | null
+          max_users?: number | null
+          name?: string
+          period?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -1028,6 +1129,7 @@ export type Database = {
           last_notification_date: string | null
           max_stk_pushes: number | null
           max_users: number
+          period: string | null
           started_at: string
           tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at: string
@@ -1044,6 +1146,7 @@ export type Database = {
           last_notification_date?: string | null
           max_stk_pushes?: number | null
           max_users?: number
+          period?: string | null
           started_at?: string
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
@@ -1060,6 +1163,7 @@ export type Database = {
           last_notification_date?: string | null
           max_stk_pushes?: number | null
           max_users?: number
+          period?: string | null
           started_at?: string
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string

@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneInput } from '@/components/forms/PhoneInput';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Smartphone, Shield, Zap, ArrowLeft } from 'lucide-react';
+import { Smartphone, Shield, Zap, ArrowLeft, Home } from 'lucide-react';
 import { RegistrationWizard } from '@/components/auth/RegistrationWizard';
 import { WelcomeModal } from '@/components/onboarding/WelcomeModal';
 import logo from '@/assets/m-leja-logo.png';
@@ -73,6 +73,14 @@ export default function Auth() {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/')}
+          className="absolute top-4 left-4"
+        >
+          <Home className="mr-2 h-4 w-4" />
+          Home
+        </Button>
         <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
           {/* Left side - Branding */}
           <div className="hidden md:block space-y-6">
