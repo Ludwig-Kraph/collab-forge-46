@@ -39,6 +39,7 @@ import GovLanding from '@/pages/government/GovLanding';
 import NationalDashboard from '@/pages/government/NationalDashboard';
 import CountyDashboard from '@/pages/government/CountyDashboard';
 import InterGovernmental from '@/pages/government/InterGovernmental';
+import MpesaDarajaSettings from '@/pages/MpesaDarajaSettings';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -91,6 +92,7 @@ const App = () => (
             <Route path="/gov/cross-gov" element={<ProtectedRoute><InterGovernmental /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+            <Route path="/mpesa-daraja" element={<ProtectedRoute><MpesaDarajaSettings /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/how-to" element={<ProtectedRoute><HowTo /></ProtectedRoute>} />

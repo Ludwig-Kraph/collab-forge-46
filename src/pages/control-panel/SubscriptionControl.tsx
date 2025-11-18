@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save } from 'lucide-react';
+import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save, Plus } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
+import { CreateTierDialog } from '@/components/subscription/CreateTierDialog';
 
 interface SubscriptionTier {
   id: string;
@@ -109,6 +110,33 @@ export default function SubscriptionControl() {
   const [tiers, setTiers] = useState<SubscriptionTier[]>(defaultTiers);
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  useEffect(() => {
+    fetchCustomTiers();
+  }, []);
+
+  const fetchCustomTiers = async () => {
+    const { data, error } = await supabase
+      .from('subscription_tiers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (data) {
+      const customTiers: SubscriptionTier[] = data.map(tier => ({
+        id: tier.id,
+        name: tier.name,
+        price: tier.price,
+        currency: tier.currency,
+        maxUsers: tier.max_users || 0,
+        maxStkPushes: tier.max_stk_pushes,
+        features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
+        terms: tier.description || '',
+        icon: Building2,
+      }));
+      setTiers([...defaultTiers, ...customTiers]);
+    }
+  };
 
   const handleSaveTier = async () => {
     if (!selectedTier) return;
@@ -143,12 +171,24 @@ export default function SubscriptionControl() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscription Control</h1>
-          <p className="text-muted-foreground">
-            Manage subscription tiers, pricing, features, and policies
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Subscription Control</h1>
+            <p className="text-muted-foreground">
+              Manage subscription tiers, pricing, features, and policies
+            </p>
+          </div>
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Subscription Tier
+          </Button>
         </div>
+
+        <CreateTierDialog 
+          open={showCreateDialog} 
+          onOpenChange={setShowCreateDialog}
+          onSuccess={fetchCustomTiers}
+        />
 
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>

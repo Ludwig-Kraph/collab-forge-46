@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Mail, Users, UserCheck } from "lucide-react";
+import { Plus, Mail, Users, UserCheck, Wallet } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { AssignMpesaDialog } from "@/components/staff/AssignMpesaDialog";
 
 interface StaffMember {
   id: string;
@@ -37,6 +38,8 @@ export default function Staff() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [assignMpesaDialogOpen, setAssignMpesaDialogOpen] = useState(false);
+  const [selectedStaffMember, setSelectedStaffMember] = useState<StaffMember | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     role: "user"
@@ -214,14 +217,27 @@ export default function Staff() {
                 <div className="space-y-4">
                   {staff.map((member) => (
                     <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">{member.full_name}</p>
                         <p className="text-sm text-muted-foreground">{member.email}</p>
                         <p className="text-sm text-muted-foreground">{member.phone_number}</p>
                       </div>
-                      <Badge variant={getRoleBadgeVariant(member.role)}>
-                        {member.role}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={getRoleBadgeVariant(member.role)}>
+                          {member.role}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedStaffMember(member);
+                            setAssignMpesaDialogOpen(true);
+                          }}
+                        >
+                          <Wallet className="h-4 w-4 mr-2" />
+                          Assign M-Pesa
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -294,6 +310,15 @@ export default function Staff() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {selectedStaffMember && (
+          <AssignMpesaDialog
+            open={assignMpesaDialogOpen}
+            onOpenChange={setAssignMpesaDialogOpen}
+            staffMemberId={selectedStaffMember.id}
+            staffMemberName={selectedStaffMember.full_name}
+          />
+        )}
       </div>
     </Layout>
   );
