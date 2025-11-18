@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { MpesaDarajaCredentials } from "@/components/settings/MpesaDarajaCredentials";
 
 const Settings = () => {
   const { user, updatePassword, updateProfile, isSuperAdmin } = useAuth();
@@ -279,6 +280,8 @@ const Settings = () => {
 
           {/* MPESA Accounts */}
           <TabsContent value="mpesa" className="space-y-6">
+            {user && <MpesaDarajaCredentials userId={user.id} />}
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
