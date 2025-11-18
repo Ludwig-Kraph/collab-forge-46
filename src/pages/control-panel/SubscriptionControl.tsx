@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface SubscriptionTier {
   id: string;
@@ -26,6 +27,7 @@ interface SubscriptionTier {
   features: string[];
   terms: string;
   icon: any;
+  period: 'daily' | 'weekly' | 'monthly' | 'annual';
 }
 
 const defaultTiers: SubscriptionTier[] = [
@@ -38,7 +40,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: 3,
     features: ['3 free STK pushes', 'Single user', 'Basic support', '30 days trial'],
     terms: 'Free trial for 30 days. Limited to 3 STK push payments.',
-    icon: Zap
+    icon: Zap,
+    period: 'monthly'
   },
   {
     id: 'basic',
@@ -49,7 +52,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: 100,
     features: ['Up to 3 users', '100 STK pushes/month', 'Email support', 'Basic analytics'],
     terms: 'Monthly subscription. Billed monthly. Cancel anytime.',
-    icon: Users
+    icon: Users,
+    period: 'monthly'
   },
   {
     id: 'standard',
@@ -60,7 +64,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: 500,
     features: ['Up to 10 users', '500 STK pushes/month', 'Priority support', 'Advanced analytics', 'Multi-outlet support'],
     terms: 'Monthly subscription. Billed monthly. Cancel anytime.',
-    icon: Building2
+    icon: Building2,
+    period: 'monthly'
   },
   {
     id: 'professional',
@@ -71,7 +76,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: 2000,
     features: ['Up to 50 users', '2000 STK pushes/month', '24/7 support', 'Custom reports', 'API access', 'Department management'],
     terms: 'Monthly subscription. Billed monthly. Cancel anytime.',
-    icon: Crown
+    icon: Crown,
+    period: 'monthly'
   },
   {
     id: 'enterprise',
@@ -82,7 +88,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: null,
     features: ['Up to 200 users', 'Unlimited STK pushes', 'Dedicated support', 'Custom integration', 'SLA guarantee', 'Advanced RBAC'],
     terms: 'Annual contract. Custom pricing available for larger organizations.',
-    icon: Building2
+    icon: Building2,
+    period: 'annual'
   },
   {
     id: 'corporate',
@@ -93,7 +100,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: null,
     features: ['Unlimited users', 'Unlimited STK pushes', 'White-label option', 'Dedicated account manager', 'Custom development', 'Multi-tenant support'],
     terms: 'Annual contract. Customizable to business needs.',
-    icon: Building2
+    icon: Building2,
+    period: 'annual'
   },
   {
     id: 'government',
@@ -104,7 +112,8 @@ const defaultTiers: SubscriptionTier[] = [
     maxStkPushes: null,
     features: ['Unlimited users', 'Unlimited STK pushes', 'Government-grade security', 'Compliance reporting', 'Inter-governmental integration', 'Audit trails'],
     terms: 'Special government pricing. Subject to approval and verification.',
-    icon: Landmark
+    icon: Landmark,
+    period: 'monthly'
   }
 ];
 
@@ -114,6 +123,14 @@ export default function SubscriptionControl() {
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'annual'>('monthly');
+  
+  // Get unique periods from tiers
+  const uniquePeriods = Array.from(new Set(tiers.map(tier => tier.period)));
+  const showPeriodSwitch = uniquePeriods.length > 1;
+  
+  // Filter tiers by selected period
+  const filteredTiers = tiers.filter(tier => tier.period === selectedPeriod);
   
   // Available icons for selection
   const availableIcons = [
@@ -238,7 +255,8 @@ export default function SubscriptionControl() {
         maxStkPushes: newTier.maxStkPushes || null,
         features: newTier.features.filter(f => f.trim() !== ''),
         terms: newTier.description,
-        icon: iconToUse
+        icon: iconToUse,
+        period: newTier.period as 'daily' | 'weekly' | 'monthly' | 'annual'
       };
 
       setTiers([...tiers, tierToAdd]);
@@ -443,6 +461,34 @@ export default function SubscriptionControl() {
           </Dialog>
         </div>
 
+        {showPeriodSwitch && (
+          <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+            <Label className="text-sm font-medium">Subscription Period:</Label>
+            <ToggleGroup type="single" value={selectedPeriod} onValueChange={(value) => value && setSelectedPeriod(value as any)}>
+              {uniquePeriods.includes('daily') && (
+                <ToggleGroupItem value="daily" aria-label="Daily">
+                  Daily
+                </ToggleGroupItem>
+              )}
+              {uniquePeriods.includes('weekly') && (
+                <ToggleGroupItem value="weekly" aria-label="Weekly">
+                  Weekly
+                </ToggleGroupItem>
+              )}
+              {uniquePeriods.includes('monthly') && (
+                <ToggleGroupItem value="monthly" aria-label="Monthly">
+                  Monthly
+                </ToggleGroupItem>
+              )}
+              {uniquePeriods.includes('annual') && (
+                <ToggleGroupItem value="annual" aria-label="Annual">
+                  Annual
+                </ToggleGroupItem>
+              )}
+            </ToggleGroup>
+          </div>
+        )}
+
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -452,7 +498,7 @@ export default function SubscriptionControl() {
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {tiers.map((tier) => {
+              {filteredTiers.map((tier) => {
                 const Icon = tier.icon;
                 return (
                   <Card key={tier.id}>
@@ -465,7 +511,7 @@ export default function SubscriptionControl() {
                       </div>
                       <CardTitle>{tier.name}</CardTitle>
                       <CardDescription>
-                        {tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}/month`}
+                        {tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}/${tier.period === 'annual' ? 'year' : tier.period === 'weekly' ? 'week' : tier.period === 'daily' ? 'day' : 'month'}`}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
