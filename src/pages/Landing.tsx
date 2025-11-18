@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/m-leja-logo.png';
+import { getCopyrightText } from '@/utils/copyright';
 
 const tiers = [
   {
@@ -253,7 +254,7 @@ export default function Landing() {
         <div className="container">
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-              © 2024 M-Leja. All rights reserved.
+              {getCopyrightText()}
             </p>
             <div className="flex gap-4 justify-center text-sm">
               <Link to="/help" className="hover:underline text-muted-foreground">Help Center</Link>

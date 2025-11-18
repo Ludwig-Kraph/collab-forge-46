@@ -50,36 +50,89 @@ const HowTo = () => {
               </CardHeader>
               <CardContent className="space-y-8">
                 {/* Step 1 */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="default" className="text-lg px-4 py-2">Step 1</Badge>
-                    <h3 className="text-xl font-semibold text-foreground">Enter Your Details</h3>
+                  <div className="bg-muted rounded-lg p-6 space-y-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-foreground">Step 1: Access Registration</h4>
+                      <ul className="space-y-2 text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Navigate to the <strong>Registration</strong> page from the landing screen</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Click on "Create Account" or "Get Started" button</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-foreground">Step 2: Enter Personal Information</h4>
+                      <ul className="space-y-2 text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Enter your <strong>full name</strong> as it appears on official documents</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Provide your <strong>Kenyan phone number</strong> in format: +254XXXXXXXXX</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Enter a valid <strong>email address</strong> for account recovery</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-foreground">Step 3: Create Secure Password</h4>
+                      <ul className="space-y-2 text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Create a <strong>strong password</strong> with minimum 8 characters</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Include uppercase letters, lowercase letters, and numbers</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Confirm password by entering it again</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-foreground">Step 4: Complete Registration</h4>
+                      <ul className="space-y-2 text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Review all entered information for accuracy</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Accept the Terms of Service and Privacy Policy</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Click "Create Account" to submit registration</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Wait for email verification link (check spam folder)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span>Click verification link to activate your account</span>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="bg-muted rounded-lg p-6 space-y-3">
-                    <ul className="space-y-3 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Navigate to the <strong>Registration</strong> page from the landing screen</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Enter your <strong>full name</strong> as it appears on official documents</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Provide your <strong>Kenyan phone number</strong> in format: +254XXXXXXXXX</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Create a <strong>secure password</strong> (minimum 8 characters with uppercase, lowercase, and numbers)</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Provide your <strong>email address</strong> for account recovery and notifications</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
 
                 <Separator />
 

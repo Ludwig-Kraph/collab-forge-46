@@ -12,6 +12,8 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   userRole: string | null;
   isDemoAccount: boolean;
+  isBlocked: boolean;
+  isExpired: boolean;
   signUp: (phone: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (phone: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -34,6 +36,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isDemoAccount, setIsDemoAccount] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
+  const navigate = useNavigate();
   
 
   useEffect(() => {
@@ -74,12 +79,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('phone_number')
+        .select('phone_number, is_blocked, account_status')
         .eq('id', userId)
         .single();
 
       // Check if this is the demo account
       setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
+      
+      // Check if account is blocked
+      setIsBlocked(profile?.is_blocked || false);
+      
+      if (profile?.is_blocked) {
+        toast({
+          title: "Account Blocked",
+          description: "Your account has been blocked. Please contact support.",
+          variant: "destructive"
+        });
+      }
 
       const { data, error } = await supabase
         .from('user_roles')
@@ -92,6 +108,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(data.role);
       setIsAdmin(data.role === 'admin' || data.role === 'super_admin' || data.role === 'corporate_admin');
       setIsSuperAdmin(data.role === 'super_admin');
+      
+      // Check subscription expiry
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('expires_at, is_active')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+        
+      if (subscription?.expires_at) {
+        const expiryDate = new Date(subscription.expires_at);
+        const expired = expiryDate < new Date();
+        setIsExpired(expired);
+        
+        if (expired) {
+          toast({
+            title: "Subscription Expired",
+            description: "Your subscription has expired. Please renew to continue using all features.",
+            variant: "destructive"
+          });
+        }
+      }
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole(null);
@@ -342,6 +380,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isSuperAdmin,
         userRole,
         isDemoAccount,
+        isBlocked,
+        isExpired,
         signUp,
         signIn,
         signOut,
