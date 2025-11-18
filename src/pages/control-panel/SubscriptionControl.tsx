@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save, Plus, X } from 'lucide-react';
+import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save, Plus, X, Briefcase, Rocket, Star, Shield, Award, Target, TrendingUp, Heart, type LucideIcon } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -115,6 +115,24 @@ export default function SubscriptionControl() {
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   
+  // Available icons for selection
+  const availableIcons = [
+    { name: 'Zap', icon: Zap },
+    { name: 'Users', icon: Users },
+    { name: 'Crown', icon: Crown },
+    { name: 'Building', icon: Building2 },
+    { name: 'Landmark', icon: Landmark },
+    { name: 'Dollar', icon: DollarSign },
+    { name: 'Briefcase', icon: Briefcase },
+    { name: 'Rocket', icon: Rocket },
+    { name: 'Star', icon: Star },
+    { name: 'Shield', icon: Shield },
+    { name: 'Award', icon: Award },
+    { name: 'Target', icon: Target },
+    { name: 'Trending', icon: TrendingUp },
+    { name: 'Heart', icon: Heart }
+  ];
+
   // New tier form state
   const [newTier, setNewTier] = useState({
     name: '',
@@ -124,7 +142,8 @@ export default function SubscriptionControl() {
     maxUsers: 1,
     maxStkPushes: 0,
     features: [''],
-    isActive: true
+    isActive: true,
+    selectedIcon: 'Dollar'
   });
 
   const handleSaveTier = async () => {
@@ -205,6 +224,10 @@ export default function SubscriptionControl() {
 
     setSaving(true);
     try {
+      // Find the selected icon
+      const selectedIconObj = availableIcons.find(i => i.name === newTier.selectedIcon);
+      const iconToUse = selectedIconObj ? selectedIconObj.icon : DollarSign;
+      
       // In a real implementation, this would save to the database
       const tierToAdd: SubscriptionTier = {
         id: newTier.name.toLowerCase().replace(/\s+/g, '_'),
@@ -215,7 +238,7 @@ export default function SubscriptionControl() {
         maxStkPushes: newTier.maxStkPushes || null,
         features: newTier.features.filter(f => f.trim() !== ''),
         terms: newTier.description,
-        icon: DollarSign
+        icon: iconToUse
       };
 
       setTiers([...tiers, tierToAdd]);
@@ -234,7 +257,8 @@ export default function SubscriptionControl() {
         maxUsers: 1,
         maxStkPushes: 0,
         features: [''],
-        isActive: true
+        isActive: true,
+        selectedIcon: 'Dollar'
       });
       setDialogOpen(false);
     } catch (error) {
@@ -334,6 +358,26 @@ export default function SubscriptionControl() {
                     />
                   </FormField>
                 </div>
+
+                <FormField label="Select Icon" required>
+                  <div className="grid grid-cols-7 gap-2">
+                    {availableIcons.map(({ name, icon: Icon }) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => setNewTier({ ...newTier, selectedIcon: name })}
+                        className={`p-3 rounded-lg border-2 transition-all hover:border-primary/50 flex items-center justify-center ${
+                          newTier.selectedIcon === name
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border bg-background'
+                        }`}
+                        title={name}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </button>
+                    ))}
+                  </div>
+                </FormField>
 
                 <FormField label="Features">
                   <div className="space-y-2">
