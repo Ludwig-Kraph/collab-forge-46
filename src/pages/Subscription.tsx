@@ -78,6 +78,7 @@ const Subscription = () => {
     stkPushesLimit: 500,
     users: 3,
     usersLimit: 5,
+    isUnlimited: false,
   };
 
   const handleUpgrade = (tierName: string) => {
@@ -251,25 +252,50 @@ const Subscription = () => {
           <CardContent className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-4">
-                <div>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">STK Pushes Used</span>
-                    <span className="font-mono font-medium">
-                      {currentUsage.stkPushes} / {currentUsage.stkPushesLimit}
-                    </span>
-                  </div>
-                  <Progress value={(currentUsage.stkPushes / currentUsage.stkPushesLimit) * 100} />
-                </div>
+                {currentUsage.isUnlimited ? (
+                  <>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">STK Pushes</span>
+                        <span className="font-mono font-medium flex items-center gap-1">
+                          <Infinity className="h-4 w-4" />
+                          Unlimited
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Users</span>
+                        <span className="font-mono font-medium flex items-center gap-1">
+                          <Infinity className="h-4 w-4" />
+                          Unlimited
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">STK Pushes Used</span>
+                        <span className="font-mono font-medium">
+                          {currentUsage.stkPushes} / {currentUsage.stkPushesLimit}
+                        </span>
+                      </div>
+                      <Progress value={(currentUsage.stkPushes / currentUsage.stkPushesLimit) * 100} />
+                    </div>
 
-                <div>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Users</span>
-                    <span className="font-mono font-medium">
-                      {currentUsage.users} / {currentUsage.usersLimit}
-                    </span>
-                  </div>
-                  <Progress value={(currentUsage.users / currentUsage.usersLimit) * 100} />
-                </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Users</span>
+                        <span className="font-mono font-medium">
+                          {currentUsage.users} / {currentUsage.usersLimit}
+                        </span>
+                      </div>
+                      <Progress value={(currentUsage.users / currentUsage.usersLimit) * 100} />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-col justify-center space-y-2 rounded-lg bg-muted p-4">

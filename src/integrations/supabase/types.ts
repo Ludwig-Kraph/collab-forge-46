@@ -1123,12 +1123,12 @@ export type Database = {
           created_at: string
           expires_at: string | null
           expiry_notified: boolean | null
-          free_stk_pushes_remaining: number
+          free_stk_pushes_remaining: number | null
           id: string
           is_active: boolean
           last_notification_date: string | null
           max_stk_pushes: number | null
-          max_users: number
+          max_users: number | null
           period: string | null
           started_at: string
           tier: Database["public"]["Enums"]["subscription_tier"]
@@ -1140,12 +1140,12 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           expiry_notified?: boolean | null
-          free_stk_pushes_remaining?: number
+          free_stk_pushes_remaining?: number | null
           id?: string
           is_active?: boolean
           last_notification_date?: string | null
           max_stk_pushes?: number | null
-          max_users?: number
+          max_users?: number | null
           period?: string | null
           started_at?: string
           tier?: Database["public"]["Enums"]["subscription_tier"]
@@ -1157,12 +1157,12 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           expiry_notified?: boolean | null
-          free_stk_pushes_remaining?: number
+          free_stk_pushes_remaining?: number | null
           id?: string
           is_active?: boolean
           last_notification_date?: string | null
           max_stk_pushes?: number | null
-          max_users?: number
+          max_users?: number | null
           period?: string | null
           started_at?: string
           tier?: Database["public"]["Enums"]["subscription_tier"]
