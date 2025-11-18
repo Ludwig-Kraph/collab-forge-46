@@ -55,6 +55,7 @@ const controlPanelItems = [
   { title: "Accounts", url: "/control-panel/accounts", icon: UserCog },
   { title: "Onboarding", url: "/control-panel/onboarding", icon: UserPlus },
   { title: "Support", url: "/control-panel/support", icon: MessageSquare },
+  { title: "Government", url: "/control-panel/government", icon: Shield },
   { title: "Subscriptions", url: "/control-panel/subscriptions", icon: DollarSign },
   { title: "System Settings", url: "/control-panel/system-settings", icon: Wrench },
   { title: "MPESA API Settings", url: "/control-panel/system-settings#mpesa", icon: CreditCard },

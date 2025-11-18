@@ -1354,6 +1354,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_subscription_expired: { Args: { user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       log_audit_event: {
         Args: {
