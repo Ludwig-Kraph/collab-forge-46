@@ -118,7 +118,7 @@ export default function SubscriptionControl() {
   // New tier form state
   const [newTier, setNewTier] = useState({
     name: '',
-    description: '',
+    description: '✓ ',
     price: 0,
     period: 'monthly',
     maxUsers: 1,
@@ -172,6 +172,27 @@ export default function SubscriptionControl() {
     setNewTier({ ...newTier, features: updatedFeatures });
   };
 
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const cursorPosition = e.target.selectionStart;
+    
+    // Check if Enter was pressed (new line added)
+    if (value.length > newTier.description.length && value[cursorPosition - 1] === '\n') {
+      const beforeCursor = value.substring(0, cursorPosition);
+      const afterCursor = value.substring(cursorPosition);
+      const newValue = beforeCursor + '✓ ' + afterCursor;
+      
+      setNewTier({ ...newTier, description: newValue });
+      
+      // Set cursor position after the tick
+      setTimeout(() => {
+        e.target.selectionStart = e.target.selectionEnd = cursorPosition + 2;
+      }, 0);
+    } else {
+      setNewTier({ ...newTier, description: value });
+    }
+  };
+
   const handleCreateTier = async () => {
     if (!newTier.name || newTier.price < 0) {
       toast({
@@ -207,7 +228,7 @@ export default function SubscriptionControl() {
       // Reset form
       setNewTier({
         name: '',
-        description: '',
+        description: '✓ ',
         price: 0,
         period: 'monthly',
         maxUsers: 1,
@@ -263,9 +284,9 @@ export default function SubscriptionControl() {
                 <FormField label="Description" required>
                   <Textarea
                     value={newTier.description}
-                    onChange={(e) => setNewTier({ ...newTier, description: e.target.value })}
-                    placeholder="Describe the tier's terms and conditions"
-                    rows={3}
+                    onChange={handleDescriptionChange}
+                    placeholder="✓ Start typing terms and conditions..."
+                    rows={5}
                   />
                 </FormField>
 
