@@ -16,7 +16,8 @@ import {
   UserPlus,
   MessageSquare,
   Wrench,
-  DollarSign
+  DollarSign,
+  Key
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -48,6 +49,11 @@ const mainItems = [
   { title: "Transactions", url: "/transactions", icon: Receipt },
   { title: "Ledger", url: "/ledger", icon: BookOpen },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
+];
+
+const adminItems = [
+  { title: "MPESA Credentials", url: "/mpesa-credentials", icon: Key },
+  { title: "Manage Users", url: "/users", icon: Users },
 ];
 
 const controlPanelItems = [
@@ -123,20 +129,20 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {isAdmin && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/users")}>
+                {isAdmin && adminItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <NavLink 
-                        to="/users" 
+                        to={item.url} 
                         className="hover:bg-muted/50" 
                         activeClassName="bg-muted text-primary font-medium"
                       >
-                        <Users className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                        {!isCollapsed && <span>Users</span>}
+                        <item.icon className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
+                        {!isCollapsed && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )}
+                ))}
                 {isSuperAdmin && (
                   <Collapsible
                     open={isControlPanelOpen}
