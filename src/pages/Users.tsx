@@ -21,7 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Search, MoreVertical, Shield, User, Crown } from "lucide-react";
+import { UserPlus, Search, MoreVertical, Shield, User, Crown, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +34,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { MpesaAccountAssignment } from "@/components/users/MpesaAccountAssignment";
 
 interface UserData {
   id: string;
@@ -74,11 +75,14 @@ const getRoleBadgeVariant = (role: string): "default" | "secondary" | "destructi
 };
 
 const Users = () => {
-  const { createRBACUser, isAdmin } = useAuth();
+  const { createRBACUser, isAdmin, user: currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [userOrgId, setUserOrgId] = useState<string>("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -88,7 +92,26 @@ const Users = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchUserOrganization();
   }, []);
+
+  const fetchUserOrganization = async () => {
+    if (!currentUser) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', currentUser.id)
+      .single();
+    
+    if (data?.organization_id) {
+      setUserOrgId(data.organization_id);
+    }
+  };
+
+  const handleAssignAccounts = (user: UserData) => {
+    setSelectedUser(user);
+    setAssignmentDialogOpen(true);
+  };
 
   const fetchUsers = async () => {
     try {
@@ -289,12 +312,16 @@ const Users = () => {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View details</DropdownMenuItem>
-                        <DropdownMenuItem>Change role</DropdownMenuItem>
-                      </DropdownMenuContent>
+                       <DropdownMenuContent align="end">
+                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem onClick={() => handleAssignAccounts(user)}>
+                           <Wallet className="h-4 w-4 mr-2" />
+                           Assign MPESA Accounts
+                         </DropdownMenuItem>
+                         <DropdownMenuItem>View details</DropdownMenuItem>
+                         <DropdownMenuItem>Change role</DropdownMenuItem>
+                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                 </CardHeader>
@@ -328,6 +355,16 @@ const Users = () => {
           </div>
         )}
       </div>
+
+      {selectedUser && userOrgId && (
+        <MpesaAccountAssignment
+          open={assignmentDialogOpen}
+          onOpenChange={setAssignmentDialogOpen}
+          userId={selectedUser.id}
+          userName={selectedUser.full_name}
+          organizationId={userOrgId}
+        />
+      )}
     </Layout>
   );
 };
