@@ -1,20 +1,16 @@
 import Layout from "@/components/layout/Layout";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, CreditCard, HelpCircle, Users, Key } from "lucide-react";
+import { Settings, CreditCard, HelpCircle, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 
 const More = () => {
-  const { isAdmin, isSuperAdmin } = useAuth();
-  
   const menuItems = [
-    { icon: Users, label: "User Management", path: "/users", description: "Manage team members and roles", requiresAdmin: true },
-    { icon: Key, label: "MPESA Credentials", path: "/mpesa-credentials", description: "Manage Daraja API credentials", requiresAdmin: true },
+    { icon: Users, label: "User Management", path: "/users", description: "Manage team members and roles" },
     { icon: Settings, label: "Settings", path: "/settings", description: "Account and preferences" },
     { icon: CreditCard, label: "Subscription", path: "/subscription", description: "Manage your plan" },
     { icon: HelpCircle, label: "Help & Support", path: "/help", description: "Get assistance" },
-  ].filter(item => !item.requiresAdmin || isAdmin || isSuperAdmin);
+  ];
 
   return (
     <Layout>

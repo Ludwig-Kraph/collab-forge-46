@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneInput } from '@/components/forms/PhoneInput';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Smartphone, Shield, Zap, ArrowLeft, Home } from 'lucide-react';
+import { Smartphone, Shield, Zap, ArrowLeft } from 'lucide-react';
 import { RegistrationWizard } from '@/components/auth/RegistrationWizard';
 import { WelcomeModal } from '@/components/onboarding/WelcomeModal';
 import logo from '@/assets/m-leja-logo.png';
@@ -53,22 +53,14 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
         <div className="w-full max-w-6xl">
-          <div className="flex justify-between items-center mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => setShowRegistration(false)}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Login
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/')}
-            >
-              <Home className="mr-2 h-4 w-4" />
-              Home
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={() => setShowRegistration(false)}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Login
+          </Button>
           <RegistrationWizard
             onComplete={handleRegistrationComplete}
             onCancel={() => setShowRegistration(false)}
@@ -81,17 +73,7 @@ export default function Auth() {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
-        <div className="w-full max-w-6xl">
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/')}
-            >
-              <Home className="mr-2 h-4 w-4" />
-              Home
-            </Button>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
           {/* Left side - Branding */}
           <div className="hidden md:block space-y-6">
             <div className="space-y-4">
@@ -203,7 +185,6 @@ export default function Auth() {
               </form>
             </CardContent>
           </Card>
-          </div>
         </div>
       </div>
 

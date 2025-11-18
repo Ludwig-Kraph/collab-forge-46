@@ -1299,38 +1299,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_mpesa_accounts: {
-        Row: {
-          assigned_at: string | null
-          assigned_by: string | null
-          id: string
-          mpesa_account_id: string
-          user_id: string
-        }
-        Insert: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          id?: string
-          mpesa_account_id: string
-          user_id: string
-        }
-        Update: {
-          assigned_at?: string | null
-          assigned_by?: string | null
-          id?: string
-          mpesa_account_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_mpesa_accounts_mpesa_account_id_fkey"
-            columns: ["mpesa_account_id"]
-            isOneToOne: false
-            referencedRelation: "mpesa_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
