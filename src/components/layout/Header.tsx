@@ -35,7 +35,7 @@ const Header = () => {
             <SidebarTrigger />
           </div>
 
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <img src={logo} alt="M-Leja" className="h-8 w-auto" />
           </Link>
         </div>
