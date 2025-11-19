@@ -232,9 +232,9 @@ export default function Outlets() {
                 <Label htmlFor="outlet_type">Outlet Type</Label>
                 <Select value={formData.outlet_type} onValueChange={(value) => setFormData({ ...formData, outlet_type: value })}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select outlet type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="branch">Branch</SelectItem>
                     <SelectItem value="station">Station</SelectItem>
                     <SelectItem value="regional_office">Regional Office</SelectItem>
@@ -245,9 +245,9 @@ export default function Outlets() {
                 <Label htmlFor="classification">Classification</Label>
                 <Select value={formData.classification} onValueChange={(value) => setFormData({ ...formData, classification: value })}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select classification" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="national">National</SelectItem>
                     <SelectItem value="regional">Regional</SelectItem>
                     <SelectItem value="county">County</SelectItem>

@@ -90,9 +90,9 @@ export default function GovLanding() {
                   onValueChange={(value) => setCredentials({ ...credentials, governmentLevel: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select government level" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="national">
                       <div className="flex items-center">
                         <Building2 className="h-4 w-4 mr-2" />

@@ -229,9 +229,9 @@ export default function Departments() {
                 <Label htmlFor="department_type">Department Type</Label>
                 <Select value={formData.department_type} onValueChange={(value) => setFormData({ ...formData, department_type: value })}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select department type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="customer_care">Customer Care</SelectItem>
                     <SelectItem value="sales">Sales</SelectItem>
                     <SelectItem value="hr">Human Resources</SelectItem>
