@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading, isBlocked } = useAuth();
+  const { user, loading, isBlocked, isSuperAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -21,7 +21,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  if (isBlocked) {
+  // Super Admins have absolute immunity - cannot be blocked
+  if (isBlocked && !isSuperAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

@@ -104,10 +104,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Production environment - no demo accounts
       setIsDemoAccount(false);
       
-      // Check if account is blocked
-      setIsBlocked(profile?.is_blocked || false);
+      // Check if account is blocked (Super Admins have immunity and cannot be blocked)
+      const isSuperAdminUser = roleData?.role === 'super_admin';
+      const blockedStatus = profile?.is_blocked || false;
       
-      if (profile?.is_blocked) {
+      // Super Admins have absolute immunity - cannot be blocked
+      setIsBlocked(isSuperAdminUser ? false : blockedStatus);
+      
+      if (blockedStatus && !isSuperAdminUser) {
         toast({
           title: "Account Blocked",
           description: "Your account has been blocked. Please contact support.",
@@ -129,9 +133,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAdmin(roleData.role === 'admin' || roleData.role === 'super_admin' || roleData.role === 'corporate_admin');
       setIsSuperAdmin(roleData.role === 'super_admin');
       
-      // Super admins have unlimited access, skip subscription checks
+      // Super Admins have absolute immunity - they are above subscription system
+      // Super Admins are subscription policy makers, not subscribers
       if (roleData.role === 'super_admin') {
-        setIsExpired(false);
+        setIsBlocked(false); // Cannot be blocked
+        setIsExpired(false); // Never expires
         setLoading(false);
         return;
       }
