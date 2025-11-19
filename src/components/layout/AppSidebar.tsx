@@ -59,7 +59,7 @@ const controlPanelItems = [
   { title: "Government", url: "/control-panel/government", icon: Shield },
   { title: "Subscriptions", url: "/control-panel/subscriptions", icon: DollarSign },
   { title: "M-Pesa Daraja", url: "/mpesa-daraja", icon: Key },
-  { title: "System Settings", url: "/control-panel/system-settings", icon: Wrench },
+  { title: "System Settings", url: "/control-panel/settings", icon: Wrench },
   { title: "Communication", url: "/control-panel/communication", icon: MessageSquare },
 ];
 
