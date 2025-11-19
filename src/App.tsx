@@ -35,7 +35,6 @@ import SubscriptionOutlets from '@/pages/subscription/Outlets';
 import SubscriptionStaff from '@/pages/subscription/Staff';
 import SubscriptionDepartments from '@/pages/subscription/Departments';
 import CashierDashboard from '@/pages/CashierDashboard';
-import DebugAuth from '@/pages/DebugAuth';
 import GovLanding from '@/pages/government/GovLanding';
 import NationalDashboard from '@/pages/government/NationalDashboard';
 import CountyDashboard from '@/pages/government/CountyDashboard';
@@ -74,7 +73,6 @@ const App = () => (
             <Route path="/ledger" element={<ProtectedRoute><Ledger /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/more" element={<ProtectedRoute><More /></ProtectedRoute>} />
-            <Route path="/debug-auth" element={<ProtectedRoute><DebugAuth /></ProtectedRoute>} />
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/control-panel" element={<SuperAdminRoute><ControlPanel /></SuperAdminRoute>} />
             <Route path="/control-panel/accounts" element={<SuperAdminRoute><Accounts /></SuperAdminRoute>} />
