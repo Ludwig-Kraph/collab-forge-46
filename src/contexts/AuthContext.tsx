@@ -431,6 +431,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Super Admin function to reset any user's password
   const resetUserPassword = async (userId: string, newPassword: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('reset-user-password', {
