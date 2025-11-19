@@ -79,11 +79,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('phone_number, is_blocked, account_status')
-        .eq('id', userId)
-        .single();
+      // Optimized: Fetch all user data in parallel for better performance
+      const [profileResult, roleResult, subscriptionResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('phone_number, is_blocked, account_status')
+          .eq('id', userId)
+          .maybeSingle(),
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .maybeSingle(),
+        supabase
+          .from('subscriptions')
+          .select('expires_at, is_active')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .maybeSingle()
+      ]);
+
+      const profile = profileResult.data;
+      const roleData = roleResult.data;
+      const subscription = subscriptionResult.data;
 
       // Check if this is the demo account
       setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
@@ -97,28 +115,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           description: "Your account has been blocked. Please contact support.",
           variant: "destructive"
         });
+        setLoading(false);
+        return;
       }
 
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
+      if (!roleData) {
+        console.error('No role found for user');
+        setUserRole(null);
+        setIsAdmin(false);
+        setIsSuperAdmin(false);
+        setLoading(false);
+        return;
+      }
 
-      if (error) throw error;
-
-      setUserRole(data.role);
-      setIsAdmin(data.role === 'admin' || data.role === 'super_admin' || data.role === 'corporate_admin');
-      setIsSuperAdmin(data.role === 'super_admin');
+      setUserRole(roleData.role);
+      setIsAdmin(roleData.role === 'admin' || roleData.role === 'super_admin' || roleData.role === 'corporate_admin');
+      setIsSuperAdmin(roleData.role === 'super_admin');
       setLoading(false);
-      
-      // Check subscription expiry
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('expires_at, is_active')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .single();
         
       if (subscription?.expires_at) {
         const expiryDate = new Date(subscription.expires_at);
