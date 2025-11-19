@@ -46,49 +46,35 @@ export default function Accounts() {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      
-      // Fetch all RBAC profiles (RLS will filter based on user's context)
+      // Only fetch Control Panel RBAC accounts (no organization_id = Control Panel users)
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .eq('is_rbac_user', true)
+        .is('organization_id', null)
         .order('created_at', { ascending: false });
 
-      if (profilesError) {
-        console.error('Profiles error:', profilesError);
-        throw profilesError;
-      }
-
-      if (!profiles || profiles.length === 0) {
-        setAccounts([]);
-        setLoading(false);
-        return;
-      }
+      if (profilesError) throw profilesError;
 
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('*')
-        .in('user_id', profiles.map(p => p.id));
+        .select('*');
 
-      if (rolesError) {
-        console.error('Roles error:', rolesError);
-        throw rolesError;
-      }
+      if (rolesError) throw rolesError;
 
-      const accountsWithRoles = profiles.map(profile => {
+      const accountsWithRoles = profiles?.map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
         return {
           ...profile,
           role: userRole?.role || 'user'
         };
-      });
+      }) || [];
 
       setAccounts(accountsWithRoles);
     } catch (error: any) {
-      console.error('Fetch accounts error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to fetch accounts",
+        description: error.message,
         variant: "destructive"
       });
     } finally {

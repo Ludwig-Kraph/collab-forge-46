@@ -64,7 +64,7 @@ export default function Staff() {
         return;
       }
 
-      // Fetch staff members with better error handling
+      // Fetch staff members
       const { data: staffData, error: staffError } = await supabase
         .from('profiles')
         .select(`
@@ -78,10 +78,7 @@ export default function Staff() {
         .eq('organization_id', profile.organization_id)
         .eq('is_rbac_user', true);
 
-      if (staffError) {
-        console.error('Staff fetch error:', staffError);
-        throw staffError;
-      }
+      if (staffError) throw staffError;
 
       const formattedStaff = staffData?.map((member: any) => ({
         id: member.id,
@@ -94,24 +91,19 @@ export default function Staff() {
 
       setStaff(formattedStaff);
 
-      // Fetch invitations with error handling
+      // Fetch invitations
       const { data: invitationsData, error: invitationsError } = await supabase
         .from('invitations')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false });
 
-      if (invitationsError) {
-        console.error('Invitations fetch error:', invitationsError);
-        throw invitationsError;
-      }
-      
+      if (invitationsError) throw invitationsError;
       setInvitations(invitationsData || []);
     } catch (error: any) {
-      console.error('Fetch error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to fetch staff data",
+        description: error.message,
         variant: "destructive"
       });
     } finally {
