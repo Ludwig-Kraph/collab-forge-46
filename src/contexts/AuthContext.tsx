@@ -79,8 +79,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      console.log('[AuthContext] Fetching role for user:', userId);
-      
       // Optimized: Fetch all user data in parallel for better performance
       const [profileResult, roleResult, subscriptionResult] = await Promise.all([
         supabase
@@ -105,10 +103,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const roleData = roleResult.data;
       const subscription = subscriptionResult.data;
 
-      console.log('[AuthContext] Profile:', profile);
-      console.log('[AuthContext] Role data:', roleData);
-      console.log('[AuthContext] Role errors:', roleResult.error);
-
       // Check if this is the demo account
       setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
       
@@ -126,7 +120,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (!roleData) {
-        console.error('[AuthContext] No role found for user');
         setUserRole(null);
         setIsAdmin(false);
         setIsSuperAdmin(false);
@@ -134,16 +127,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      console.log('[AuthContext] Setting role:', roleData.role);
-      console.log('[AuthContext] Is super admin:', roleData.role === 'super_admin');
-      
       setUserRole(roleData.role);
       setIsAdmin(roleData.role === 'admin' || roleData.role === 'super_admin' || roleData.role === 'corporate_admin');
       setIsSuperAdmin(roleData.role === 'super_admin');
       
       // Super admins have unlimited access, skip subscription checks
       if (roleData.role === 'super_admin') {
-        console.log('[AuthContext] Super admin detected - unlimited access granted');
         setIsExpired(false);
         setLoading(false);
         return;
