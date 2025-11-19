@@ -77,6 +77,8 @@ export function AppSidebar() {
   const { isAdmin, isSuperAdmin } = useAuth();
   const currentPath = location.pathname;
 
+  console.log('[AppSidebar] isAdmin:', isAdmin, 'isSuperAdmin:', isSuperAdmin);
+
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => currentPath === path;
   const isControlPanelActive = currentPath.startsWith("/control-panel");

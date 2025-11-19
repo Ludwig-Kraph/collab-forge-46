@@ -21,6 +21,8 @@ const Header = () => {
   const { user, signOut, isAdmin, isSuperAdmin, userRole, isDemoAccount } = useAuth();
   const navigate = useNavigate();
 
+  console.log('[Header] User:', user?.id, 'Role:', userRole, 'isSuperAdmin:', isSuperAdmin, 'isAdmin:', isAdmin);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
