@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,11 @@ import { ArrowDownLeft, ArrowUpRight, Calendar as CalendarIcon, Download, Filter
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import ExportButton from "@/components/transactions/ExportButton";
+import { useToast } from "@/hooks/use-toast";
 
 type TransactionType = "received" | "sent" | "all";
 type TransactionStatus = "completed" | "pending" | "failed" | "all";
@@ -28,64 +33,55 @@ interface Transaction {
 }
 
 const Transactions = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<TransactionType>("all");
   const [statusFilter, setStatusFilter] = useState<TransactionStatus>("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock transactions data
-  const allTransactions: Transaction[] = [
-    {
-      id: "1",
-      type: "received",
-      amount: 5000,
-      phoneNumber: "+254712345678",
-      description: "Invoice payment #1234",
-      status: "completed",
-      date: new Date(2025, 0, 15, 10, 30),
-      mpesaRef: "RBK123456789",
-    },
-    {
-      id: "2",
-      type: "sent",
-      amount: 1200,
-      phoneNumber: "+254798765432",
-      description: "Refund for order #456",
-      status: "completed",
-      date: new Date(2025, 0, 15, 9, 15),
-      mpesaRef: "RBK987654321",
-    },
-    {
-      id: "3",
-      type: "received",
-      amount: 8500,
-      phoneNumber: "+254723456789",
-      description: "Product purchase",
-      status: "completed",
-      date: new Date(2025, 0, 14, 16, 45),
-      mpesaRef: "RBK456789123",
-    },
-    {
-      id: "4",
-      type: "received",
-      amount: 2300,
-      phoneNumber: "+254734567890",
-      description: "Service payment",
-      status: "pending",
-      date: new Date(2025, 0, 14, 14, 20),
-      mpesaRef: "RBK789123456",
-    },
-    {
-      id: "5",
-      type: "sent",
-      amount: 500,
-      phoneNumber: "+254745678901",
-      description: "Cash back promotion",
-      status: "failed",
-      date: new Date(2025, 0, 13, 11, 0),
-      mpesaRef: "RBK321654987",
-    },
-  ];
+  useEffect(() => {
+    if (user) {
+      fetchTransactions();
+    }
+  }, [user]);
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedTransactions: Transaction[] = data?.map(t => ({
+        id: t.id,
+        type: t.transaction_type === 'received' ? 'received' : 'sent',
+        amount: Number(t.amount),
+        phoneNumber: t.phone_number,
+        description: t.description || `Transaction with ${t.phone_number}`,
+        status: t.status as "completed" | "pending" | "failed",
+        date: new Date(t.created_at),
+        mpesaRef: t.mpesa_receipt_number || t.transaction_id,
+      })) || [];
+
+      setAllTransactions(formattedTransactions);
+    } catch (error: any) {
+      console.error('Error fetching transactions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load transactions",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter transactions
   const filteredTransactions = allTransactions.filter((tx) => {
@@ -104,10 +100,6 @@ const Transactions = () => {
     return matchesSearch && matchesType && matchesStatus && matchesDate;
   });
 
-  const handleExport = () => {
-    console.log("Exporting transactions...");
-    // Export logic will be implemented with backend
-  };
 
   const getStatusBadge = (status: Transaction["status"]) => {
     const variants: Record<Transaction["status"], { variant: "default" | "secondary" | "destructive"; label: string }> = {
@@ -119,6 +111,16 @@ const Transactions = () => {
     const config = variants[status];
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -208,10 +210,7 @@ const Transactions = () => {
               <p className="text-sm text-muted-foreground">
                 Showing {filteredTransactions.length} of {allTransactions.length} transactions
               </p>
-              <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
+              <ExportButton transactions={filteredTransactions} />
             </div>
           </CardContent>
         </Card>
