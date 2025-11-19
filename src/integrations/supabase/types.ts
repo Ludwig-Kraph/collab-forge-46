@@ -1181,6 +1181,24 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admin_cache: {
+        Row: {
+          is_super_admin: boolean
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          is_super_admin?: boolean
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          is_super_admin?: boolean
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           assigned_to: string | null
