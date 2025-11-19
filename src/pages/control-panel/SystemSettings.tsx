@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Key, Server, AlertTriangle, CheckCircle, Save } from "lucide-react";
+import { Key, Server, AlertTriangle, CheckCircle, Save, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import PerformanceMonitor from "@/components/admin/PerformanceMonitor";
 
 export default function SystemSettings() {
   const { toast } = useToast();
@@ -122,10 +123,11 @@ export default function SystemSettings() {
         </div>
 
         <Tabs defaultValue="mpesa" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="mpesa">MPESA Credentials</TabsTrigger>
             <TabsTrigger value="daraja">Daraja API Secrets</TabsTrigger>
             <TabsTrigger value="api">API Settings</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="system">System Config</TabsTrigger>
           </TabsList>
 
@@ -386,6 +388,10 @@ export default function SystemSettings() {
                 <p className="text-sm text-muted-foreground">API settings coming soon...</p>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <PerformanceMonitor />
           </TabsContent>
 
           <TabsContent value="system">

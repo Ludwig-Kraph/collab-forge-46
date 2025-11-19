@@ -105,3 +105,12 @@ M-Leja supports both Supabase Cloud and self-hosted Supabase instances:
 **Proprietary - All Rights Reserved**
 
 © 2024 Timothy Ng'ang'a. Unauthorized use, reproduction, or distribution is prohibited and subject to legal action.
+
+## Performance Optimization
+
+For optimizing Supabase connectivity and reducing lag during peak times, see [SUPABASE_PERFORMANCE_GUIDE.md](SUPABASE_PERFORMANCE_GUIDE.md) which covers:
+- Container scaling and resource allocation
+- Connection pooling optimization  
+- Query caching and batching strategies
+- Real-time performance tuning
+- Monitoring and troubleshooting
