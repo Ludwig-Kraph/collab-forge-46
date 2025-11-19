@@ -61,12 +61,17 @@ const Header = () => {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">My Account</p>
-                    {isAdmin && (
+                    {isSuperAdmin ? (
+                      <Badge variant="default" className="ml-2 text-xs bg-primary">
+                        <Shield className="mr-1 h-3 w-3" />
+                        Super Admin
+                      </Badge>
+                    ) : isAdmin ? (
                       <Badge variant="default" className="ml-2 text-xs">
                         <Shield className="mr-1 h-3 w-3" />
                         Admin
                       </Badge>
-                    )}
+                    ) : null}
                   </div>
                   <p className="text-xs text-muted-foreground">{user?.phone}</p>
                 </div>
