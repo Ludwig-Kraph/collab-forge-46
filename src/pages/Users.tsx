@@ -92,16 +92,32 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
+      // Get current user's profile to get organization_id
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: currentProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Only fetch RBAC users within the same organization
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, phone_number, created_at, is_rbac_user')
-        .eq('is_rbac_user', true);
+        .select('id, full_name, email, phone_number, created_at, is_rbac_user, organization_id')
+        .eq('is_rbac_user', true)
+        .eq('organization_id', currentProfile.organization_id);
 
       if (profilesError) throw profilesError;
 
+      // Fetch roles for organization members only
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
-        .select('user_id, role');
+        .select('user_id, role, organization_id')
+        .eq('organization_id', currentProfile.organization_id);
 
       if (rolesError) throw rolesError;
 
