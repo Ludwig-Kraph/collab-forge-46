@@ -244,10 +244,18 @@ export default function Accounts() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="registration_clerk">Registration Clerk</SelectItem>
-                      <SelectItem value="customer_care">Customer Care</SelectItem>
-                      <SelectItem value="customer_care_manager">Customer Care Manager</SelectItem>
-                      <SelectItem value="account_manager">Account Manager</SelectItem>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                      <SelectItem value="cashier">Cashier</SelectItem>
+                      <SelectItem value="sales_agent">Sales Agent</SelectItem>
+                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="assistant_manager">Assistant Manager</SelectItem>
+                      <SelectItem value="senior_manager">Senior Manager</SelectItem>
+                      <SelectItem value="developer">Developer</SelectItem>
+                      <SelectItem value="cfo">CFO</SelectItem>
+                      <SelectItem value="director">Director</SelectItem>
+                      <SelectItem value="ceo">CEO</SelectItem>
+                      <SelectItem value="corporate_admin">Corporate Admin</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
@@ -281,9 +289,19 @@ export default function Accounts() {
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="registration_clerk">Registration Clerk</SelectItem>
-                  <SelectItem value="customer_care">Customer Care</SelectItem>
-                  <SelectItem value="account_manager">Account Manager</SelectItem>
+                  <SelectItem value="corporate_admin">Corporate Admin</SelectItem>
+                  <SelectItem value="ceo">CEO</SelectItem>
+                  <SelectItem value="director">Director</SelectItem>
+                  <SelectItem value="cfo">CFO</SelectItem>
+                  <SelectItem value="senior_manager">Senior Manager</SelectItem>
+                  <SelectItem value="assistant_manager">Assistant Manager</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="supervisor">Supervisor</SelectItem>
+                  <SelectItem value="developer">Developer</SelectItem>
+                  <SelectItem value="sales_agent">Sales Agent</SelectItem>
+                  <SelectItem value="cashier">Cashier</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
