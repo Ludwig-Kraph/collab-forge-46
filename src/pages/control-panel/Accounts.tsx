@@ -46,40 +46,21 @@ export default function Accounts() {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      
-      // Fetch all Control Panel users (organization_id is null)
-      // This includes both RBAC users AND the Super Admin
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role')
-        .is('organization_id', null);
-
-      if (rolesError) {
-        console.error("Roles fetch error:", rolesError);
-        throw rolesError;
-      }
-
-      if (!roles || roles.length === 0) {
-        setAccounts([]);
-        return;
-      }
-
-      // Get user IDs from roles
-      const userIds = roles.map(r => r.user_id);
-
-      // Fetch profiles for these users
+      // Only fetch Control Panel RBAC accounts (not regular subscription users)
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .in('id', userIds)
+        .eq('is_rbac_user', true)
         .order('created_at', { ascending: false });
 
-      if (profilesError) {
-        console.error("Profiles fetch error:", profilesError);
-        throw profilesError;
-      }
+      if (profilesError) throw profilesError;
 
-      // Combine profiles with their roles
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*');
+
+      if (rolesError) throw rolesError;
+
       const accountsWithRoles = profiles?.map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
         return {
@@ -90,10 +71,9 @@ export default function Accounts() {
 
       setAccounts(accountsWithRoles);
     } catch (error: any) {
-      console.error("Fetch accounts error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to load accounts",
+        description: error.message,
         variant: "destructive"
       });
     } finally {
@@ -129,18 +109,8 @@ export default function Accounts() {
     }
   };
 
-  const handleSuspendAccount = async (userId: string, userRole: string) => {
+  const handleSuspendAccount = async (userId: string) => {
     try {
-      // Super Admins cannot be suspended - they have absolute immunity
-      if (userRole === 'super_admin') {
-        toast({
-          title: "Action Denied",
-          description: "Super Admins cannot be suspended. They have absolute immunity.",
-          variant: "destructive"
-        });
-        return;
-      }
-
       const { error } = await supabase
         .from('profiles')
         .update({ account_status: 'suspended' })
@@ -407,8 +377,7 @@ export default function Accounts() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleSuspendAccount(account.id, account.role)}
-                          disabled={account.role === 'super_admin'}
+                          onClick={() => handleSuspendAccount(account.id)}
                         >
                           Suspend
                         </Button>

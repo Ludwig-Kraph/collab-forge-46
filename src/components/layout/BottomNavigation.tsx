@@ -1,28 +1,17 @@
-import { Home, CreditCard, Receipt, BarChart3, MoreHorizontal, Shield } from "lucide-react";
+import { Home, CreditCard, Receipt, BarChart3, MoreHorizontal } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+
+const navItems = [
+  { icon: Home, label: "Home", path: "/dashboard" },
+  { icon: CreditCard, label: "Payments", path: "/payment" },
+  { icon: Receipt, label: "Transactions", path: "/transactions" },
+  { icon: BarChart3, label: "Analytics", path: "/analytics" },
+  { icon: MoreHorizontal, label: "More", path: "/more" },
+];
 
 const BottomNavigation = () => {
   const location = useLocation();
-  const { isSuperAdmin } = useAuth();
-
-  const baseNavItems = [
-    { icon: Home, label: "Home", path: "/dashboard" },
-    { icon: CreditCard, label: "Payments", path: "/payment" },
-    { icon: Receipt, label: "Transactions", path: "/transactions" },
-    { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  ];
-
-  const navItems = isSuperAdmin 
-    ? [
-        ...baseNavItems,
-        { icon: Shield, label: "Control", path: "/control-panel" }
-      ]
-    : [
-        ...baseNavItems,
-        { icon: MoreHorizontal, label: "More", path: "/more" }
-      ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">

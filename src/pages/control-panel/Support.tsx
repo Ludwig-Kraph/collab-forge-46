@@ -3,11 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Clock, AlertCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface SupportTicket {
@@ -25,77 +29,68 @@ export default function Support() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newTicket, setNewTicket] = useState({ subject: "", description: "", priority: "normal" });
 
   useEffect(() => {
     fetchTickets();
   }, []);
 
   const fetchTickets = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTickets((data || []) as SupportTicket[]);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    const { data } = await supabase.from('support_tickets').select('*').order('created_at', { ascending: false });
+    setTickets((data || []) as SupportTicket[]);
   };
 
-  const handleAssignTicket = async (ticketId: string) => {
-    try {
-      const { error } = await supabase
-        .from('support_tickets')
-        .update({ assigned_to: user?.id, status: 'in_progress' })
-        .eq('id', ticketId);
-
-      if (error) throw error;
-      toast({ title: "Ticket Assigned" });
-      fetchTickets();
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    }
+  const handleCreateTicket = async () => {
+    await supabase.from('support_tickets').insert({ ...newTicket, user_id: user?.id, status: 'open' });
+    toast({ title: "Ticket Created" });
+    setCreateDialogOpen(false);
+    setNewTicket({ subject: "", description: "", priority: "normal" });
+    fetchTickets();
   };
 
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Support Tickets</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Support Tickets</h1>
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="mr-2 h-4 w-4" />Create</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create Ticket</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input value={newTicket.subject} onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })} placeholder="Subject" />
+                <Textarea value={newTicket.description} onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })} placeholder="Description" />
+                <Select value={newTicket.priority} onValueChange={(v) => setNewTicket({ ...newTicket, priority: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={handleCreateTicket}>Create</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="space-y-4">
-          {loading ? (
-            <p className="text-center text-muted-foreground">Loading...</p>
-          ) : tickets.length === 0 ? (
-            <Card><CardContent className="py-8 text-center"><AlertCircle className="h-12 w-12 mx-auto text-muted-foreground" /><p className="text-muted-foreground">No tickets</p></CardContent></Card>
-          ) : (
-            tickets.map((ticket) => (
-              <Card key={ticket.id}>
-                <CardHeader>
-                  <div className="flex justify-between">
-                    <CardTitle className="flex items-center gap-2"><MessageSquare className="h-4 w-4" />{ticket.subject}</CardTitle>
-                    <div className="flex gap-2">
-                      <Badge>{ticket.priority}</Badge>
-                      <Badge variant="outline">{ticket.status}</Badge>
-                    </div>
-                  </div>
-                  <CardDescription className="flex items-center gap-2"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true })}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm mb-4">{ticket.description}</p>
-                  {ticket.status === 'open' && <Button size="sm" onClick={() => handleAssignTicket(ticket.id)}>Assign to Me</Button>}
-                </CardContent>
-              </Card>
-            ))
-          )}
+          {tickets.map((ticket) => (
+            <Card key={ticket.id}>
+              <CardHeader>
+                <CardTitle>{ticket.subject}</CardTitle>
+                <CardDescription>{formatDistanceToNow(new Date(ticket.created_at))} ago</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-2">{ticket.description}</p>
+                <Badge>{ticket.priority}</Badge>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </Layout>

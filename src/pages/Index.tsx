@@ -3,10 +3,11 @@ import Layout from "@/components/layout/Layout";
 import FloatingActionButton from "@/components/layout/FloatingActionButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle, Shield } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { DemoAccountBadge } from "@/components/layout/DemoAccountBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +31,7 @@ interface SubscriptionData {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user, isSuperAdmin } = useAuth();
+  const { isDemoAccount, user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
@@ -49,7 +50,7 @@ const Index = () => {
     try {
       setLoading(true);
 
-      // Super Admins are above the subscription system - no subscription checks
+      // Super Admins don't have subscription limits
       if (!isSuperAdmin) {
         // Fetch subscription data
         const { data: subData, error: subError } = await supabase
@@ -111,9 +112,7 @@ const Index = () => {
   };
 
   const freePushes = subscription?.free_stk_pushes_remaining;
-  const tierName = subscription?.tier === 'super_admin' 
-    ? 'Super Admin'
-    : subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
+  const tierName = subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
   const isUnlimited = freePushes === null || subscription?.max_stk_pushes === null;
   const usagePercent = !isUnlimited && subscription?.max_stk_pushes 
     ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
@@ -122,27 +121,7 @@ const Index = () => {
   return (
     <Layout>
       <div className="container px-4 py-6">
-        {isSuperAdmin && (
-          <Card className="mb-6 border-primary bg-gradient-to-r from-primary/10 to-primary/5 shadow-elegant">
-            <CardContent className="flex items-center justify-between pt-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold">Control Panel Access</p>
-                  <p className="text-sm text-muted-foreground">
-                    Full system administration with unlimited privileges
-                  </p>
-                </div>
-              </div>
-              <Button onClick={() => navigate("/control-panel")} className="gap-2 shadow-md">
-                <Shield className="h-4 w-4" />
-                Open Control Panel
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {isDemoAccount && <DemoAccountBadge />}
         
         <div className="mb-6">
           <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>

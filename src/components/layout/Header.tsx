@@ -14,10 +14,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { DemoAccountBadge } from "./DemoAccountBadge";
 import logo from '@/assets/m-leja-logo.png';
 
 const Header = () => {
-  const { user, signOut, isAdmin, isSuperAdmin, userRole } = useAuth();
+  const { user, signOut, isAdmin, isSuperAdmin, userRole, isDemoAccount } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -41,17 +42,7 @@ const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {isSuperAdmin && (
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={() => navigate('/control-panel')}
-              className="hidden md:flex gap-2 bg-primary hover:bg-primary/90 shadow-md"
-            >
-              <Shield className="h-4 w-4" />
-              Control Panel
-            </Button>
-          )}
+          {isDemoAccount && <DemoAccountBadge variant="badge" />}
           
           <NotificationCenter />
 
@@ -72,13 +63,7 @@ const Header = () => {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">My Account</p>
-                    {isSuperAdmin && (
-                      <Badge variant="default" className="ml-2 text-xs bg-primary">
-                        <Shield className="mr-1 h-3 w-3" />
-                        Super Admin
-                      </Badge>
-                    )}
-                    {isAdmin && !isSuperAdmin && (
+                    {isAdmin && (
                       <Badge variant="default" className="ml-2 text-xs">
                         <Shield className="mr-1 h-3 w-3" />
                         Admin

@@ -26,6 +26,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const DEMO_PHONE = '+254000000000';
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -45,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
         
         // Fetch user role after auth state changes
         if (session?.user) {
@@ -53,9 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }, 0);
         } else {
           setIsAdmin(false);
-          setIsSuperAdmin(false);
           setUserRole(null);
-          setLoading(false);
         }
       }
     );
@@ -64,11 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
       
       if (session?.user) {
         fetchUserRole(session.user.id);
-      } else {
-        setLoading(false);
       }
     });
 
@@ -77,72 +77,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      // Optimized: Fetch all user data in parallel for better performance
-      const [profileResult, roleResult, subscriptionResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('phone_number, is_blocked, account_status')
-          .eq('id', userId)
-          .maybeSingle(),
-        supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .maybeSingle(),
-        supabase
-          .from('subscriptions')
-          .select('expires_at, is_active')
-          .eq('user_id', userId)
-          .eq('is_active', true)
-          .maybeSingle()
-      ]);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone_number, is_blocked, account_status')
+        .eq('id', userId)
+        .single();
 
-      const profile = profileResult.data;
-      const roleData = roleResult.data;
-      const subscription = subscriptionResult.data;
-
-      // Production environment - no demo accounts
-      setIsDemoAccount(false);
+      // Check if this is the demo account
+      setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
       
-      // Check if account is blocked (Super Admins have immunity and cannot be blocked)
-      const isSuperAdminUser = roleData?.role === 'super_admin';
-      const blockedStatus = profile?.is_blocked || false;
+      // Check if account is blocked
+      setIsBlocked(profile?.is_blocked || false);
       
-      // Super Admins have absolute immunity - cannot be blocked
-      setIsBlocked(isSuperAdminUser ? false : blockedStatus);
-      
-      if (blockedStatus && !isSuperAdminUser) {
+      if (profile?.is_blocked) {
         toast({
           title: "Account Blocked",
           description: "Your account has been blocked. Please contact support.",
           variant: "destructive"
         });
-        setLoading(false);
-        return;
       }
 
-      if (!roleData) {
-        setUserRole(null);
-        setIsAdmin(false);
-        setIsSuperAdmin(false);
-        setLoading(false);
-        return;
-      }
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
 
-      setUserRole(roleData.role);
-      setIsAdmin(roleData.role === 'admin' || roleData.role === 'super_admin' || roleData.role === 'corporate_admin');
-      setIsSuperAdmin(roleData.role === 'super_admin');
+      if (error) throw error;
+
+      setUserRole(data.role);
+      setIsAdmin(data.role === 'admin' || data.role === 'super_admin' || data.role === 'corporate_admin');
+      setIsSuperAdmin(data.role === 'super_admin');
       
-      // Super Admins have absolute immunity - they are above subscription system
-      // Super Admins are subscription policy makers, not subscribers
-      if (roleData.role === 'super_admin') {
-        setIsBlocked(false); // Cannot be blocked
-        setIsExpired(false); // Never expires
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(false);
+      // Check subscription expiry
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('expires_at, is_active')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
         
       if (subscription?.expires_at) {
         const expiryDate = new Date(subscription.expires_at);
@@ -162,9 +135,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(null);
       setIsAdmin(false);
       setIsSuperAdmin(false);
-      setIsBlocked(false);
-      setIsExpired(false);
-      setLoading(false);
     }
   };
 

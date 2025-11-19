@@ -40,7 +40,6 @@ import NationalDashboard from '@/pages/government/NationalDashboard';
 import CountyDashboard from '@/pages/government/CountyDashboard';
 import InterGovernmental from '@/pages/government/InterGovernmental';
 import MpesaDarajaSettings from '@/pages/MpesaDarajaSettings';
-import Officials from '@/pages/government/Officials';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -81,9 +80,8 @@ const App = () => (
             <Route path="/control-panel/support" element={<SuperAdminRoute><Support /></SuperAdminRoute>} />
             <Route path="/control-panel/communication" element={<SuperAdminRoute><Communication /></SuperAdminRoute>} />
             <Route path="/control-panel/subscriptions" element={<SuperAdminRoute><SubscriptionControl /></SuperAdminRoute>} />
-            <Route path="/control-panel/system-settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
+            <Route path="/control-panel/settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/control-panel/government" element={<SuperAdminRoute><Government /></SuperAdminRoute>} />
-            <Route path="/control-panel/government/officials" element={<SuperAdminRoute><Officials /></SuperAdminRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
             <Route path="/subscription/staff" element={<AdminRoute><SubscriptionStaff /></AdminRoute>} />
             <Route path="/subscription/departments" element={<AdminRoute><SubscriptionDepartments /></AdminRoute>} />

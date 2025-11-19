@@ -118,53 +118,65 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Admin Section */}
-        {isAdmin && !isSuperAdmin && (
+        {(isAdmin || isSuperAdmin) && (
           <SidebarGroup>
             <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
               Administration
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/users")}>
-                    <NavLink 
-                      to="/users" 
-                      className="hover:bg-muted/50" 
-                      activeClassName="bg-muted text-primary font-medium"
-                    >
-                      <Users className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                      {!isCollapsed && <span>Users</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {/* Control Panel Section - Top Level for Super Admin */}
-        {isSuperAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-              Control Panel
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {controlPanelItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                {isAdmin && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/users")}>
                       <NavLink 
-                        to={item.url}
-                        end
+                        to="/users" 
                         className="hover:bg-muted/50" 
                         activeClassName="bg-muted text-primary font-medium"
                       >
-                        <item.icon className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                        {!isCollapsed && <span>{item.title}</span>}
+                        <Users className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
+                        {!isCollapsed && <span>Users</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+                )}
+                {isSuperAdmin && (
+                  <Collapsible
+                    open={isControlPanelOpen}
+                    onOpenChange={setIsControlPanelOpen}
+                    className="group/collapsible"
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton isActive={isControlPanelActive} className="bg-primary/5 hover:bg-primary/10 data-[state=open]:bg-primary/10">
+                          <Shield className={isCollapsed ? "h-5 w-5 text-primary" : "mr-3 h-5 w-5 text-primary"} />
+                          {!isCollapsed && <span className="font-medium">Control Panel</span>}
+                          {!isCollapsed && (
+                            <ChevronDown className="ml-auto h-4 w-4 text-primary transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {controlPanelItems.map((item) => (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                                <NavLink 
+                                  to={item.url}
+                                  end
+                                  className="hover:bg-muted/50" 
+                                  activeClassName="bg-muted text-primary font-medium"
+                                >
+                                  <item.icon className="mr-2 h-4 w-4" />
+                                  {!isCollapsed && <span>{item.title}</span>}
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
