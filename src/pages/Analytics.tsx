@@ -20,6 +20,7 @@ const Analytics = () => {
     totalTransactions: 0,
     avgTransaction: 0,
     successRate: 0,
+    activeCustomers: 0,
   });
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [transactionVolumeData, setTransactionVolumeData] = useState<any[]>([]);
@@ -52,12 +53,17 @@ const Analytics = () => {
       const totalRev = received.reduce((sum, t) => sum + Number(t.amount), 0);
       const totalTrans = transactions?.length || 0;
       const successful = transactions?.filter(t => t.status === 'completed').length || 0;
+      
+      // Calculate unique customers from phone numbers
+      const uniquePhones = new Set(transactions?.map(t => t.phone_number) || []);
+      const activeCustomers = uniquePhones.size;
 
       setMetrics({
         totalRevenue: totalRev,
         totalTransactions: totalTrans,
         avgTransaction: totalTrans > 0 ? totalRev / received.length : 0,
         successRate: totalTrans > 0 ? (successful / totalTrans) * 100 : 0,
+        activeCustomers: activeCustomers,
       });
 
       // Group data for charts (by month for 30+ days, by day for 7 days)
@@ -177,10 +183,10 @@ const Analytics = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono">573</div>
+              <div className="text-2xl font-bold font-mono">{metrics.activeCustomers}</div>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <TrendingUp className="h-3 w-3 text-primary" />
-                <span className="text-primary">+19.3%</span> from last month
+                <Activity className="h-3 w-3 text-muted-foreground" />
+                Unique customers
               </p>
             </CardContent>
           </Card>
