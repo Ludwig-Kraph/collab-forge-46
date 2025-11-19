@@ -146,87 +146,99 @@ export default function Government() {
             </p>
           </div>
           
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" />
-                Create Entity
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Government Entity</DialogTitle>
-                <DialogDescription>
-                  Add a new government entity to the system
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Entity Type</label>
-                  <Select
-                    value={newEntity.entity_type}
-                    onValueChange={(value: 'national' | 'county') => 
-                      setNewEntity({ ...newEntity, entity_type: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select entity type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      <SelectItem value="national">National Government</SelectItem>
-                      <SelectItem value="county">County Government</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Entity Name</label>
-                  <Input
-                    placeholder="e.g., National Treasury, Nairobi County"
-                    value={newEntity.entity_name}
-                    onChange={(e) => setNewEntity({ ...newEntity, entity_name: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Entity Code</label>
-                  <Input
-                    placeholder="e.g., NAT-001, CTY-047"
-                    value={newEntity.entity_code}
-                    onChange={(e) => setNewEntity({ ...newEntity, entity_code: e.target.value })}
-                  />
-                </div>
-
-                {newEntity.entity_type === 'county' && (
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={() => window.location.href = '/control-panel/government/officials'}
+            >
+              <Users className="w-4 h-4" />
+              Government Officials
+            </Button>
+            
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create Entity
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Government Entity</DialogTitle>
+                  <DialogDescription>
+                    Add a new government entity to the system
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">County Name</label>
+                    <label className="text-sm font-medium">Entity Type</label>
+                    <Select
+                      value={newEntity.entity_type}
+                      onValueChange={(value: 'national' | 'county') => 
+                        setNewEntity({ ...newEntity, entity_type: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select entity type" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="national">National Government</SelectItem>
+                        <SelectItem value="county">County Government</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Entity Name</label>
                     <Input
-                      placeholder="e.g., Nairobi, Mombasa"
-                      value={newEntity.county_name}
-                      onChange={(e) => setNewEntity({ ...newEntity, county_name: e.target.value })}
+                      placeholder="e.g., National Treasury, Nairobi County"
+                      value={newEntity.entity_name}
+                      onChange={(e) => setNewEntity({ ...newEntity, entity_name: e.target.value })}
                     />
                   </div>
-                )}
-              </div>
-              <Button onClick={handleCreateEntity} className="w-full">
-                Create Entity
-              </Button>
-            </DialogContent>
-          </Dialog>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Entity Code</label>
+                    <Input
+                      placeholder="e.g., NAT-001, CTY-047"
+                      value={newEntity.entity_code}
+                      onChange={(e) => setNewEntity({ ...newEntity, entity_code: e.target.value })}
+                    />
+                  </div>
+
+                  {newEntity.entity_type === 'county' && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">County Name</label>
+                      <Input
+                        placeholder="e.g., Nairobi, Mombasa"
+                        value={newEntity.county_name}
+                        onChange={(e) => setNewEntity({ ...newEntity, county_name: e.target.value })}
+                      />
+                    </div>
+                  )}
+                </div>
+                <Button onClick={handleCreateEntity} className="w-full">
+                  Create Entity
+                </Button>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
+        <div className="mb-6 flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[250px]">
             <Input
               placeholder="Search entities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-md"
+              className="w-full"
             />
           </div>
+          
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent className="bg-background z-50">
@@ -237,106 +249,67 @@ export default function Government() {
           </Select>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Entities</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{entities.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">National Level</CardTitle>
-              <Shield className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {entities.filter(e => e.entity_type === 'national').length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">County Level</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {entities.filter(e => e.entity_type === 'county').length}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Entities List */}
-        {loading ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <Activity className="w-6 h-6 animate-spin text-muted-foreground" />
-            </CardContent>
-          </Card>
-        ) : filteredEntities.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium text-muted-foreground">No entities found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredEntities.map((entity) => (
+        {/* Entity List */}
+        <div className="grid gap-4">
+          {loading ? (
+            <Card>
+              <CardContent className="py-8">
+                <p className="text-center text-muted-foreground">Loading entities...</p>
+              </CardContent>
+            </Card>
+          ) : filteredEntities.length === 0 ? (
+            <Card>
+              <CardContent className="py-8">
+                <p className="text-center text-muted-foreground">No government entities found</p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredEntities.map((entity) => (
               <Card key={entity.id}>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="flex items-center gap-2">
-                        {entity.entity_name}
-                        {entity.is_active ? (
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 text-destructive" />
-                        )}
-                      </CardTitle>
-                      <CardDescription>Code: {entity.entity_code}</CardDescription>
-                    </div>
-                    <Badge variant={getEntityBadgeVariant(entity.entity_type)}>
-                      {entity.entity_type === 'national' ? 'National' : 'County'}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {entity.county_name && (
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">County: </span>
-                        <span className="font-medium">{entity.county_name}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Building2 className="w-6 h-6 text-primary" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {entity.entity_name}
+                          <Badge variant={getEntityBadgeVariant(entity.entity_type)}>
+                            {entity.entity_type}
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription>
+                          Code: {entity.entity_code}
+                          {entity.county_name && ` • ${entity.county_name}`}
+                        </CardDescription>
                       </div>
-                    )}
-                    <div className="text-sm text-muted-foreground">
-                      Created {formatDistanceToNow(new Date(entity.created_at))} ago
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant={entity.is_active ? "destructive" : "default"}
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant={entity.is_active ? "default" : "secondary"}>
+                        {entity.is_active ? <CheckCircle className="w-3 h-3 mr-1" /> : <AlertCircle className="w-3 h-3 mr-1" />}
+                        {entity.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                      
+                      <Button 
+                        variant="outline" 
                         size="sm"
                         onClick={() => handleToggleStatus(entity.id, entity.is_active)}
                       >
                         {entity.is_active ? 'Deactivate' : 'Activate'}
                       </Button>
-                      <Button variant="outline" size="sm">
-                        Manage Officials
-                      </Button>
                     </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    Created {formatDistanceToNow(new Date(entity.created_at), { addSuffix: true })}
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
     </Layout>
   );
