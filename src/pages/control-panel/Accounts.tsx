@@ -54,13 +54,21 @@ export default function Accounts() {
         .is('organization_id', null)
         .order('created_at', { ascending: false });
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error("Profiles fetch error:", profilesError);
+        throw profilesError;
+      }
 
+      // Fetch roles separately with proper filtering
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('*');
+        .select('*')
+        .is('organization_id', null);
 
-      if (rolesError) throw rolesError;
+      if (rolesError) {
+        console.error("Roles fetch error:", rolesError);
+        throw rolesError;
+      }
 
       const accountsWithRoles = profiles?.map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
@@ -72,9 +80,10 @@ export default function Accounts() {
 
       setAccounts(accountsWithRoles);
     } catch (error: any) {
+      console.error("Fetch accounts error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to load accounts",
         variant: "destructive"
       });
     } finally {
