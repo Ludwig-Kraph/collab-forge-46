@@ -7,7 +7,6 @@ import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle, Users, Ac
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { DemoAccountBadge } from "@/components/layout/DemoAccountBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +30,7 @@ interface SubscriptionData {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isDemoAccount, user, isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
@@ -204,8 +203,6 @@ const Index = () => {
     return (
       <Layout>
         <div className="container px-4 py-6 max-w-7xl mx-auto">
-          <DemoAccountBadge variant="banner" isDemoAccount={isDemoAccount} />
-          
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -421,8 +418,6 @@ const Index = () => {
   return (
     <Layout>
       <div className="container px-4 py-6">
-        {isDemoAccount && <DemoAccountBadge />}
-        
         <div className="mb-6">
           <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back! Here's your business overview</p>

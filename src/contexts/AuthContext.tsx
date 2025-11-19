@@ -11,7 +11,6 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   userRole: string | null;
-  isDemoAccount: boolean;
   isBlocked: boolean;
   isExpired: boolean;
   signUp: (phone: string, password: string, fullName: string) => Promise<{ error: any }>;
@@ -35,8 +34,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEMO_PHONE = '+254000000000';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -44,7 +41,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [isDemoAccount, setIsDemoAccount] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const navigate = useNavigate();
@@ -88,12 +84,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('phone_number, is_blocked, account_status, account_type, account_id, role_level, organization_id')
+        .select('is_blocked, account_status, account_type, account_id, role_level, organization_id')
         .eq('id', userId)
         .single();
-
-      // Check if this is the demo account
-      setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
       
       // Check if account is blocked
       setIsBlocked(profile?.is_blocked || false);
@@ -465,7 +458,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAdmin,
         isSuperAdmin,
         userRole,
-        isDemoAccount,
         isBlocked,
         isExpired,
         signUp,
