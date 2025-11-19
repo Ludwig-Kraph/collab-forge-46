@@ -3,7 +3,7 @@ import Layout from "@/components/layout/Layout";
 import FloatingActionButton from "@/components/layout/FloatingActionButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle, Users, Activity } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,30 +39,116 @@ const Index = () => {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
+  
+  // Super Admin specific states
+  const [platformStats, setPlatformStats] = useState({
+    totalUsers: 0,
+    totalTransactions: 0,
+    totalRevenue: 0,
+    activeSubscriptions: 0,
+    pendingRegistrations: 0,
+    openTickets: 0,
+    systemAlerts: 0,
+  });
 
   useEffect(() => {
     if (user) {
-      fetchDashboardData();
+      if (isSuperAdmin) {
+        fetchSuperAdminDashboard();
+      } else {
+        fetchDashboardData();
+      }
     }
-  }, [user]);
+  }, [user, isSuperAdmin]);
+
+  const fetchSuperAdminDashboard = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch total users count
+      const { count: usersCount, error: usersError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch total transactions count and sum
+      const { data: transData, error: transError } = await supabase
+        .from('transactions')
+        .select('amount, transaction_type, status');
+
+      const totalTransactions = transData?.length || 0;
+      const totalRevenue = transData
+        ?.filter(t => t.transaction_type === 'received' && t.status === 'completed')
+        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+
+      // Fetch active subscriptions
+      const { count: subsCount, error: subsError } = await supabase
+        .from('subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+
+      // Fetch pending registrations
+      const { count: regCount, error: regError } = await supabase
+        .from('registration_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      // Fetch open support tickets
+      const { count: ticketsCount, error: ticketsError } = await supabase
+        .from('support_tickets')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['open', 'in_progress']);
+
+      // Fetch unresolved system alerts
+      const { count: alertsCount, error: alertsError } = await supabase
+        .from('system_alerts')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_resolved', false);
+
+      setPlatformStats({
+        totalUsers: usersCount || 0,
+        totalTransactions,
+        totalRevenue,
+        activeSubscriptions: subsCount || 0,
+        pendingRegistrations: regCount || 0,
+        openTickets: ticketsCount || 0,
+        systemAlerts: alertsCount || 0,
+      });
+
+      // Fetch recent system activity (latest transactions across all users)
+      const { data: recentActivity, error: activityError } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      setRecentTransactions(recentActivity || []);
+
+    } catch (error: any) {
+      console.error('Error fetching super admin dashboard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
 
-      // Super Admins don't have subscription limits
-      if (!isSuperAdmin) {
-        // Fetch subscription data
-        const { data: subData, error: subError } = await supabase
-          .from('subscriptions')
-          .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
-          .eq('user_id', user?.id)
-          .eq('is_active', true)
-          .single();
+      // Fetch subscription data
+      const { data: subData, error: subError } = await supabase
+        .from('subscriptions')
+        .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
+        .eq('user_id', user?.id)
+        .eq('is_active', true)
+        .single();
 
-        if (subError && subError.code !== 'PGRST116') throw subError;
-        setSubscription(subData);
-      }
+      if (subError && subError.code !== 'PGRST116') throw subError;
+      setSubscription(subData);
 
       // Fetch recent transactions
       const { data: transData, error: transError } = await supabase
@@ -112,6 +198,220 @@ const Index = () => {
   };
 
   const freePushes = subscription?.free_stk_pushes_remaining;
+
+  // Super Admin Dashboard Render
+  if (isSuperAdmin && !loading) {
+    return (
+      <Layout>
+        <div className="container px-4 py-6 max-w-7xl mx-auto">
+          <DemoAccountBadge variant="banner" isDemoAccount={isDemoAccount} />
+          
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Super Admin Control Center
+            </h1>
+            <p className="text-muted-foreground mt-2">System-wide overview and management</p>
+          </div>
+
+          {/* Platform Statistics Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+            <Card className="border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-primary">{platformStats.totalUsers}</div>
+                <p className="text-xs text-muted-foreground mt-1">Registered accounts</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-secondary/20 shadow-elegant hover:shadow-glow transition-all duration-300">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Transactions</CardTitle>
+                  <Activity className="h-5 w-5 text-secondary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-secondary">{platformStats.totalTransactions.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">Platform-wide</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-accent/20 shadow-elegant hover:shadow-glow transition-all duration-300">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+                  <Wallet className="h-5 w-5 text-accent" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-accent">
+                  KES {platformStats.totalRevenue.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">All time</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscriptions</CardTitle>
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-primary">{platformStats.activeSubscriptions}</div>
+                <p className="text-xs text-muted-foreground mt-1">Currently active</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Action Cards Grid */}
+          <div className="grid gap-4 md:grid-cols-3 mb-8">
+            <Card 
+              className="cursor-pointer hover:shadow-elegant transition-all duration-300 border-amber-500/20 bg-amber-500/5"
+              onClick={() => navigate('/control-panel/onboarding')}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">Pending Registrations</CardTitle>
+                  <AlertCircle className="h-5 w-5 text-amber-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">{platformStats.pendingRegistrations}</div>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting review</p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-elegant transition-all duration-300 border-blue-500/20 bg-blue-500/5"
+              onClick={() => navigate('/control-panel/support')}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
+                  <AlertCircle className="h-5 w-5 text-blue-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{platformStats.openTickets}</div>
+                <p className="text-xs text-muted-foreground mt-1">Need attention</p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-elegant transition-all duration-300 border-destructive/20 bg-destructive/5"
+              onClick={() => navigate('/control-panel')}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">System Alerts</CardTitle>
+                  <AlertCircle className="h-5 w-5 text-destructive" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-destructive">{platformStats.systemAlerts}</div>
+                <p className="text-xs text-muted-foreground mt-1">Unresolved</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Common administrative tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                <Button onClick={() => navigate('/control-panel/accounts')} className="w-full">
+                  <Users className="mr-2 h-4 w-4" />
+                  Manage Accounts
+                </Button>
+                <Button onClick={() => navigate('/control-panel/onboarding')} variant="secondary" className="w-full">
+                  <ArrowUpRight className="mr-2 h-4 w-4" />
+                  Review Registrations
+                </Button>
+                <Button onClick={() => navigate('/control-panel/system-settings')} variant="outline" className="w-full">
+                  <Wallet className="mr-2 h-4 w-4" />
+                  System Settings
+                </Button>
+                <Button onClick={() => navigate('/control-panel/support')} variant="outline" className="w-full">
+                  <AlertCircle className="mr-2 h-4 w-4" />
+                  Support Center
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Platform Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Platform Activity</CardTitle>
+              <CardDescription>Latest transactions across all users</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentTransactions.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Activity className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No recent activity</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentTransactions.slice(0, 8).map((transaction) => (
+                    <div
+                      key={transaction.id}
+                      className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        {transaction.transaction_type === "received" ? (
+                          <div className="rounded-full bg-primary/10 p-2">
+                            <ArrowDownLeft className="h-4 w-4 text-primary" />
+                          </div>
+                        ) : (
+                          <div className="rounded-full bg-destructive/10 p-2">
+                            <ArrowUpRight className="h-4 w-4 text-destructive" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-sm">
+                            {transaction.transaction_type === "received" ? "Received" : "Sent"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {transaction.phone_number}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-bold font-mono ${
+                          transaction.transaction_type === "received" 
+                            ? "text-primary" 
+                            : "text-destructive"
+                        }`}>
+                          {transaction.transaction_type === "received" ? "+" : "-"}
+                          KES {Number(transaction.amount).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        <FloatingActionButton />
+      </Layout>
+    );
+  }
   const tierName = subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
   const isUnlimited = freePushes === null || subscription?.max_stk_pushes === null;
   const usagePercent = !isUnlimited && subscription?.max_stk_pushes 
