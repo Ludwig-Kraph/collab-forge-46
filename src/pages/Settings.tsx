@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import SupabaseConnectionSettings from "@/components/settings/SupabaseConnectionSettings";
 
 const Settings = () => {
   const { user, updatePassword, updateProfile, isSuperAdmin } = useAuth();
@@ -181,10 +182,11 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="accounts">Accounts</TabsTrigger>
             <TabsTrigger value="mpesa">MPESA</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
@@ -275,6 +277,11 @@ const Settings = () => {
                 <p className="text-sm text-muted-foreground">Payment methods coming soon...</p>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Database Connection */}
+          <TabsContent value="database" className="space-y-6">
+            <SupabaseConnectionSettings />
           </TabsContent>
 
           {/* MPESA Accounts */}

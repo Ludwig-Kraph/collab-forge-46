@@ -2,8 +2,18 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://cfuolhkzxsxfovalswhp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmdW9saGt6eHN4Zm92YWxzd2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyMzQ5MDUsImV4cCI6MjA3NzgxMDkwNX0.d8LjLPuVyHW8JkvQX17zcpQDQ0VhpbHXXExGI3jGmMo";
+// Default Supabase Cloud configuration
+const DEFAULT_SUPABASE_URL = "https://cfuolhkzxsxfovalswhp.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmdW9saGt6eHN4Zm92YWxzd2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyMzQ5MDUsImV4cCI6MjA3NzgxMDkwNX0.d8LjLPuVyHW8JkvQX17zcpQDQ0VhpbHXXExGI3jGmMo";
+
+// Check for self-hosted configuration
+const useSelfHosted = localStorage.getItem("supabase_use_self_hosted") === "true";
+const SUPABASE_URL = useSelfHosted 
+  ? localStorage.getItem("supabase_custom_url") || DEFAULT_SUPABASE_URL
+  : DEFAULT_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = useSelfHosted
+  ? localStorage.getItem("supabase_custom_anon_key") || DEFAULT_SUPABASE_PUBLISHABLE_KEY
+  : DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
