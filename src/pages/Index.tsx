@@ -111,7 +111,9 @@ const Index = () => {
   };
 
   const freePushes = subscription?.free_stk_pushes_remaining;
-  const tierName = subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
+  const tierName = subscription?.tier === 'super_admin' 
+    ? 'Super Admin'
+    : subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
   const isUnlimited = freePushes === null || subscription?.max_stk_pushes === null;
   const usagePercent = !isUnlimited && subscription?.max_stk_pushes 
     ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
