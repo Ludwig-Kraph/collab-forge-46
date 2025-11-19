@@ -44,6 +44,18 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {isDemoAccount && <DemoAccountBadge variant="badge" />}
           
+          {isSuperAdmin && (
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={() => navigate('/control-panel')}
+              className="hidden md:flex gap-2 bg-primary hover:bg-primary/90 shadow-md"
+            >
+              <Shield className="h-4 w-4" />
+              Control Panel
+            </Button>
+          )}
+          
           <NotificationCenter />
 
           {/* User Avatar */}
@@ -63,7 +75,13 @@ const Header = () => {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">My Account</p>
-                    {isAdmin && (
+                    {isSuperAdmin && (
+                      <Badge variant="default" className="ml-2 text-xs bg-primary">
+                        <Shield className="mr-1 h-3 w-3" />
+                        Super Admin
+                      </Badge>
+                    )}
+                    {isAdmin && !isSuperAdmin && (
                       <Badge variant="default" className="ml-2 text-xs">
                         <Shield className="mr-1 h-3 w-3" />
                         Admin

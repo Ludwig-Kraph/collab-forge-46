@@ -3,7 +3,7 @@ import Layout from "@/components/layout/Layout";
 import FloatingActionButton from "@/components/layout/FloatingActionButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle, Shield } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,6 +122,28 @@ const Index = () => {
     <Layout>
       <div className="container px-4 py-6">
         {isDemoAccount && <DemoAccountBadge />}
+        
+        {isSuperAdmin && (
+          <Card className="mb-6 border-primary bg-gradient-to-r from-primary/10 to-primary/5 shadow-elegant">
+            <CardContent className="flex items-center justify-between pt-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">Control Panel Access</p>
+                  <p className="text-sm text-muted-foreground">
+                    Full system administration with unlimited privileges
+                  </p>
+                </div>
+              </div>
+              <Button onClick={() => navigate("/control-panel")} className="gap-2 shadow-md">
+                <Shield className="h-4 w-4" />
+                Open Control Panel
+              </Button>
+            </CardContent>
+          </Card>
+        )}
         
         <div className="mb-6">
           <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>
