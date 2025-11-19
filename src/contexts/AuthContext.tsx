@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
         
         // Fetch user role after auth state changes
         if (session?.user) {
@@ -56,7 +55,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsSuperAdmin(false);
           setUserRole(null);
+          setLoading(false);
         }
       }
     );
@@ -65,10 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
       if (session?.user) {
         fetchUserRole(session.user.id);
+      } else {
+        setLoading(false);
       }
     });
 
@@ -108,6 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(data.role);
       setIsAdmin(data.role === 'admin' || data.role === 'super_admin' || data.role === 'corporate_admin');
       setIsSuperAdmin(data.role === 'super_admin');
+      setLoading(false);
       
       // Check subscription expiry
       const { data: subscription } = await supabase
@@ -135,6 +138,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(null);
       setIsAdmin(false);
       setIsSuperAdmin(false);
+      setIsBlocked(false);
+      setIsExpired(false);
+      setLoading(false);
     }
   };
 
