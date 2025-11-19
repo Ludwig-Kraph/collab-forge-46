@@ -267,6 +267,13 @@ export default function ControlPanel() {
               <QuickActionPanel
                 actions={[
                   {
+                    title: "Create Super Admin",
+                    description: "Register new Super Admin accounts",
+                    icon: Shield,
+                    path: "/control-panel/super-admins",
+                    variant: "outline"
+                  },
+                  {
                     title: "Review Registrations",
                     description: "Approve or reject new business registrations",
                     icon: UserPlus,
