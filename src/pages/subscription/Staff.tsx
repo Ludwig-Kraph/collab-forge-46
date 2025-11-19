@@ -55,7 +55,7 @@ export default function Staff() {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('organization_id')
+        .select('organization_id, account_type, account_id')
         .eq('id', user.id)
         .single();
 
@@ -64,7 +64,7 @@ export default function Staff() {
         return;
       }
 
-      // Fetch staff members
+      // Fetch staff members in same account context
       const { data: staffData, error: staffError } = await supabase
         .from('profiles')
         .select(`
@@ -76,7 +76,9 @@ export default function Staff() {
           user_roles!inner(role)
         `)
         .eq('organization_id', profile.organization_id)
-        .eq('is_rbac_user', true);
+        .eq('is_rbac_user', true)
+        .eq('account_type', profile.account_type)
+        .eq('account_id', profile.account_id);
 
       if (staffError) throw staffError;
 

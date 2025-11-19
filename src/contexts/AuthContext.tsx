@@ -19,7 +19,15 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   verifyOTP: (phone: string, token: string) => Promise<{ error: any }>;
   resendOTP: (phone: string) => Promise<{ error: any }>;
-  createRBACUser: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any, user: any }>;
+  createRBACUser: (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role: string,
+    accountType?: string,
+    accountId?: string,
+    roleLevel?: string
+  ) => Promise<{ error: any, user: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   updateProfile: (fullName: string, phoneNumber?: string) => Promise<{ error: any }>;
 }
@@ -79,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('phone_number, is_blocked, account_status')
+        .select('phone_number, is_blocked, account_status, account_type, account_id, role_level, organization_id')
         .eq('id', userId)
         .single();
 
@@ -270,13 +278,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const createRBACUser = async (email: string, password: string, fullName: string, role: string) => {
+  const createRBACUser = async (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role: string,
+    accountType?: string,
+    accountId?: string,
+    roleLevel?: string
+  ) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         throw new Error('Not authenticated');
       }
+
+      // Get current user's profile for account context
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('account_type, account_id, organization_id')
+        .eq('id', user?.id)
+        .single();
+
+      const currentAccountType = accountType || profile?.account_type || 'subscription';
+      const currentAccountId = accountId || profile?.account_id;
+      const currentRoleLevel = roleLevel || 'user';
 
       const SUPABASE_URL = "https://cfuolhkzxsxfovalswhp.supabase.co";
 
@@ -293,7 +320,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             password,
             fullName,
             role,
-            organizationId: user?.user_metadata?.organization_id || null
+            organizationId: profile?.organization_id,
+            accountType: currentAccountType,
+            accountId: currentAccountId,
+            roleLevel: currentRoleLevel
           }),
         }
       );

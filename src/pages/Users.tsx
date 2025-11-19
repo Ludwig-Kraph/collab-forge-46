@@ -92,16 +92,33 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
+      // First get current user's account context
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: currentProfile, error: currentProfileError } = await supabase
+        .from('profiles')
+        .select('account_type, account_id')
+        .eq('id', user.id)
+        .single();
+
+      if (currentProfileError) throw currentProfileError;
+
+      // Fetch only users in the same account context
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, phone_number, created_at, is_rbac_user')
-        .eq('is_rbac_user', true);
+        .select('id, full_name, email, phone_number, created_at, is_rbac_user, account_type, account_id')
+        .eq('is_rbac_user', true)
+        .eq('account_type', currentProfile.account_type)
+        .eq('account_id', currentProfile.account_id);
 
       if (profilesError) throw profilesError;
 
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
-        .select('user_id, role');
+        .select('user_id, role')
+        .eq('account_type', currentProfile.account_type)
+        .eq('account_id', currentProfile.account_id);
 
       if (rolesError) throw rolesError;
 
