@@ -6,6 +6,9 @@ import { AdminCard } from "@/components/admin/AdminCard";
 import { MetricWidget } from "@/components/admin/MetricWidget";
 import { StatusIndicator } from "@/components/admin/StatusIndicator";
 import { AlertBanner } from "@/components/admin/AlertBanner";
+import { QuickActionPanel } from "@/components/admin/QuickActionPanel";
+import { SystemHealthMonitor } from "@/components/admin/SystemHealthMonitor";
+import { PlatformInsights } from "@/components/admin/PlatformInsights";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,7 +21,11 @@ import {
   TrendingUp,
   Clock,
   Server,
-  Building2
+  Building2,
+  UserPlus,
+  FileText,
+  Settings,
+  MessageSquare
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +52,12 @@ interface PlatformStats {
   totalUsers: number;
   activeSubscriptions: number;
   totalTransactions: number;
+  totalRevenue: number;
+  pendingRegistrations: number;
+  openTickets: number;
   systemHealth: "healthy" | "warning" | "error";
+  rbacUsers: number;
+  governmentEntities: number;
 }
 
 export default function ControlPanel() {
@@ -56,7 +68,12 @@ export default function ControlPanel() {
     totalUsers: 0,
     activeSubscriptions: 0,
     totalTransactions: 0,
-    systemHealth: "healthy"
+    totalRevenue: 0,
+    pendingRegistrations: 0,
+    openTickets: 0,
+    systemHealth: "healthy",
+    rbacUsers: 0,
+    governmentEntities: 0
   });
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
@@ -70,17 +87,29 @@ export default function ControlPanel() {
       setLoading(true);
 
       // Fetch platform statistics
-      const [usersRes, subsRes, transRes] = await Promise.all([
+      const [usersRes, subsRes, transRes, revenueRes, regRes, ticketsRes, rbacRes, govRes] = await Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('transactions').select('id', { count: 'exact', head: true })
+        supabase.from('transactions').select('id', { count: 'exact', head: true }),
+        supabase.from('transactions').select('amount'),
+        supabase.from('registration_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_rbac_user', true),
+        supabase.from('government_entities').select('id', { count: 'exact', head: true })
       ]);
+
+      const totalRevenue = revenueRes.data?.reduce((sum, t) => sum + (Number(t.amount) || 0), 0) || 0;
 
       setStats({
         totalUsers: usersRes.count || 0,
         activeSubscriptions: subsRes.count || 0,
         totalTransactions: transRes.count || 0,
-        systemHealth: "healthy"
+        totalRevenue,
+        pendingRegistrations: regRes.count || 0,
+        openTickets: ticketsRes.count || 0,
+        systemHealth: "healthy",
+        rbacUsers: rbacRes.count || 0,
+        governmentEntities: govRes.count || 0
       });
 
       // Fetch system alerts
@@ -189,9 +218,38 @@ export default function ControlPanel() {
             trend={{ value: 23, label: "from last week" }}
           />
           <MetricWidget
-            title="System Uptime"
-            value="99.9%"
-            icon={Server}
+            title="Total Revenue"
+            value={`KES ${stats.totalRevenue.toLocaleString()}`}
+            icon={TrendingUp}
+            trend={{ value: 22, label: "from last month" }}
+          />
+        </div>
+
+        {/* Secondary Metrics */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <MetricWidget
+            title="RBAC Users"
+            value={stats.rbacUsers}
+            icon={Shield}
+            className="border-primary/20"
+          />
+          <MetricWidget
+            title="Government Entities"
+            value={stats.governmentEntities}
+            icon={Building2}
+            className="border-primary/20"
+          />
+          <MetricWidget
+            title="Pending Registrations"
+            value={stats.pendingRegistrations}
+            icon={Clock}
+            className="border-orange-500/20"
+          />
+          <MetricWidget
+            title="Open Tickets"
+            value={stats.openTickets}
+            icon={AlertTriangle}
+            className="border-yellow-500/20"
           />
         </div>
 
@@ -204,53 +262,46 @@ export default function ControlPanel() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <AdminCard
-                title="Platform Health"
-                description="System components status"
-                icon={Database}
-              >
-                <div className="space-y-2 mt-4">
-                  <StatusIndicator status="healthy" label="Database" />
-                  <StatusIndicator status="healthy" label="Authentication" />
-                  <StatusIndicator status="healthy" label="Edge Functions" />
-                  <StatusIndicator status="healthy" label="Storage" />
-                </div>
-              </AdminCard>
+            {/* Top Row - Quick Actions and Platform Health */}
+            <div className="grid gap-4 lg:grid-cols-2">
+              <QuickActionPanel
+                actions={[
+                  {
+                    title: "Review Registrations",
+                    description: "Approve or reject new business registrations",
+                    icon: UserPlus,
+                    path: "/control-panel/onboarding",
+                    badge: stats.pendingRegistrations,
+                    variant: stats.pendingRegistrations > 0 ? "default" : "outline"
+                  },
+                  {
+                    title: "Manage Support Tickets",
+                    description: "Respond to customer support requests",
+                    icon: MessageSquare,
+                    path: "/control-panel/support",
+                    badge: stats.openTickets,
+                    variant: stats.openTickets > 0 ? "default" : "outline"
+                  },
+                  {
+                    title: "RBAC User Management",
+                    description: "Create and manage role-based access accounts",
+                    icon: Shield,
+                    path: "/control-panel/accounts"
+                  },
+                  {
+                    title: "System Settings",
+                    description: "Configure MPESA and platform settings",
+                    icon: Settings,
+                    path: "/control-panel/settings"
+                  }
+                ]}
+              />
 
-              <AdminCard
-                title="Quick Actions"
-                description="Common administrative tasks"
-                icon={Shield}
-              >
-                <div className="space-y-2 mt-4">
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/settings'}>
-                    <Server className="mr-2 h-4 w-4" />
-                    System Settings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/accounts'}>
-                    <Users className="mr-2 h-4 w-4" />
-                    Manage RBAC Accounts
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/onboarding'}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    Client Onboarding Queue
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/support'}>
-                    <Shield className="mr-2 h-4 w-4" />
-                    Support Tickets
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    Team Communication
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/government'}>
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Government Entities
-                  </Button>
-                </div>
-              </AdminCard>
+              <SystemHealthMonitor />
             </div>
+
+            {/* Bottom Row - Platform Insights */}
+            <PlatformInsights />
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
