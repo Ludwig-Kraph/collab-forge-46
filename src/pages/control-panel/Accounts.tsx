@@ -240,9 +240,9 @@ export default function Accounts() {
                   <label className="text-sm font-medium">Role</label>
                   <Select value={newAccount.role} onValueChange={(value) => setNewAccount({ ...newAccount, role: value })}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background z-50">
                       <SelectItem value="user">User</SelectItem>
                       <SelectItem value="viewer">Viewer</SelectItem>
                       <SelectItem value="cashier">Cashier</SelectItem>
@@ -285,7 +285,7 @@ export default function Accounts() {
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
@@ -308,7 +308,7 @@ export default function Accounts() {
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="suspended">Suspended</SelectItem>
