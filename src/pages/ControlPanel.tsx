@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { AdminCard } from "@/components/admin/AdminCard";
-import { MetricWidget } from "@/components/admin/MetricWidget";
 import { StatusIndicator } from "@/components/admin/StatusIndicator";
-import { AlertBanner } from "@/components/admin/AlertBanner";
+import { ControlPanelStats } from "@/components/admin/ControlPanelStats";
+import { AlertsList } from "@/components/admin/AlertsList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,40 +12,20 @@ import {
   Activity, 
   Shield, 
   Database,
-  AlertTriangle,
-  TrendingUp,
-  Clock,
   Server,
   Building2,
-  Key
+  Key,
+  Clock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-
-interface SystemAlert {
-  id: string;
-  title: string;
-  message: string;
-  severity: "info" | "warning" | "error" | "critical";
-  is_resolved: boolean;
-  created_at: string;
-}
-
-interface AuditLog {
-  id: string;
-  user_id: string;
-  action: string;
-  entity_type: string;
-  created_at: string;
-}
-
-interface PlatformStats {
-  totalUsers: number;
-  activeSubscriptions: number;
-  totalTransactions: number;
-  systemHealth: "healthy" | "warning" | "error";
-}
+import { 
+  useControlPanelStats, 
+  useSystemAlerts, 
+  useAuditLogs 
+} from "@/hooks/useControlPanelData";
+import { useState, useEffect } from "react";
 
 interface MpesaConfig {
   shortcode: string;
@@ -56,61 +34,18 @@ interface MpesaConfig {
 }
 
 export default function ControlPanel() {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<PlatformStats>({
-    totalUsers: 0,
-    activeSubscriptions: 0,
-    totalTransactions: 0,
-    systemHealth: "healthy"
-  });
-  const [alerts, setAlerts] = useState<SystemAlert[]>([]);
-  const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
+  const { stats, loading: statsLoading } = useControlPanelStats();
+  const { alerts, loading: alertsLoading, resolveAlert } = useSystemAlerts();
+  const { logs: recentLogs, loading: logsLoading } = useAuditLogs(10);
   const [mpesaConfig, setMpesaConfig] = useState<MpesaConfig | null>(null);
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchMpesaConfig();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchMpesaConfig = async () => {
     try {
-      setLoading(true);
-
-      // Fetch platform statistics
-      const [usersRes, subsRes, transRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('transactions').select('id', { count: 'exact', head: true })
-      ]);
-
-      setStats({
-        totalUsers: usersRes.count || 0,
-        activeSubscriptions: subsRes.count || 0,
-        totalTransactions: transRes.count || 0,
-        systemHealth: "healthy"
-      });
-
-      // Fetch system alerts
-      const { data: alertsData } = await supabase
-        .from('system_alerts')
-        .select('*')
-        .eq('is_resolved', false)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (alertsData) setAlerts(alertsData as SystemAlert[]);
-
-      // Fetch recent audit logs
-      const { data: logsData } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (logsData) setRecentLogs(logsData);
-
-      // Fetch MPESA Daraja configuration
       const { data: mpesaData } = await supabase
         .from('mpesa_daraja_configs')
         .select('shortcode, environment, is_active')
@@ -118,99 +53,39 @@ export default function ControlPanel() {
         .single();
 
       if (mpesaData) setMpesaConfig(mpesaData);
-
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load dashboard data",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      // Silent error - config may not exist yet
+      console.log("M-Pesa config not found");
     }
   };
 
   const handleResolveAlert = async (alertId: string) => {
-    try {
-      const { error } = await supabase
-        .from('system_alerts')
-        .update({ 
-          is_resolved: true, 
-          resolved_by: user?.id,
-          resolved_at: new Date().toISOString()
-        })
-        .eq('id', alertId);
-
-      if (error) throw error;
-
-      setAlerts(alerts.filter(a => a.id !== alertId));
-      
-      toast({
-        title: "Alert Resolved",
-        description: "The alert has been marked as resolved."
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to resolve alert",
-        variant: "destructive"
-      });
-    }
+    await resolveAlert(alertId);
   };
 
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">M-Leja Control Panel</h1>
-            <p className="text-muted-foreground">Platform-wide monitoring and administration</p>
+            <p className="text-muted-foreground">Super Admin Dashboard</p>
           </div>
           <StatusIndicator status={stats.systemHealth} label="System Status" />
         </div>
 
         {/* Active Alerts */}
         {alerts.length > 0 && (
-          <div className="space-y-3">
-            {alerts.map((alert) => (
-              <AlertBanner
-                key={alert.id}
-                severity={alert.severity}
-                title={alert.title}
-                message={alert.message}
-                onDismiss={() => handleResolveAlert(alert.id)}
-              />
-            ))}
-          </div>
+          <AlertsList 
+            alerts={alerts} 
+            loading={alertsLoading} 
+            onResolve={handleResolveAlert}
+          />
         )}
 
-        {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MetricWidget
-            title="Total Users"
-            value={stats.totalUsers}
-            icon={Users}
-            trend={{ value: 12, label: "from last month" }}
-          />
-          <MetricWidget
-            title="Active Subscriptions"
-            value={stats.activeSubscriptions}
-            icon={TrendingUp}
-            trend={{ value: 8, label: "from last month" }}
-          />
-          <MetricWidget
-            title="Total Transactions"
-            value={stats.totalTransactions.toLocaleString()}
-            icon={Activity}
-            trend={{ value: 23, label: "from last week" }}
-          />
-          <MetricWidget
-            title="System Uptime"
-            value="99.9%"
-            icon={Server}
-          />
-        </div>
+        {/* Platform Statistics */}
+        <ControlPanelStats stats={stats} loading={statsLoading} />
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
@@ -251,25 +126,23 @@ export default function ControlPanel() {
                         <span className="text-sm text-muted-foreground">Environment</span>
                         <Badge 
                           variant={mpesaConfig.environment === 'production' ? 'default' : 'secondary'}
-                          className={mpesaConfig.environment === 'production' ? 'bg-green-500' : 'bg-orange-500'}
                         >
                           {mpesaConfig.environment === 'production' ? 'LIVE' : 'SANDBOX'}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Status</span>
-                        <StatusIndicator 
-                          status={mpesaConfig.is_active ? "healthy" : "error"} 
-                          label={mpesaConfig.is_active ? "Active" : "Inactive"} 
-                        />
+                        <Badge variant={mpesaConfig.is_active ? 'default' : 'secondary'}>
+                          {mpesaConfig.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
                       </div>
                       <Button 
                         variant="outline" 
-                        className="w-full justify-start" 
+                        className="w-full mt-2"
                         onClick={() => window.location.href = '/mpesa-daraja'}
                       >
                         <Key className="mr-2 h-4 w-4" />
-                        Modify Credentials
+                        Manage Configuration
                       </Button>
                     </>
                   ) : (
@@ -293,28 +166,28 @@ export default function ControlPanel() {
               description="Common administrative tasks"
               icon={Shield}
             >
-              <div className="space-y-2 mt-4">
-                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/system-settings'}>
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                <Button variant="outline" className="justify-start" onClick={() => window.location.href = '/control-panel/system-settings'}>
                   <Server className="mr-2 h-4 w-4" />
                   System Settings
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/accounts'}>
+                <Button variant="outline" className="justify-start" onClick={() => window.location.href = '/control-panel/accounts'}>
                   <Users className="mr-2 h-4 w-4" />
-                  Manage RBAC Accounts
+                  Manage Accounts
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/onboarding'}>
+                <Button variant="outline" className="justify-start" onClick={() => window.location.href = '/control-panel/onboarding'}>
                   <Activity className="mr-2 h-4 w-4" />
-                  Client Onboarding Queue
+                  Client Onboarding
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/support'}>
+                <Button variant="outline" className="justify-start" onClick={() => window.location.href = '/control-panel/support'}>
                   <Shield className="mr-2 h-4 w-4" />
                   Support Tickets
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
+                <Button variant="outline" className="justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
                   <Activity className="mr-2 h-4 w-4" />
-                  Team Communication
+                  Communication
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/government'}>
+                <Button variant="outline" className="justify-start" onClick={() => window.location.href = '/control-panel/government'}>
                   <Building2 className="mr-2 h-4 w-4" />
                   Government Entities
                 </Button>
@@ -330,16 +203,16 @@ export default function ControlPanel() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentLogs.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No recent activity</p>
+                  {logsLoading ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Loading logs...</p>
+                  ) : recentLogs.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
                   ) : (
                     recentLogs.map((log) => (
                       <div key={log.id} className="flex items-center justify-between border-b pb-3 last:border-0">
                         <div>
                           <p className="text-sm font-medium">{log.action}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {log.entity_type}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{log.entity_type}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-3 w-3 text-muted-foreground" />
@@ -359,25 +232,25 @@ export default function ControlPanel() {
             <Card>
               <CardHeader>
                 <CardTitle>Security Overview</CardTitle>
-                <CardDescription>System security status and monitoring</CardDescription>
+                <CardDescription>System security status and compliance</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Multi-Factor Authentication</span>
-                    <Badge variant="outline" className="bg-green-500/10 text-green-600">Active</Badge>
+                    <span className="text-sm">Super Admin Immunity</span>
+                    <Badge className="bg-green-500">Active</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Row Level Security</span>
-                    <Badge variant="outline" className="bg-green-500/10 text-green-600">Enabled</Badge>
+                    <span className="text-sm">Row Level Security</span>
+                    <Badge className="bg-green-500">Enabled</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Audit Logging</span>
-                    <Badge variant="outline" className="bg-green-500/10 text-green-600">Active</Badge>
+                    <span className="text-sm">Audit Logging</span>
+                    <Badge className="bg-green-500">Active</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Failed Login Attempts (24h)</span>
-                    <Badge variant="outline">0</Badge>
+                    <span className="text-sm">Encryption</span>
+                    <Badge className="bg-green-500">End-to-End</Badge>
                   </div>
                 </div>
               </CardContent>
