@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,71 +7,113 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowDownLeft, ArrowUpRight, Download, TrendingDown, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { exportData } from "@/utils/exportData";
 
 type PeriodType = "daily" | "weekly" | "monthly" | "yearly";
 
+interface LedgerEntry {
+  id: string;
+  date: Date;
+  description: string;
+  received: number;
+  spent: number;
+  balance: number;
+  category: string;
+  status: string;
+}
+
 const Ledger = () => {
+  const { user } = useAuth();
   const [period, setPeriod] = useState<PeriodType>("monthly");
+  const [loading, setLoading] = useState(true);
+  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+  const [totalReceived, setTotalReceived] = useState(0);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [netFlow, setNetFlow] = useState(0);
+  const [currentBalance, setCurrentBalance] = useState(0);
 
-  // Mock ledger data
-  const ledgerEntries = [
-    {
-      id: "1",
-      date: new Date(2025, 0, 15),
-      description: "Invoice payment #1234",
-      received: 5000,
-      spent: 0,
-      balance: 50750,
-      category: "Sales",
-    },
-    {
-      id: "2",
-      date: new Date(2025, 0, 15),
-      description: "Refund for order #456",
-      received: 0,
-      spent: 1200,
-      balance: 45750,
-      category: "Refunds",
-    },
-    {
-      id: "3",
-      date: new Date(2025, 0, 14),
-      description: "Product purchase",
-      received: 8500,
-      spent: 0,
-      balance: 46950,
-      category: "Sales",
-    },
-    {
-      id: "4",
-      date: new Date(2025, 0, 14),
-      description: "Service payment",
-      received: 2300,
-      spent: 0,
-      balance: 38450,
-      category: "Services",
-    },
-    {
-      id: "5",
-      date: new Date(2025, 0, 13),
-      description: "Supplier payment",
-      received: 0,
-      spent: 3500,
-      balance: 36150,
-      category: "Expenses",
-    },
-  ];
+  useEffect(() => {
+    if (user) {
+      fetchLedgerData();
+    }
+  }, [user, period]);
 
-  // Calculate summary statistics
-  const totalReceived = ledgerEntries.reduce((sum, entry) => sum + entry.received, 0);
-  const totalSpent = ledgerEntries.reduce((sum, entry) => sum + entry.spent, 0);
-  const netFlow = totalReceived - totalSpent;
-  const currentBalance = ledgerEntries[0]?.balance || 0;
+  const fetchLedgerData = async () => {
+    try {
+      setLoading(true);
+      
+      // Determine date range based on period
+      const startDate = new Date();
+      switch (period) {
+        case 'daily':
+          startDate.setDate(startDate.getDate() - 1);
+          break;
+        case 'weekly':
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'monthly':
+          startDate.setMonth(startDate.getMonth() - 1);
+          break;
+        case 'yearly':
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
+      }
+
+      const { data: transactions, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform transactions to ledger format
+      const entries: LedgerEntry[] = transactions?.map(t => ({
+        id: t.id,
+        date: new Date(t.created_at),
+        description: t.description || `${t.transaction_type} - ${t.phone_number}`,
+        received: t.transaction_type === 'received' ? Number(t.amount) : 0,
+        spent: t.transaction_type === 'sent' ? Number(t.amount) : 0,
+        balance: Number(t.balance_after) || 0,
+        category: t.transaction_type === 'received' ? 'Sales' : 'Expenses',
+        status: t.status,
+      })) || [];
+
+      setLedgerEntries(entries);
+      
+      // Calculate totals
+      const received = entries.reduce((sum, e) => sum + e.received, 0);
+      const spent = entries.reduce((sum, e) => sum + e.spent, 0);
+      
+      setTotalReceived(received);
+      setTotalSpent(spent);
+      setNetFlow(received - spent);
+      setCurrentBalance(entries[0]?.balance || 0);
+
+    } catch (error: any) {
+      console.error('Error fetching ledger data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleExport = () => {
-    console.log("Exporting ledger...");
-    // Export logic will be implemented with backend
+    exportData(ledgerEntries, `ledger-${period}`, 'csv');
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -87,7 +129,7 @@ const Ledger = () => {
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background z-50">
               <SelectItem value="daily">Daily</SelectItem>
               <SelectItem value="weekly">Weekly</SelectItem>
               <SelectItem value="monthly">Monthly</SelectItem>

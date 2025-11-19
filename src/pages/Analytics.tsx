@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,28 +6,106 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Line, LineChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { TrendingUp, TrendingDown, DollarSign, Users, CreditCard, Activity } from "lucide-react";
-
-// Mock data for charts
-const revenueData = [
-  { month: "Jan", revenue: 45000, transactions: 120 },
-  { month: "Feb", revenue: 52000, transactions: 145 },
-  { month: "Mar", revenue: 48000, transactions: 132 },
-  { month: "Apr", revenue: 61000, transactions: 168 },
-  { month: "May", revenue: 73000, transactions: 195 },
-  { month: "Jun", revenue: 68000, transactions: 178 },
-];
-
-const transactionVolumeData = [
-  { day: "Mon", count: 42, amount: 12400 },
-  { day: "Tue", count: 38, amount: 10800 },
-  { day: "Wed", count: 51, amount: 15200 },
-  { day: "Thu", count: 45, amount: 13600 },
-  { day: "Fri", count: 62, amount: 18900 },
-  { day: "Sat", count: 28, amount: 8200 },
-  { day: "Sun", count: 19, amount: 5400 },
-];
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { startOfMonth, format } from "date-fns";
 
 const Analytics = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("30days");
+  const [metrics, setMetrics] = useState({
+    totalRevenue: 0,
+    totalTransactions: 0,
+    avgTransaction: 0,
+    successRate: 0,
+  });
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [transactionVolumeData, setTransactionVolumeData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchAnalyticsData();
+    }
+  }, [user, period]);
+
+  const fetchAnalyticsData = async () => {
+    try {
+      setLoading(true);
+      const daysBack = period === "7days" ? 7 : period === "30days" ? 30 : period === "90days" ? 90 : 365;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+
+      // Fetch transactions for the period
+      const { data: transactions, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Calculate metrics
+      const received = transactions?.filter(t => t.transaction_type === 'received') || [];
+      const totalRev = received.reduce((sum, t) => sum + Number(t.amount), 0);
+      const totalTrans = transactions?.length || 0;
+      const successful = transactions?.filter(t => t.status === 'completed').length || 0;
+
+      setMetrics({
+        totalRevenue: totalRev,
+        totalTransactions: totalTrans,
+        avgTransaction: totalTrans > 0 ? totalRev / received.length : 0,
+        successRate: totalTrans > 0 ? (successful / totalTrans) * 100 : 0,
+      });
+
+      // Group data for charts (by month for 30+ days, by day for 7 days)
+      const groupedByPeriod = new Map();
+      transactions?.forEach(t => {
+        const key = daysBack <= 7 
+          ? format(new Date(t.created_at), 'EEE')
+          : format(new Date(t.created_at), 'MMM');
+        
+        if (!groupedByPeriod.has(key)) {
+          groupedByPeriod.set(key, { revenue: 0, count: 0 });
+        }
+        
+        const data = groupedByPeriod.get(key);
+        if (t.transaction_type === 'received') {
+          data.revenue += Number(t.amount);
+        }
+        data.count += 1;
+      });
+
+      const chartData = Array.from(groupedByPeriod.entries()).map(([key, value]) => ({
+        [daysBack <= 7 ? 'day' : 'month']: key,
+        revenue: value.revenue,
+        transactions: value.count,
+        count: value.count,
+        amount: value.revenue,
+      }));
+
+      setRevenueData(chartData);
+      setTransactionVolumeData(chartData);
+
+    } catch (error: any) {
+      console.error('Error fetching analytics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container px-4 py-8">
@@ -35,11 +114,11 @@ const Analytics = () => {
             <h1 className="text-3xl font-bold">Analytics</h1>
             <p className="text-muted-foreground">Track your business performance and insights</p>
           </div>
-          <Select defaultValue="30days">
+          <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background z-50">
               <SelectItem value="7days">Last 7 days</SelectItem>
               <SelectItem value="30days">Last 30 days</SelectItem>
               <SelectItem value="90days">Last 90 days</SelectItem>
@@ -56,10 +135,10 @@ const Analytics = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono">KES 347,000</div>
+              <div className="text-2xl font-bold font-mono">KES {metrics.totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <TrendingUp className="h-3 w-3 text-primary" />
-                <span className="text-primary">+12.5%</span> from last month
+                <Activity className="h-3 w-3 text-muted-foreground" />
+                Real-time data
               </p>
             </CardContent>
           </Card>
@@ -70,10 +149,10 @@ const Analytics = () => {
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono">938</div>
+              <div className="text-2xl font-bold font-mono">{metrics.totalTransactions}</div>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <TrendingUp className="h-3 w-3 text-primary" />
-                <span className="text-primary">+8.2%</span> from last month
+                <Activity className="h-3 w-3 text-muted-foreground" />
+                Total transactions
               </p>
             </CardContent>
           </Card>
@@ -84,10 +163,10 @@ const Analytics = () => {
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono">KES 370</div>
+              <div className="text-2xl font-bold font-mono">KES {Math.round(metrics.avgTransaction).toLocaleString()}</div>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <TrendingDown className="h-3 w-3 text-destructive" />
-                <span className="text-destructive">-2.1%</span> from last month
+                <Activity className="h-3 w-3 text-muted-foreground" />
+                Average value
               </p>
             </CardContent>
           </Card>
