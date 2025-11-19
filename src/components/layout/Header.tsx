@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -19,11 +19,9 @@ import logo from '@/assets/m-leja-logo.png';
 
 const Header = () => {
   const { user, signOut, isAdmin, isSuperAdmin, userRole, isDemoAccount } = useAuth();
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
   };
 
   return (
