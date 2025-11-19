@@ -272,38 +272,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const createRBACUser = async (email: string, password: string, fullName: string, role: string) => {
     try {
-      const { data, error } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: fullName,
-          is_rbac_user: true
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert([{ user_id: data.user.id, role: role as any }]);
-
-        if (roleError) throw roleError;
-
-        // Log audit event
-        await supabase.rpc('log_audit_event', {
-          _action: 'create_rbac_user',
-          _entity_type: 'user',
-          _entity_id: data.user.id,
-          _changes: { role, email, full_name: fullName },
-          _ip_address: null,
-          _user_agent: navigator.userAgent
-        });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
       }
 
-      return { error: null, user: data.user };
+      const SUPABASE_URL = "https://cfuolhkzxsxfovalswhp.supabase.co";
+
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/create-rbac-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            fullName,
+            role,
+            organizationId: user?.user_metadata?.organization_id || null
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create RBAC user');
+      }
+
+      toast({
+        title: "User Created",
+        description: `RBAC user ${fullName} has been created successfully.`,
+      });
+
+      return { error: null, user: result.user };
     } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create RBAC user",
+        variant: "destructive",
+      });
       return { error, user: null };
     }
   };
