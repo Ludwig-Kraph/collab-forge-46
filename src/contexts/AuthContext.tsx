@@ -30,6 +30,7 @@ interface AuthContextType {
   ) => Promise<{ error: any, user: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
   updateProfile: (fullName: string, phoneNumber?: string) => Promise<{ error: any }>;
+  resetUserPassword: (userId: string, newPassword: string) => Promise<{ error: any, success: boolean }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -430,6 +431,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetUserPassword = async (userId: string, newPassword: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: { userId, newPassword }
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Password Reset",
+        description: "User password has been successfully reset.",
+      });
+      
+      return { error: null, success: true };
+    } catch (error: any) {
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Failed to reset user password",
+        variant: "destructive",
+      });
+      return { error, success: false };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -450,6 +475,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         createRBACUser,
         updatePassword,
         updateProfile,
+        resetUserPassword,
       }}
     >
       {children}
