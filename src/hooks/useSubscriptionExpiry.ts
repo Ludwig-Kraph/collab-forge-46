@@ -30,12 +30,32 @@ export const useSubscriptionExpiry = (userId: string | null) => {
 
     const checkSubscriptionStatus = async () => {
       try {
+        // Check if user is super admin first - they have unlimited access
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        // Super admins bypass all subscription checks
+        if (roleData?.role === 'super_admin') {
+          setStatus({
+            isExpired: false,
+            isExpiringSoon: false,
+            daysUntilExpiry: null,
+            tier: 'enterprise',
+            expiresAt: null
+          });
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase
           .from('subscriptions')
           .select('tier, expires_at, is_active, expiry_notified')
           .eq('user_id', userId)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
 

@@ -131,6 +131,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(roleData.role);
       setIsAdmin(roleData.role === 'admin' || roleData.role === 'super_admin' || roleData.role === 'corporate_admin');
       setIsSuperAdmin(roleData.role === 'super_admin');
+      
+      // Super admins have unlimited access, skip subscription checks
+      if (roleData.role === 'super_admin') {
+        setIsExpired(false);
+        setLoading(false);
+        return;
+      }
+      
       setLoading(false);
         
       if (subscription?.expires_at) {
