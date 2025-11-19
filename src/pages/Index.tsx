@@ -49,7 +49,7 @@ const Index = () => {
     try {
       setLoading(true);
 
-      // Super Admins don't have subscription limits
+      // Super Admins are above the subscription system - no subscription checks
       if (!isSuperAdmin) {
         // Fetch subscription data
         const { data: subData, error: subError } = await supabase
