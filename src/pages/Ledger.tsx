@@ -222,26 +222,21 @@ const Ledger = () => {
               <CardDescription>By category</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-secondary"></div>
-                    <span className="text-sm">Sales</span>
+              {totalReceived > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-secondary"></div>
+                      <span className="text-sm">Total Received</span>
+                    </div>
+                    <span className="font-mono-numbers text-sm font-semibold">
+                      KES {totalReceived.toLocaleString()}
+                    </span>
                   </div>
-                  <span className="font-mono-numbers text-sm font-semibold">
-                    KES {(13500).toLocaleString()}
-                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-primary"></div>
-                    <span className="text-sm">Services</span>
-                  </div>
-                  <span className="font-mono-numbers text-sm font-semibold">
-                    KES {(2300).toLocaleString()}
-                  </span>
-                </div>
-              </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No income recorded for this period</p>
+              )}
             </CardContent>
           </Card>
 
@@ -251,26 +246,21 @@ const Ledger = () => {
               <CardDescription>By category</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-accent"></div>
-                    <span className="text-sm">Refunds</span>
+              {totalSpent > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full bg-accent"></div>
+                      <span className="text-sm">Total Spent</span>
+                    </div>
+                    <span className="font-mono-numbers text-sm font-semibold">
+                      KES {totalSpent.toLocaleString()}
+                    </span>
                   </div>
-                  <span className="font-mono-numbers text-sm font-semibold">
-                    KES {(1200).toLocaleString()}
-                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-destructive"></div>
-                    <span className="text-sm">Expenses</span>
-                  </div>
-                  <span className="font-mono-numbers text-sm font-semibold">
-                    KES {(3500).toLocaleString()}
-                  </span>
-                </div>
-              </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No expenses recorded for this period</p>
+              )}
             </CardContent>
           </Card>
         </div>
