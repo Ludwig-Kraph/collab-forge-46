@@ -170,9 +170,9 @@ export default function Government() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select entity type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background z-50">
                       <SelectItem value="national">National Government</SelectItem>
                       <SelectItem value="county">County Government</SelectItem>
                     </SelectContent>
@@ -229,7 +229,7 @@ export default function Government() {
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background z-50">
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="national">National</SelectItem>
               <SelectItem value="county">County</SelectItem>

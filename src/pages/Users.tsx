@@ -209,13 +209,23 @@ const Users = () => {
                   <Label htmlFor="role">Role</Label>
                   <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
                     <SelectTrigger id="role">
-                      <SelectValue />
+                      <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background z-50">
                       <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                      <SelectItem value="cashier">Cashier</SelectItem>
+                      <SelectItem value="sales_agent">Sales Agent</SelectItem>
+                      <SelectItem value="supervisor">Supervisor</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="assistant_manager">Assistant Manager</SelectItem>
+                      <SelectItem value="senior_manager">Senior Manager</SelectItem>
+                      <SelectItem value="developer">Developer</SelectItem>
+                      <SelectItem value="cfo">CFO</SelectItem>
+                      <SelectItem value="director">Director</SelectItem>
+                      <SelectItem value="ceo">CEO</SelectItem>
+                      <SelectItem value="corporate_admin">Corporate Admin</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
-                      {isAdmin && <SelectItem value="corporate_admin">Corporate Admin</SelectItem>}
                     </SelectContent>
                   </Select>
                 </div>
