@@ -70,21 +70,21 @@ serve(async (req) => {
       throw new Error('Failed to create user');
     }
 
-    // Insert into profiles
+    // Update profile (trigger will have created it)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .insert({
-        id: newUser.user.id,
+      .update({
         full_name: fullName,
         email: email,
         phone_number: email, // Using email as placeholder for RBAC users
         is_rbac_user: true,
         organization_id: organizationId || null
-      });
+      })
+      .eq('id', newUser.user.id);
 
     if (profileError) {
-      console.error('Profile creation error:', profileError);
-      // Continue anyway, the trigger might have created it
+      console.error('Profile update error:', profileError);
+      throw profileError;
     }
 
     // Insert role

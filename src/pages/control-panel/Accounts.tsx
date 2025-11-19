@@ -46,11 +46,12 @@ export default function Accounts() {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      // Only fetch Control Panel RBAC accounts (not regular subscription users)
+      // Only fetch Control Panel RBAC accounts (no organization_id = Control Panel users)
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .eq('is_rbac_user', true)
+        .is('organization_id', null)
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
