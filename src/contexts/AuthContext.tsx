@@ -26,8 +26,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEMO_PHONE = '+254000000000';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -103,8 +101,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const roleData = roleResult.data;
       const subscription = subscriptionResult.data;
 
-      // Check if this is the demo account
-      setIsDemoAccount(profile?.phone_number === DEMO_PHONE);
+      // Production environment - no demo accounts
+      setIsDemoAccount(false);
       
       // Check if account is blocked
       setIsBlocked(profile?.is_blocked || false);

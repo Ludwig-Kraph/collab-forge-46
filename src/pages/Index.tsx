@@ -7,7 +7,6 @@ import { ArrowUpRight, ArrowDownLeft, TrendingUp, Wallet, AlertCircle, Shield } 
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { DemoAccountBadge } from "@/components/layout/DemoAccountBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +30,7 @@ interface SubscriptionData {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isDemoAccount, user, isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
@@ -121,8 +120,6 @@ const Index = () => {
   return (
     <Layout>
       <div className="container px-4 py-6">
-        {isDemoAccount && <DemoAccountBadge />}
-        
         {isSuperAdmin && (
           <Card className="mb-6 border-primary bg-gradient-to-r from-primary/10 to-primary/5 shadow-elegant">
             <CardContent className="flex items-center justify-between pt-6">
