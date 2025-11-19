@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Key, Server, AlertTriangle, CheckCircle, Save, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import PerformanceMonitor from "@/components/admin/PerformanceMonitor";
+import SupabaseConnectionSettings from "@/components/settings/SupabaseConnectionSettings";
 
 export default function SystemSettings() {
   const { toast } = useToast();
@@ -123,11 +124,12 @@ export default function SystemSettings() {
         </div>
 
         <Tabs defaultValue="mpesa" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="mpesa">MPESA Credentials</TabsTrigger>
             <TabsTrigger value="daraja">Daraja API Secrets</TabsTrigger>
             <TabsTrigger value="api">API Settings</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="system">System Config</TabsTrigger>
           </TabsList>
 
@@ -392,6 +394,10 @@ export default function SystemSettings() {
 
           <TabsContent value="performance">
             <PerformanceMonitor />
+          </TabsContent>
+
+          <TabsContent value="database">
+            <SupabaseConnectionSettings />
           </TabsContent>
 
           <TabsContent value="system">
