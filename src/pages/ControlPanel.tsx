@@ -18,7 +18,8 @@ import {
   TrendingUp,
   Clock,
   Server,
-  Building2
+  Building2,
+  Key
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,12 @@ interface PlatformStats {
   systemHealth: "healthy" | "warning" | "error";
 }
 
+interface MpesaConfig {
+  shortcode: string;
+  environment: string;
+  is_active: boolean;
+}
+
 export default function ControlPanel() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -60,6 +67,7 @@ export default function ControlPanel() {
   });
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
+  const [mpesaConfig, setMpesaConfig] = useState<MpesaConfig | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -101,6 +109,15 @@ export default function ControlPanel() {
         .limit(10);
 
       if (logsData) setRecentLogs(logsData);
+
+      // Fetch MPESA Daraja configuration
+      const { data: mpesaData } = await supabase
+        .from('mpesa_daraja_configs')
+        .select('shortcode, environment, is_active')
+        .limit(1)
+        .single();
+
+      if (mpesaData) setMpesaConfig(mpesaData);
 
     } catch (error: any) {
       toast({
@@ -219,38 +236,90 @@ export default function ControlPanel() {
               </AdminCard>
 
               <AdminCard
-                title="Quick Actions"
-                description="Common administrative tasks"
-                icon={Shield}
+                title="M-Pesa Daraja Configuration"
+                description="Payment gateway credentials status"
+                icon={Key}
               >
-                <div className="space-y-2 mt-4">
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/settings'}>
-                    <Server className="mr-2 h-4 w-4" />
-                    System Settings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/accounts'}>
-                    <Users className="mr-2 h-4 w-4" />
-                    Manage RBAC Accounts
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/onboarding'}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    Client Onboarding Queue
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/support'}>
-                    <Shield className="mr-2 h-4 w-4" />
-                    Support Tickets
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    Team Communication
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/government'}>
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Government Entities
-                  </Button>
+                <div className="space-y-4 mt-4">
+                  {mpesaConfig ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Shortcode</span>
+                        <Badge variant="outline" className="font-mono">{mpesaConfig.shortcode}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Environment</span>
+                        <Badge 
+                          variant={mpesaConfig.environment === 'production' ? 'default' : 'secondary'}
+                          className={mpesaConfig.environment === 'production' ? 'bg-green-500' : 'bg-orange-500'}
+                        >
+                          {mpesaConfig.environment === 'production' ? 'LIVE' : 'SANDBOX'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Status</span>
+                        <StatusIndicator 
+                          status={mpesaConfig.is_active ? "healthy" : "error"} 
+                          label={mpesaConfig.is_active ? "Active" : "Inactive"} 
+                        />
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start" 
+                        onClick={() => window.location.href = '/mpesa-daraja'}
+                      >
+                        <Key className="mr-2 h-4 w-4" />
+                        Modify Credentials
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground mb-4">No M-Pesa configuration found</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => window.location.href = '/mpesa-daraja'}
+                      >
+                        <Key className="mr-2 h-4 w-4" />
+                        Configure Now
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </AdminCard>
             </div>
+
+            <AdminCard
+              title="Quick Actions"
+              description="Common administrative tasks"
+              icon={Shield}
+            >
+              <div className="space-y-2 mt-4">
+                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/system-settings'}>
+                  <Server className="mr-2 h-4 w-4" />
+                  System Settings
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/accounts'}>
+                  <Users className="mr-2 h-4 w-4" />
+                  Manage RBAC Accounts
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/onboarding'}>
+                  <Activity className="mr-2 h-4 w-4" />
+                  Client Onboarding Queue
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/support'}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  Support Tickets
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/communication'}>
+                  <Activity className="mr-2 h-4 w-4" />
+                  Team Communication
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/control-panel/government'}>
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Government Entities
+                </Button>
+              </div>
+            </AdminCard>
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
