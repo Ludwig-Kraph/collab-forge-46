@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import Header from "./Header";
 import BottomNavigation from "./BottomNavigation";
+import Footer from "./Footer";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { useLocation } from "react-router-dom";
@@ -19,8 +20,9 @@ const Layout = ({ children, className, showBottomNav = true }: LayoutProps) => {
   // Don't show sidebar on landing and auth pages
   if (isAuthPage) {
     return (
-      <div className="min-h-screen bg-background">
-        <main>{children}</main>
+      <div className="min-h-screen bg-background flex flex-col">
+        <main className="flex-1">{children}</main>
+        <Footer />
       </div>
     );
   }
@@ -34,7 +36,7 @@ const Layout = ({ children, className, showBottomNav = true }: LayoutProps) => {
         </div>
 
         {/* Main content area */}
-        <SidebarInset className="flex-1">
+        <SidebarInset className="flex-1 flex flex-col">
           <Header />
           
           <main className={cn("flex-1 pb-20 md:pb-6", className)}>
@@ -42,6 +44,7 @@ const Layout = ({ children, className, showBottomNav = true }: LayoutProps) => {
           </main>
 
           {showBottomNav && <BottomNavigation />}
+          <Footer />
         </SidebarInset>
       </div>
     </SidebarProvider>

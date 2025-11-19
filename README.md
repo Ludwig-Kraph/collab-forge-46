@@ -2,6 +2,17 @@
 
 M-Leja is a Progressive Web Application (PWA) designed to streamline MPESA payment operations for businesses and government agencies.
 
+## Copyright & Licensing
+
+**© 2024 Timothy Ng'ang'a. All Rights Reserved.**
+
+**Developed by**: Timothy Ng'ang'a  
+**Source Code**: Fully owned as is property of developer
+
+⚠️ **LEGAL NOTICE**: Forking, cloning, or using this code without proper licensing will incur a **USD $1,000,000 damage fee**.
+
+**For licensing inquiries, contact**: [Nassir Group](https://nassirgroup.com)
+
 ## Features
 
 - **STK Push Payments**: Trigger payment requests to Till and Paybill numbers
@@ -63,6 +74,34 @@ npm run build  # Production
 
 See [SECURITY.md](SECURITY.md) for security policies and vulnerability reporting.
 
+## Complete Self-Hosting Guide
+
+For comprehensive self-hosting instructions including:
+- Supported web hosting control panels (cPanel, Plesk, DirectAdmin, etc.)
+- Supabase Cloud and Self-Hosted setup
+- Production-level configuration
+- SSL/TLS setup
+- Monitoring and maintenance
+
+See: [SELF_HOSTING_GUIDE.md](SELF_HOSTING_GUIDE.md)
+
+## Supabase Connection Options
+
+M-Leja supports both Supabase Cloud and self-hosted Supabase instances:
+
+### Option 1: Supabase Cloud (Default)
+- No additional setup required
+- Fully managed infrastructure
+- Automatic backups and scaling
+
+### Option 2: Self-Hosted Supabase
+- Full control over your data
+- Can be switched via Settings → Supabase Connection in the app
+- Requires Docker and 8GB+ RAM
+- See [SELF_HOSTING_GUIDE.md](SELF_HOSTING_GUIDE.md) for setup instructions
+
 ## License
 
-Proprietary - All rights reserved
+**Proprietary - All Rights Reserved**
+
+© 2024 Timothy Ng'ang'a. Unauthorized use, reproduction, or distribution is prohibited and subject to legal action.
