@@ -868,7 +868,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_id: string | null
           account_status: string | null
+          account_type: Database["public"]["Enums"]["account_type"] | null
           avatar_type: string | null
           block_reason: string | null
           blocked_at: string | null
@@ -888,12 +890,15 @@ export type Database = {
           organization_id: string | null
           phone_number: string
           pin_hash: string | null
+          role_level: Database["public"]["Enums"]["role_level"] | null
           subscription_tier: string | null
           updated_at: string
           verification_badge_color: string | null
         }
         Insert: {
+          account_id?: string | null
           account_status?: string | null
+          account_type?: Database["public"]["Enums"]["account_type"] | null
           avatar_type?: string | null
           block_reason?: string | null
           blocked_at?: string | null
@@ -913,12 +918,15 @@ export type Database = {
           organization_id?: string | null
           phone_number: string
           pin_hash?: string | null
+          role_level?: Database["public"]["Enums"]["role_level"] | null
           subscription_tier?: string | null
           updated_at?: string
           verification_badge_color?: string | null
         }
         Update: {
+          account_id?: string | null
           account_status?: string | null
+          account_type?: Database["public"]["Enums"]["account_type"] | null
           avatar_type?: string | null
           block_reason?: string | null
           blocked_at?: string | null
@@ -938,6 +946,7 @@ export type Database = {
           organization_id?: string | null
           phone_number?: string
           pin_hash?: string | null
+          role_level?: Database["public"]["Enums"]["role_level"] | null
           subscription_tier?: string | null
           updated_at?: string
           verification_badge_color?: string | null
@@ -1437,24 +1446,33 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          account_id: string | null
+          account_type: Database["public"]["Enums"]["account_type"] | null
           created_at: string
           id: string
           organization_id: string | null
           role: Database["public"]["Enums"]["app_role"]
+          role_level: Database["public"]["Enums"]["role_level"] | null
           user_id: string
         }
         Insert: {
+          account_id?: string | null
+          account_type?: Database["public"]["Enums"]["account_type"] | null
           created_at?: string
           id?: string
           organization_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          role_level?: Database["public"]["Enums"]["role_level"] | null
           user_id: string
         }
         Update: {
+          account_id?: string | null
+          account_type?: Database["public"]["Enums"]["account_type"] | null
           created_at?: string
           id?: string
           organization_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          role_level?: Database["public"]["Enums"]["role_level"] | null
           user_id?: string
         }
         Relationships: [
@@ -1473,7 +1491,19 @@ export type Database = {
     }
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
+      can_manage_user: {
+        Args: { _admin_id: string; _target_user_id: string }
+        Returns: boolean
+      }
       decrement_stk_pushes: { Args: { _user_id: string }; Returns: undefined }
+      get_user_account_context: {
+        Args: { _user_id: string }
+        Returns: {
+          account_id: string
+          account_type: Database["public"]["Enums"]["account_type"]
+          role_level: Database["public"]["Enums"]["role_level"]
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1504,8 +1534,10 @@ export type Database = {
         Returns: string
       }
       super_admin_exists: { Args: never; Returns: boolean }
+      user_is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      account_type: "subscription" | "government" | "control_panel"
       app_role:
         | "admin"
         | "manager"
@@ -1524,6 +1556,7 @@ export type Database = {
         | "ceo"
       government_level: "national" | "county"
       mpesa_account_type: "till" | "paybill" | "pochi"
+      role_level: "super_admin" | "admin" | "user"
       subscription_tier:
         | "free_trial"
         | "basic"
@@ -1532,6 +1565,7 @@ export type Database = {
         | "enterprise"
         | "corporate"
         | "government"
+        | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1659,6 +1693,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["subscription", "government", "control_panel"],
       app_role: [
         "admin",
         "manager",
@@ -1678,6 +1713,7 @@ export const Constants = {
       ],
       government_level: ["national", "county"],
       mpesa_account_type: ["till", "paybill", "pochi"],
+      role_level: ["super_admin", "admin", "user"],
       subscription_tier: [
         "free_trial",
         "basic",
@@ -1686,6 +1722,7 @@ export const Constants = {
         "enterprise",
         "corporate",
         "government",
+        "super_admin",
       ],
     },
   },

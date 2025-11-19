@@ -35,7 +35,23 @@ serve(async (req) => {
       );
     }
 
-    // Check if user has admin role
+    // Parse request body first
+    const { email, password, fullName, role, organizationId, accountType, accountId, roleLevel } = await req.json();
+
+    // Check if user has admin role and get their account context
+    const { data: adminProfile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('account_type, account_id, role_level')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !adminProfile) {
+      return new Response(
+        JSON.stringify({ error: 'Admin profile not found' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
@@ -49,7 +65,23 @@ serve(async (req) => {
       );
     }
 
-    const { email, password, fullName, role, organizationId } = await req.json();
+    // Validate account context - new user must be in same account as admin
+    if (accountType !== adminProfile.account_type || accountId !== adminProfile.account_id) {
+      return new Response(
+        JSON.stringify({ error: 'Cannot create users in different account context' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Government Admin cannot create other Admins or Super Admins
+    if (adminProfile.account_type === 'government' && 
+        adminProfile.role_level === 'admin' && 
+        roleLevel !== 'user') {
+      return new Response(
+        JSON.stringify({ error: 'Government Admins can only create RBAC users, not other admins' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Create user with admin API
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -70,8 +102,8 @@ serve(async (req) => {
       throw new Error('Failed to create user');
     }
 
-    // Insert into profiles
-    const { error: profileError } = await supabaseAdmin
+    // Insert into profiles with account context
+    const { error: profileInsertError } = await supabaseAdmin
       .from('profiles')
       .insert({
         id: newUser.user.id,
@@ -79,21 +111,27 @@ serve(async (req) => {
         email: email,
         phone_number: email, // Using email as placeholder for RBAC users
         is_rbac_user: true,
-        organization_id: organizationId || null
+        organization_id: organizationId || null,
+        account_type: accountType,
+        account_id: accountId,
+        role_level: roleLevel || 'user'
       });
 
-    if (profileError) {
-      console.error('Profile creation error:', profileError);
+    if (profileInsertError) {
+      console.error('Profile creation error:', profileInsertError);
       // Continue anyway, the trigger might have created it
     }
 
-    // Insert role
+    // Insert role with account context
     const { error: roleInsertError } = await supabaseAdmin
       .from('user_roles')
       .insert({
         user_id: newUser.user.id,
         role: role,
-        organization_id: organizationId || null
+        organization_id: organizationId || null,
+        account_type: accountType,
+        account_id: accountId,
+        role_level: roleLevel || 'user'
       });
 
     if (roleInsertError) {
