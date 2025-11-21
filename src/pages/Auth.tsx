@@ -24,11 +24,17 @@ export default function Auth() {
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated on page load (not after login)
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    let mounted = true;
+    
+    if (user && mounted) {
+      navigate('/dashboard', { replace: true });
     }
+    
+    return () => {
+      mounted = false;
+    };
   }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -37,9 +43,7 @@ export default function Auth() {
     
     const { error } = await signIn(loginPhone, loginPassword);
     
-    if (!error) {
-      navigate('/dashboard');
-    }
+    // Don't manually navigate - let useEffect handle it after user state updates
     
     setLoading(false);
   };
