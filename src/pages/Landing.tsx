@@ -34,35 +34,48 @@ export default function Landing() {
 
   // Fetch subscription tiers from database
   useEffect(() => {
-    const fetchTiers = async () => {
-      const { data, error } = await supabase
-        .from('subscription_tiers')
-        .select('*')
-        .eq('show_on_landing', true)
-        .eq('is_active', true)
-        .order('price', { ascending: true });
+    let mounted = true;
 
-      if (data && !error) {
-        const formattedTiers: Tier[] = data.map(tier => ({
-          name: tier.name,
-          price: tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}`,
-          period: tier.is_period_enabled ? `/${tier.period}` : undefined,
-          description: tier.description || '',
-          features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
-          popular: false,
-        }));
-        setTiers(formattedTiers);
+    const fetchTiers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('subscription_tiers')
+          .select('*')
+          .eq('show_on_landing', true)
+          .eq('is_active', true)
+          .order('price', { ascending: true });
+
+        if (mounted && data && !error) {
+          const formattedTiers: Tier[] = data.map(tier => ({
+            name: tier.name,
+            price: tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}`,
+            period: tier.is_period_enabled ? `/${tier.period}` : undefined,
+            description: tier.description || '',
+            features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
+            popular: false,
+          }));
+          setTiers(formattedTiers);
+        }
+      } catch (error) {
+        console.error('Error fetching tiers:', error);
+      } finally {
+        if (mounted) {
+          setLoadingTiers(false);
+        }
       }
-      setLoadingTiers(false);
     };
 
     fetchTiers();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!loading && user) {
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [user, loading, navigate]);
 
