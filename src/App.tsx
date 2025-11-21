@@ -8,7 +8,10 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { lazy, Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from '@/components/auth/AdminRoute';
+import { SuperAdminRoute } from '@/components/auth/SuperAdminRoute';
 import { ThemeProvider } from "next-themes";
 
 // Lazy load pages for better performance
@@ -20,27 +23,6 @@ const Transactions = lazy(() => import("./pages/Transactions"));
 const Ledger = lazy(() => import("./pages/Ledger"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const More = lazy(() => import("./pages/More"));
-import { AdminRoute } from '@/components/auth/AdminRoute';
-import { SuperAdminRoute } from '@/components/auth/SuperAdminRoute';
-import Users from '@/pages/Users';
-import ControlPanel from '@/pages/ControlPanel';
-import Accounts from '@/pages/control-panel/Accounts';
-import Onboarding from '@/pages/control-panel/Onboarding';
-import Support from '@/pages/control-panel/Support';
-import Communication from '@/pages/control-panel/Communication';
-import SystemSettings from '@/pages/control-panel/SystemSettings';
-import Government from '@/pages/control-panel/Government';
-import SubscriptionControl from '@/pages/control-panel/SubscriptionControl';
-import SuperAdminManagement from '@/pages/control-panel/SuperAdminManagement';
-import SubscriptionOutlets from '@/pages/subscription/Outlets';
-import SubscriptionStaff from '@/pages/subscription/Staff';
-import SubscriptionDepartments from '@/pages/subscription/Departments';
-import CashierDashboard from '@/pages/CashierDashboard';
-import GovLanding from '@/pages/government/GovLanding';
-import NationalDashboard from '@/pages/government/NationalDashboard';
-import CountyDashboard from '@/pages/government/CountyDashboard';
-import InterGovernmental from '@/pages/government/InterGovernmental';
-import MpesaDarajaSettings from '@/pages/MpesaDarajaSettings';
 const Settings = lazy(() => import("./pages/Settings"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
@@ -48,14 +30,36 @@ const HowTo = lazy(() => import("./pages/HowTo"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Initialize QueryClient for React Query with optimized defaults
+// Heavy components - lazy load
+const Users = lazy(() => import('@/pages/Users'));
+const ControlPanel = lazy(() => import('@/pages/ControlPanel'));
+const Accounts = lazy(() => import('@/pages/control-panel/Accounts'));
+const Onboarding = lazy(() => import('@/pages/control-panel/Onboarding'));
+const Support = lazy(() => import('@/pages/control-panel/Support'));
+const Communication = lazy(() => import('@/pages/control-panel/Communication'));
+const SystemSettings = lazy(() => import('@/pages/control-panel/SystemSettings'));
+const Government = lazy(() => import('@/pages/control-panel/Government'));
+const SubscriptionControl = lazy(() => import('@/pages/control-panel/SubscriptionControl'));
+const SuperAdminManagement = lazy(() => import('@/pages/control-panel/SuperAdminManagement'));
+const SubscriptionOutlets = lazy(() => import('@/pages/subscription/Outlets'));
+const SubscriptionStaff = lazy(() => import('@/pages/subscription/Staff'));
+const SubscriptionDepartments = lazy(() => import('@/pages/subscription/Departments'));
+const CashierDashboard = lazy(() => import('@/pages/CashierDashboard'));
+const GovLanding = lazy(() => import('@/pages/government/GovLanding'));
+const NationalDashboard = lazy(() => import('@/pages/government/NationalDashboard'));
+const CountyDashboard = lazy(() => import('@/pages/government/CountyDashboard'));
+const InterGovernmental = lazy(() => import('@/pages/government/InterGovernmental'));
+const MpesaDarajaSettings = lazy(() => import('@/pages/MpesaDarajaSettings'));
+
+// Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30000, // 30 seconds - data is fresh for this period
-      gcTime: 5 * 60 * 1000, // 5 minutes - cached data lifetime
-      refetchOnWindowFocus: false, // Don't refetch when window regains focus
-      retry: 2, // Retry failed requests twice
+      staleTime: 60000, // 1 minute - more aggressive caching
+      gcTime: 10 * 60 * 1000, // 10 minutes - longer cache lifetime
+      refetchOnWindowFocus: false,
+      retry: 2,
+      refetchOnMount: false, // Don't refetch if data is fresh
     },
   },
 });

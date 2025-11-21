@@ -1505,7 +1505,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dashboard_stats: {
+        Row: {
+          active_subscriptions: number | null
+          total_revenue: number | null
+          total_transactions: number | null
+          total_users: number | null
+          transactions_last_30_days: number | null
+          users_last_30_days: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
@@ -1551,6 +1561,7 @@ export type Database = {
         }
         Returns: string
       }
+      refresh_dashboard_stats: { Args: never; Returns: undefined }
       super_admin_exists: { Args: never; Returns: boolean }
       user_is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
