@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
+import { usePrefetch } from "@/hooks/usePrefetch";
 
 interface Transaction {
   id: string;
@@ -33,6 +34,9 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  
+  // Prefetch likely next pages for instant navigation
+  usePrefetch(user?.id);
   
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
