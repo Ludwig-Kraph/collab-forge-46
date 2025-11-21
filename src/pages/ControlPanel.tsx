@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +30,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 
 interface SystemAlert {
   id: string;
@@ -86,19 +87,25 @@ export default function ControlPanel() {
     try {
       setLoading(true);
 
-      // Fetch platform statistics
-      const [usersRes, subsRes, transRes, revenueRes, regRes, ticketsRes, rbacRes, govRes] = await Promise.all([
+      // Fetch platform statistics - optimized with proper filtering
+      const [usersRes, subsRes, transRes, regRes, ticketsRes, rbacRes, govRes] = await Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('transactions').select('id', { count: 'exact', head: true }),
-        supabase.from('transactions').select('amount'),
         supabase.from('registration_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_rbac_user', true),
         supabase.from('government_entities').select('id', { count: 'exact', head: true })
       ]);
 
-      const totalRevenue = revenueRes.data?.reduce((sum, t) => sum + (Number(t.amount) || 0), 0) || 0;
+      // Fetch revenue separately with proper filtering
+      const { data: revenueData } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('transaction_type', 'received')
+        .eq('status', 'completed');
+
+      const totalRevenue = revenueData?.reduce((sum, t) => sum + (Number(t.amount) || 0), 0) || 0;
 
       setStats({
         totalUsers: usersRes.count || 0,
@@ -172,7 +179,10 @@ export default function ControlPanel() {
 
   return (
     <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -374,6 +384,7 @@ export default function ControlPanel() {
           </TabsContent>
         </Tabs>
       </div>
+      )}
     </Layout>
   );
 }

@@ -10,26 +10,29 @@ export const useRealtimeBalance = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Calculate balance from transactions
+    // Calculate balance from transactions - with user filter for performance
     const calculateBalance = async () => {
       const { data, error } = await supabase
         .from('transactions')
         .select('amount, transaction_type, status')
-        .eq('status', 'completed');
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(1);
 
       if (error) {
         console.error('Error calculating balance:', error);
-      } else {
-        const total = data?.reduce((acc, transaction) => {
-          if (transaction.transaction_type === 'received') {
-            return acc + Number(transaction.amount);
-          } else if (transaction.transaction_type === 'sent') {
-            return acc - Number(transaction.amount);
-          }
-          return acc;
-        }, 0) || 0;
+      } else if (data && data.length > 0) {
+        // Use the most recent transaction's balance_after
+        const { data: latestTrans } = await supabase
+          .from('transactions')
+          .select('balance_after')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
         
-        setBalance(total);
+        setBalance(latestTrans?.balance_after || 0);
       }
       setLoading(false);
     };

@@ -48,7 +48,17 @@ const HowTo = lazy(() => import("./pages/HowTo"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+// Initialize QueryClient for React Query with optimized defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30000, // 30 seconds - data is fresh for this period
+      gcTime: 5 * 60 * 1000, // 5 minutes - cached data lifetime
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      retry: 2, // Retry failed requests twice
+    },
+  },
+});
 
 const App = () => (
   <ErrorBoundary>

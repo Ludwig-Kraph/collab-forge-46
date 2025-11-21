@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import FloatingActionButton from "@/components/layout/FloatingActionButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 
 interface Transaction {
   id: string;
@@ -64,53 +65,33 @@ const Index = () => {
     try {
       setLoading(true);
 
-      // Fetch total users count
-      const { count: usersCount, error: usersError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      // Fetch all counts in parallel for better performance
+      const [usersCount, subsCount, transCount, regCount, ticketsCount, alertsCount] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('transactions').select('*', { count: 'exact', head: true }),
+        supabase.from('registration_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
+        supabase.from('system_alerts').select('*', { count: 'exact', head: true }).eq('is_resolved', false)
+      ]);
 
-      // Fetch total transactions count and sum
-      const { data: transData, error: transError } = await supabase
+      // Fetch revenue separately (aggregation)
+      const { data: revenueData } = await supabase
         .from('transactions')
-        .select('amount, transaction_type, status');
+        .select('amount')
+        .eq('transaction_type', 'received')
+        .eq('status', 'completed');
 
-      const totalTransactions = transData?.length || 0;
-      const totalRevenue = transData
-        ?.filter(t => t.transaction_type === 'received' && t.status === 'completed')
-        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      // Fetch active subscriptions
-      const { count: subsCount, error: subsError } = await supabase
-        .from('subscriptions')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
-
-      // Fetch pending registrations
-      const { count: regCount, error: regError } = await supabase
-        .from('registration_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-
-      // Fetch open support tickets
-      const { count: ticketsCount, error: ticketsError } = await supabase
-        .from('support_tickets')
-        .select('*', { count: 'exact', head: true })
-        .in('status', ['open', 'in_progress']);
-
-      // Fetch unresolved system alerts
-      const { count: alertsCount, error: alertsError } = await supabase
-        .from('system_alerts')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_resolved', false);
+      const totalRevenue = revenueData?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
       setPlatformStats({
-        totalUsers: usersCount || 0,
-        totalTransactions,
+        totalUsers: usersCount.count || 0,
+        totalTransactions: transCount.count || 0,
         totalRevenue,
-        activeSubscriptions: subsCount || 0,
-        pendingRegistrations: regCount || 0,
-        openTickets: ticketsCount || 0,
-        systemAlerts: alertsCount || 0,
+        activeSubscriptions: subsCount.count || 0,
+        pendingRegistrations: regCount.count || 0,
+        openTickets: ticketsCount.count || 0,
+        systemAlerts: alertsCount.count || 0,
       });
 
       // Fetch recent system activity (latest transactions across all users)
@@ -409,11 +390,29 @@ const Index = () => {
       </Layout>
     );
   }
-  const tierName = subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial';
-  const isUnlimited = freePushes === null || subscription?.max_stk_pushes === null;
-  const usagePercent = !isUnlimited && subscription?.max_stk_pushes 
-    ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
-    : 0;
+  const tierName = useMemo(() => 
+    subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial',
+    [subscription?.tier]
+  );
+  const isUnlimited = useMemo(() => 
+    freePushes === null || subscription?.max_stk_pushes === null,
+    [freePushes, subscription?.max_stk_pushes]
+  );
+  const usagePercent = useMemo(() => 
+    !isUnlimited && subscription?.max_stk_pushes 
+      ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
+      : 0,
+    [isUnlimited, subscription?.max_stk_pushes, subscription?.used_stk_pushes]
+  );
+
+  // Show skeleton while loading
+  if (loading) {
+    return (
+      <Layout>
+        <DashboardSkeleton />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
