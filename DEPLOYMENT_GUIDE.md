@@ -1,36 +1,389 @@
-# M-Leja Production Deployment Guide
+# M-Leja Multi-Platform Deployment Guide
 
-## Pre-Deployment Checklist
+Complete guide for deploying M-Leja to various hosting platforms and CMS systems.
 
-### 1. Environment Setup
-- [ ] Supabase project configured
-- [ ] Production database set up
-- [ ] All migrations applied successfully
-- [ ] Edge functions deployed
-- [ ] Secrets configured in Supabase
+## Quick Start
 
-### 2. MPESA Configuration
-- [ ] MPESA Daraja API credentials obtained (production)
-- [ ] MPESA shortcode registered
-- [ ] Passkey configured
-- [ ] Callback URL registered with Safaricom
-- [ ] Test STK push in production environment
+M-Leja is production-ready and compatible with:
+- ✅ Static hosting (Vercel, Netlify, Cloudflare Pages)
+- ✅ Traditional web hosting (cPanel, FTP, Apache, Nginx)
+- ✅ Cloud platforms (AWS, Google Cloud, Azure)
+- ✅ Container deployments (Docker, Kubernetes)
 
-### 3. Security Configuration
-- [ ] Enable leaked password protection
-- [ ] Configure RLS policies
-- [ ] Set up database functions with search_path
-- [ ] Review and test all access controls
-- [ ] Enable SSL/TLS
+## Prerequisites
 
-### 4. Performance Optimization
-- [ ] Database indexes created
-- [ ] Bundle size optimized
-- [ ] Images compressed
-- [ ] CDN configured (if applicable)
-- [ ] Caching strategies implemented
+- Node.js 18+ installed
+- Git repository (recommended)
+- Supabase project configured
+- MPESA Daraja API credentials
 
-## Deployment Steps
+---
+
+## Platform-Specific Deployment
+
+### 1. Vercel (Recommended for Speed)
+
+**Automatic GitHub Deployment:**
+1. Connect GitHub repository to Vercel
+2. Import project
+3. Set environment variables:
+   ```
+   VITE_SUPABASE_URL=your_url
+   VITE_SUPABASE_ANON_KEY=your_key
+   ```
+4. Deploy automatically on push
+
+**Configuration included:** `vercel.json` (already in project)
+
+**Manual CLI Deployment:**
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+---
+
+### 2. Netlify
+
+**GitHub Integration:**
+1. Connect repository
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. Set environment variables
+5. Deploy
+
+**Configuration included:** `netlify.toml` (already in project)
+
+**Deploy via CLI:**
+```bash
+npm install -g netlify-cli
+netlify deploy --prod
+```
+
+---
+
+### 3. Cloudflare Pages
+
+**GitHub Integration:**
+1. Connect repository
+2. Framework preset: None
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. Set environment variables
+
+**Configuration included:** `_redirects` (already in project)
+
+---
+
+### 4. Traditional Web Hosting (cPanel/FTP)
+
+**Perfect for shared hosting, GoDaddy, Bluehost, Hostinger, etc.**
+
+**Step 1: Build locally**
+```bash
+npm install
+npm run build
+```
+
+**Step 2: Upload `dist/` contents to server**
+- Via FTP: Upload all files from `dist/` to `public_html` or `www`
+- Via cPanel File Manager: Upload and extract zip of `dist/`
+
+**Step 3: Configure Apache (included)**
+- `.htaccess` file is already in the project
+- If not present, create one with the provided config
+- Ensures SPA routing works correctly
+
+**Step 4: Set environment variables**
+Create `config.js` in `public_html`:
+```javascript
+window.ENV = {
+  VITE_SUPABASE_URL: 'your_url',
+  VITE_SUPABASE_ANON_KEY: 'your_key'
+};
+```
+
+Then load before main script in `index.html`:
+```html
+<script src="/config.js"></script>
+```
+
+---
+
+### 5. GitHub Pages
+
+**Step 1: Configure**
+Add to `vite.config.ts`:
+```typescript
+base: '/m-leja/' // Replace with your repo name
+```
+
+**Step 2: Build and deploy**
+```bash
+npm run build
+npx gh-pages -d dist
+```
+
+**Step 3: Enable in GitHub**
+Settings → Pages → Source: gh-pages branch
+
+---
+
+### 6. AWS S3 + CloudFront
+
+**Step 1: Build**
+```bash
+npm run build
+```
+
+**Step 2: Create S3 bucket**
+```bash
+aws s3 mb s3://m-leja-app
+aws s3 sync dist/ s3://m-leja-app
+```
+
+**Step 3: Configure CloudFront**
+- Create distribution pointing to S3
+- Set default root object: `index.html`
+- Error page: `index.html` (for SPA routing)
+
+---
+
+### 7. Docker Deployment
+
+**Dockerfile included:**
+```dockerfile
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Build and run:**
+```bash
+docker build -t m-leja .
+docker run -p 80:80 m-leja
+```
+
+---
+
+### 8. Nginx Server
+
+**Step 1: Build and copy**
+```bash
+npm run build
+sudo cp -r dist/* /var/www/html/m-leja/
+```
+
+**Step 2: Configure Nginx**
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+    root /var/www/html/m-leja;
+    index index.html;
+
+    # SPA routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Service Worker - no cache
+    location = /sw.js {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Service-Worker-Allowed "/";
+    }
+
+    # Static assets cache
+    location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+**Restart Nginx:**
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+---
+
+## CMS & Platform Compatibility
+
+### WordPress Integration
+1. Upload `dist/` to `/wp-content/m-leja/`
+2. Create custom page template
+3. Enqueue assets in functions.php:
+```php
+function mleja_enqueue_scripts() {
+    wp_enqueue_script('mleja', 
+        get_template_directory_uri() . '/m-leja/assets/index.js', 
+        [], null, true);
+}
+add_action('wp_enqueue_scripts', 'mleja_enqueue_scripts');
+```
+
+### Drupal Integration
+1. Create custom module
+2. Upload assets to `/modules/custom/mleja/`
+3. Include in route controller
+
+### Joomla Integration
+1. Create custom component
+2. Upload to `/components/com_mleja/`
+3. Register in manifest XML
+
+---
+
+## Environment Variables
+
+For client-side access, prefix with `VITE_`:
+
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+**Important:** Never commit `.env` files. Use platform's environment variable settings.
+
+---
+
+## Performance Optimizations
+
+All optimization files are included:
+
+### Pre-configured:
+- ✅ Service Worker for offline support
+- ✅ Code splitting and lazy loading
+- ✅ Database indexes and materialized views
+- ✅ Aggressive caching strategies
+- ✅ Bundle optimization (Vite)
+- ✅ Virtual scrolling for large lists
+
+### Hosting checklist:
+- [ ] Enable Gzip/Brotli compression
+- [ ] Configure CDN (Cloudflare, AWS CloudFront)
+- [ ] Enable HTTP/2 or HTTP/3
+- [ ] Set proper cache headers
+- [ ] Monitor Core Web Vitals
+
+---
+
+## Security Configuration
+
+### SSL/TLS
+Always use HTTPS in production:
+- Most platforms provide free SSL (Let's Encrypt)
+- Configure redirect from HTTP to HTTPS
+- Set HSTS headers
+
+### Supabase RLS
+Verify Row Level Security policies:
+```sql
+-- Check enabled tables
+SELECT tablename FROM pg_tables 
+WHERE schemaname = 'public' 
+AND rowsecurity = true;
+```
+
+### CSP Headers
+Add to your server config:
+```
+Content-Security-Policy: default-src 'self'; 
+  script-src 'self' 'unsafe-inline'; 
+  style-src 'self' 'unsafe-inline';
+```
+
+---
+
+## Post-Deployment Checklist
+
+### Immediate Testing
+- [ ] Login/signup works
+- [ ] MPESA STK push functional
+- [ ] Transactions recorded correctly
+- [ ] Real-time updates working
+- [ ] Mobile responsive
+- [ ] PWA installs correctly
+
+### Performance
+- [ ] Run Lighthouse audit (aim for 90+)
+- [ ] Check page load time (< 2 seconds)
+- [ ] Verify service worker registration
+- [ ] Test offline functionality
+
+### Security
+- [ ] HTTPS enabled
+- [ ] RLS policies active
+- [ ] No console errors
+- [ ] Authentication working
+- [ ] Rate limiting in place
+
+---
+
+## Troubleshooting Common Issues
+
+### Issue: 404 on page refresh
+**Cause:** SPA routing not configured
+**Fix:** Ensure `.htaccess`, `_redirects`, or nginx config is in place
+
+### Issue: Environment variables undefined
+**Cause:** Missing `VITE_` prefix or not set in hosting
+**Fix:** Prefix with `VITE_` and rebuild
+
+### Issue: Service Worker not updating
+**Cause:** Aggressive caching
+**Fix:** Hard refresh (Ctrl+Shift+R) or clear cache
+
+### Issue: MPESA not working
+**Cause:** Secrets not configured or wrong environment
+**Fix:** Verify Supabase secrets and MPESA environment setting
+
+---
+
+## Monitoring & Maintenance
+
+### Uptime Monitoring
+Set up with:
+- UptimeRobot (free)
+- Pingdom
+- StatusCake
+
+### Error Tracking
+Integrate:
+- Sentry
+- LogRocket
+- Datadog
+
+### Performance Monitoring
+Use:
+- Google Analytics
+- Vercel Analytics
+- Cloudflare Web Analytics
+
+---
+
+## Support Resources
+
+- **Documentation:** `TESTING_CHECKLIST.md`, `SECURITY_AUDIT.md`, `PERFORMANCE_OPTIMIZATION.md`
+- **Supabase Docs:** https://supabase.com/docs
+- **Vite Docs:** https://vitejs.dev/guide/
+
+---
+
+**Deployment Status:** ✅ Production Ready
+**Last Updated:** 2024-11-21
+**Compatible Platforms:** 15+ hosting options
 
 ### Step 1: Configure Supabase Secrets
 
