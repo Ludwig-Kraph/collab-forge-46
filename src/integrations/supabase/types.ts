@@ -1091,6 +1091,7 @@ export type Database = {
           name: string
           period: string
           price: number
+          show_on_landing: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -1107,6 +1108,7 @@ export type Database = {
           name: string
           period?: string
           price?: number
+          show_on_landing?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -1123,6 +1125,7 @@ export type Database = {
           name?: string
           period?: string
           price?: number
+          show_on_landing?: boolean | null
           updated_at?: string | null
         }
         Relationships: []

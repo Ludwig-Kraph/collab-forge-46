@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save, Plus } from 'lucide-react';
+import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save, Plus, Upload, Download } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { CreateTierDialog } from '@/components/subscription/CreateTierDialog';
 
@@ -23,6 +23,8 @@ interface SubscriptionTier {
   features: string[];
   terms: string;
   icon: any;
+  showOnLanding?: boolean;
+  isCustom?: boolean;
 }
 
 const defaultTiers: SubscriptionTier[] = [
@@ -133,8 +135,34 @@ export default function SubscriptionControl() {
         features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
         terms: tier.description || '',
         icon: Building2,
+        showOnLanding: tier.show_on_landing || false,
+        isCustom: true,
       }));
       setTiers([...defaultTiers, ...customTiers]);
+    }
+  };
+
+  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .update({ show_on_landing: !currentStatus })
+        .eq('id', tierId);
+
+      if (error) throw error;
+
+      toast({
+        title: currentStatus ? 'Removed from Landing Page' : 'Added to Landing Page',
+        description: `Subscription tier has been ${currentStatus ? 'pulled from' : 'pushed to'} the landing page.`,
+      });
+
+      fetchCustomTiers();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -227,13 +255,33 @@ export default function SubscriptionControl() {
                             {tier.maxStkPushes === null ? 'Unlimited' : tier.maxStkPushes}
                           </span>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          className="w-full mt-4"
-                          onClick={() => setSelectedTier(tier)}
-                        >
-                          Edit Tier
-                        </Button>
+                        {tier.isCustom && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">On Landing:</span>
+                            <Badge variant={tier.showOnLanding ? 'default' : 'secondary'}>
+                              {tier.showOnLanding ? 'Visible' : 'Hidden'}
+                            </Badge>
+                          </div>
+                        )}
+                        <div className="flex gap-2 mt-4">
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => setSelectedTier(tier)}
+                          >
+                            Edit Tier
+                          </Button>
+                          {tier.isCustom && (
+                            <Button
+                              size="icon"
+                              variant={tier.showOnLanding ? 'destructive' : 'default'}
+                              onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false)}
+                              title={tier.showOnLanding ? 'Pull from Landing Page' : 'Push to Landing Page'}
+                            >
+                              {tier.showOnLanding ? <Download className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

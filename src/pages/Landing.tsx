@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -15,40 +15,49 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/m-leja-logo.png';
 import { getCopyrightText } from '@/utils/copyright';
+import { supabase } from '@/integrations/supabase/client';
 
-const tiers = [
-  {
-    name: 'Free Trial',
-    price: 'Free',
-    description: '3 free STK pushes to get started',
-    features: ['3 STK Pushes', '1 User', 'Basic Support'],
-  },
-  {
-    name: 'Basic',
-    price: 'KES 999',
-    period: '/month',
-    description: 'Perfect for small businesses',
-    features: ['50 STK Pushes/month', '1 User', 'Email Support', 'Transaction History'],
-  },
-  {
-    name: 'Professional',
-    price: 'KES 2,999',
-    period: '/month',
-    description: 'For growing businesses',
-    features: ['Unlimited STK Pushes', 'Up to 5 Users', 'Priority Support', 'Advanced Analytics'],
-    popular: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    description: 'For large organizations',
-    features: ['Unlimited Everything', 'Unlimited Users', '24/7 Support', 'Custom Integrations', 'Dedicated Account Manager'],
-  },
-];
+interface Tier {
+  name: string;
+  price: string;
+  period?: string;
+  description: string;
+  features: string[];
+  popular?: boolean;
+}
 
 export default function Landing() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [tiers, setTiers] = useState<Tier[]>([]);
+  const [loadingTiers, setLoadingTiers] = useState(true);
+
+  // Fetch subscription tiers from database
+  useEffect(() => {
+    const fetchTiers = async () => {
+      const { data, error } = await supabase
+        .from('subscription_tiers')
+        .select('*')
+        .eq('show_on_landing', true)
+        .eq('is_active', true)
+        .order('price', { ascending: true });
+
+      if (data && !error) {
+        const formattedTiers: Tier[] = data.map(tier => ({
+          name: tier.name,
+          price: tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}`,
+          period: tier.is_period_enabled ? `/${tier.period}` : undefined,
+          description: tier.description || '',
+          features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
+          popular: false,
+        }));
+        setTiers(formattedTiers);
+      }
+      setLoadingTiers(false);
+    };
+
+    fetchTiers();
+  }, []);
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
@@ -186,43 +195,53 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {tiers.map((tier) => (
-            <Card key={tier.name} className={cn(
-              'relative',
-              tier.popular && 'border-primary shadow-elegant scale-105'
-            )}>
-              <CardHeader>
-                {tier.popular && (
-                  <Badge className="w-fit mb-2 shadow-glow">⭐ Most Popular</Badge>
-                )}
-                <CardTitle className="text-xl">{tier.name}</CardTitle>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold">{tier.price}</span>
-                  {tier.period && <span className="text-muted-foreground text-sm">{tier.period}</span>}
-                </div>
-                <CardDescription className="mt-2 h-12">{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  className="w-full mt-6" 
-                  variant={tier.popular ? 'default' : 'outline'}
-                  onClick={() => navigate('/auth')}
-                >
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loadingTiers ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading pricing plans...</p>
+          </div>
+        ) : tiers.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No pricing plans available at the moment.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {tiers.map((tier) => (
+              <Card key={tier.name} className={cn(
+                'relative',
+                tier.popular && 'border-primary shadow-elegant scale-105'
+              )}>
+                <CardHeader>
+                  {tier.popular && (
+                    <Badge className="w-fit mb-2 shadow-glow">⭐ Most Popular</Badge>
+                  )}
+                  <CardTitle className="text-xl">{tier.name}</CardTitle>
+                  <div className="mt-4">
+                    <span className="text-3xl font-bold">{tier.price}</span>
+                    {tier.period && <span className="text-muted-foreground text-sm">{tier.period}</span>}
+                  </div>
+                  <CardDescription className="mt-2 h-12">{tier.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {tier.features.map((feature, index) => (
+                      <li key={`${tier.name}-${index}`} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button 
+                    className="w-full mt-6" 
+                    variant={tier.popular ? 'default' : 'outline'}
+                    onClick={() => navigate('/auth')}
+                  >
+                    Get Started
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}
