@@ -23,13 +23,14 @@ export const useRealtimeTransactions = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Initial fetch
+    // Initial fetch with user filter and reduced limit
     const fetchTransactions = async () => {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(10);
 
       if (error) {
         console.error('Error fetching transactions:', error);
