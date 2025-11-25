@@ -50,6 +50,8 @@ const NationalDashboard = lazy(() => import('@/pages/government/NationalDashboar
 const CountyDashboard = lazy(() => import('@/pages/government/CountyDashboard'));
 const InterGovernmental = lazy(() => import('@/pages/government/InterGovernmental'));
 const MpesaDarajaSettings = lazy(() => import('@/pages/MpesaDarajaSettings'));
+const SubscriptionAnalytics = lazy(() => import('@/pages/analytics/SubscriptionAnalytics'));
+const SubscriptionCMS = lazy(() => import('@/pages/cms/SubscriptionCMS'));
 
 // Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
@@ -86,7 +88,9 @@ const App = () => (
             <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
             <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
             <Route path="/ledger" element={<ProtectedRoute><Ledger /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><SubscriptionAnalytics /></ProtectedRoute>} />
+            <Route path="/analytics/basic" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/cms" element={<AdminRoute><SubscriptionCMS /></AdminRoute>} />
             <Route path="/more" element={<ProtectedRoute><More /></ProtectedRoute>} />
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/control-panel" element={<SuperAdminRoute><ControlPanel /></SuperAdminRoute>} />
