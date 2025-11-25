@@ -125,6 +125,20 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                {isAdmin && !isSuperAdmin && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/cms")}>
+                      <NavLink 
+                        to="/cms" 
+                        className="hover:bg-muted/50" 
+                        activeClassName="bg-muted text-primary font-medium"
+                      >
+                        <Settings className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
+                        {!isCollapsed && <span>CMS</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 {isAdmin && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/users")}>
