@@ -310,6 +310,18 @@ export default function ControlPanel() {
                     description: "Configure MPESA and platform settings",
                     icon: Settings,
                     path: "/control-panel/settings"
+                  },
+                  {
+                    title: "Landing Page Builder",
+                    description: "Customize landing page with drag & drop",
+                    icon: Settings,
+                    path: "/control-panel/landing-builder"
+                  },
+                  {
+                    title: "Subscription Tiers",
+                    description: "Manage subscription plans and pricing",
+                    icon: Settings,
+                    path: "/control-panel/subscriptions"
                   }
                 ]}
               />

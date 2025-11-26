@@ -72,11 +72,17 @@ export default function Landing() {
     };
   }, []);
 
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users to dashboard - check first to prevent unnecessary renders
   useEffect(() => {
-    if (!loading && user) {
+    let mounted = true;
+    
+    if (!loading && user && mounted) {
       navigate('/dashboard', { replace: true });
     }
+    
+    return () => {
+      mounted = false;
+    };
   }, [user, loading, navigate]);
 
   if (loading) {
