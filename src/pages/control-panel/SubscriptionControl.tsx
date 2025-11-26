@@ -142,18 +142,46 @@ export default function SubscriptionControl() {
     }
   };
 
-  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean) => {
+  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean, tier?: SubscriptionTier) => {
     try {
-      const { error } = await supabase
+      // Check if tier exists in database
+      const { data: existingTier } = await supabase
         .from('subscription_tiers')
-        .update({ show_on_landing: !currentStatus })
-        .eq('id', tierId);
+        .select('id')
+        .eq('id', tierId)
+        .single();
 
-      if (error) throw error;
+      if (!existingTier && tier) {
+        // Create the tier first if it doesn't exist (for default tiers)
+        const { error: insertError } = await supabase
+          .from('subscription_tiers')
+          .insert({
+            id: tierId,
+            name: tier.name,
+            price: tier.price,
+            currency: tier.currency,
+            max_users: tier.maxUsers,
+            max_stk_pushes: tier.maxStkPushes,
+            features: tier.features,
+            description: tier.terms,
+            show_on_landing: !currentStatus,
+            is_active: true,
+          });
+
+        if (insertError) throw insertError;
+      } else {
+        // Update existing tier
+        const { error } = await supabase
+          .from('subscription_tiers')
+          .update({ show_on_landing: !currentStatus })
+          .eq('id', tierId);
+
+        if (error) throw error;
+      }
 
       toast({
-        title: currentStatus ? 'Removed from Landing Page' : 'Added to Landing Page',
-        description: `Subscription tier has been ${currentStatus ? 'pulled from' : 'pushed to'} the landing page.`,
+        title: currentStatus ? 'Pulled from Landing Page' : 'Pushed to Landing Page',
+        description: `${tier?.name || 'Subscription tier'} is now ${!currentStatus ? 'visible' : 'hidden'} on the landing page.`,
       });
 
       fetchCustomTiers();
@@ -255,14 +283,12 @@ export default function SubscriptionControl() {
                             {tier.maxStkPushes === null ? 'Unlimited' : tier.maxStkPushes}
                           </span>
                         </div>
-                        {tier.isCustom && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">On Landing:</span>
-                            <Badge variant={tier.showOnLanding ? 'default' : 'secondary'}>
-                              {tier.showOnLanding ? 'Visible' : 'Hidden'}
-                            </Badge>
-                          </div>
-                        )}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Landing Page:</span>
+                          <Badge variant={tier.showOnLanding ? 'default' : 'secondary'}>
+                            {tier.showOnLanding ? 'Live' : 'Hidden'}
+                          </Badge>
+                        </div>
                         <div className="flex gap-2 mt-4">
                           <Button 
                             variant="outline" 
@@ -271,16 +297,14 @@ export default function SubscriptionControl() {
                           >
                             Edit Tier
                           </Button>
-                          {tier.isCustom && (
-                            <Button
-                              size="icon"
-                              variant={tier.showOnLanding ? 'destructive' : 'default'}
-                              onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false)}
-                              title={tier.showOnLanding ? 'Pull from Landing Page' : 'Push to Landing Page'}
-                            >
-                              {tier.showOnLanding ? <Download className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                            </Button>
-                          )}
+                          <Button
+                            size="icon"
+                            variant={tier.showOnLanding ? 'destructive' : 'default'}
+                            onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false, tier)}
+                            title={tier.showOnLanding ? 'Pull from Landing Page (Hide)' : 'Push to Landing Page (Go Live)'}
+                          >
+                            {tier.showOnLanding ? <Download className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
