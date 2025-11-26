@@ -182,6 +182,22 @@ const Index = () => {
   };
 
   const freePushes = subscription?.free_stk_pushes_remaining;
+  
+  // Calculate these values BEFORE any early returns (Rules of Hooks)
+  const tierName = useMemo(() => 
+    subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial',
+    [subscription?.tier]
+  );
+  const isUnlimited = useMemo(() => 
+    freePushes === null || subscription?.max_stk_pushes === null,
+    [freePushes, subscription?.max_stk_pushes]
+  );
+  const usagePercent = useMemo(() => 
+    !isUnlimited && subscription?.max_stk_pushes 
+      ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
+      : 0,
+    [isUnlimited, subscription?.max_stk_pushes, subscription?.used_stk_pushes]
+  );
 
   // Super Admin Dashboard Render
   if (isSuperAdmin && !loading) {
@@ -394,20 +410,6 @@ const Index = () => {
       </Layout>
     );
   }
-  const tierName = useMemo(() => 
-    subscription?.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Free Trial',
-    [subscription?.tier]
-  );
-  const isUnlimited = useMemo(() => 
-    freePushes === null || subscription?.max_stk_pushes === null,
-    [freePushes, subscription?.max_stk_pushes]
-  );
-  const usagePercent = useMemo(() => 
-    !isUnlimited && subscription?.max_stk_pushes 
-      ? ((subscription.used_stk_pushes / subscription.max_stk_pushes) * 100)
-      : 0,
-    [isUnlimited, subscription?.max_stk_pushes, subscription?.used_stk_pushes]
-  );
 
   // Show skeleton while loading
   if (loading) {
