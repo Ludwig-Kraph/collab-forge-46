@@ -40,6 +40,7 @@ const Communication = lazy(() => import('@/pages/control-panel/Communication'));
 const SystemSettings = lazy(() => import('@/pages/control-panel/SystemSettings'));
 const Government = lazy(() => import('@/pages/control-panel/Government'));
 const SubscriptionControl = lazy(() => import('@/pages/control-panel/SubscriptionControl'));
+const LandingPageBuilder = lazy(() => import('@/pages/control-panel/LandingPageBuilder'));
 const SuperAdminManagement = lazy(() => import('@/pages/control-panel/SuperAdminManagement'));
 const SubscriptionOutlets = lazy(() => import('@/pages/subscription/Outlets'));
 const SubscriptionStaff = lazy(() => import('@/pages/subscription/Staff'));
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/control-panel/support" element={<SuperAdminRoute><Support /></SuperAdminRoute>} />
             <Route path="/control-panel/communication" element={<SuperAdminRoute><Communication /></SuperAdminRoute>} />
             <Route path="/control-panel/subscriptions" element={<SuperAdminRoute><SubscriptionControl /></SuperAdminRoute>} />
+            <Route path="/control-panel/landing-builder" element={<SuperAdminRoute><LandingPageBuilder /></SuperAdminRoute>} />
             <Route path="/control-panel/settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/control-panel/government" element={<SuperAdminRoute><Government /></SuperAdminRoute>} />
             <Route path="/control-panel/super-admins" element={<SuperAdminRoute><SuperAdminManagement /></SuperAdminRoute>} />
