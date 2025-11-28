@@ -123,47 +123,49 @@ const Index = () => {
     try {
       setLoading(true);
 
-      // Fetch subscription data
-      const { data: subData, error: subError } = await supabase
-        .from('subscriptions')
-        .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
-        .eq('user_id', user?.id)
-        .eq('is_active', true)
-        .single();
-
-      if (subError && subError.code !== 'PGRST116') throw subError;
-      setSubscription(subData);
-
-      // Fetch recent transactions
-      const { data: transData, error: transError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (transError) throw transError;
-      setRecentTransactions(transData || []);
-
-      // Calculate current balance from latest transaction
-      if (transData && transData.length > 0 && transData[0].balance_after !== null) {
-        setBalance(transData[0].balance_after);
-      }
-
-      // Calculate monthly revenue
+      // Calculate monthly revenue start date
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const { data: monthlyData, error: monthlyError } = await supabase
-        .from('transactions')
-        .select('amount, transaction_type')
-        .eq('user_id', user?.id)
-        .eq('status', 'completed')
-        .gte('created_at', startOfMonth.toISOString());
+      // Fetch all data in parallel for better performance
+      const [subResult, transResult, monthlyResult] = await Promise.all([
+        supabase
+          .from('subscriptions')
+          .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
+          .eq('user_id', user?.id)
+          .eq('is_active', true)
+          .maybeSingle(),
+        supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user?.id)
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('transactions')
+          .select('amount, transaction_type')
+          .eq('user_id', user?.id)
+          .eq('status', 'completed')
+          .gte('created_at', startOfMonth.toISOString())
+      ]);
 
-      if (!monthlyError && monthlyData) {
-        const revenue = monthlyData
+      // Process subscription data
+      if (subResult.error && subResult.error.code !== 'PGRST116') throw subResult.error;
+      setSubscription(subResult.data);
+
+      // Process transactions
+      if (transResult.error) throw transResult.error;
+      setRecentTransactions(transResult.data || []);
+
+      // Calculate current balance from latest transaction
+      if (transResult.data && transResult.data.length > 0 && transResult.data[0].balance_after !== null) {
+        setBalance(transResult.data[0].balance_after);
+      }
+
+      // Calculate monthly revenue
+      if (!monthlyResult.error && monthlyResult.data) {
+        const revenue = monthlyResult.data
           .filter(t => t.transaction_type === 'received')
           .reduce((sum, t) => sum + Number(t.amount), 0);
         setMonthlyRevenue(revenue);
