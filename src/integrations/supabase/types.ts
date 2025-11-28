@@ -1086,6 +1086,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_period_enabled: boolean | null
+          is_recommended: boolean | null
           max_stk_pushes: number | null
           max_users: number | null
           name: string
@@ -1103,6 +1104,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_period_enabled?: boolean | null
+          is_recommended?: boolean | null
           max_stk_pushes?: number | null
           max_users?: number | null
           name: string
@@ -1120,6 +1122,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_period_enabled?: boolean | null
+          is_recommended?: boolean | null
           max_stk_pushes?: number | null
           max_users?: number | null
           name?: string
