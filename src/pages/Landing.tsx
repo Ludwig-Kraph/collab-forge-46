@@ -31,6 +31,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [loadingTiers, setLoadingTiers] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'annual'>('monthly');
 
   // Fetch subscription tiers from database
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function Landing() {
           .select('*')
           .eq('show_on_landing', true)
           .eq('is_active', true)
+          .eq('period', selectedPeriod)
           .order('price', { ascending: true });
 
         if (mounted && data && !error) {
@@ -70,7 +72,7 @@ export default function Landing() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [selectedPeriod]);
 
   // Redirect authenticated users to dashboard - check first to prevent unnecessary renders
   useEffect(() => {
@@ -212,6 +214,45 @@ export default function Landing() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Start with our free trial and upgrade as you grow. No hidden fees.
           </p>
+          
+          {/* Billing Period Switcher */}
+          <div className="flex justify-center mt-8">
+            <div className="inline-flex rounded-lg border border-border bg-muted p-1">
+              <button
+                onClick={() => setSelectedPeriod('daily')}
+                className={cn(
+                  'px-6 py-2 rounded-md text-sm font-medium transition-all',
+                  selectedPeriod === 'daily'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Daily
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('monthly')}
+                className={cn(
+                  'px-6 py-2 rounded-md text-sm font-medium transition-all',
+                  selectedPeriod === 'monthly'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('annual')}
+                className={cn(
+                  'px-6 py-2 rounded-md text-sm font-medium transition-all',
+                  selectedPeriod === 'annual'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Annual
+              </button>
+            </div>
+          </div>
         </div>
 
         {loadingTiers ? (
