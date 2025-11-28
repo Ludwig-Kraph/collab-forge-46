@@ -40,7 +40,52 @@ export default function SubscriptionControl() {
 
   useEffect(() => {
     fetchTiers();
+    ensureFreeTierExists();
   }, []);
+
+  const ensureFreeTierExists = async () => {
+    // Check if free trial tier exists
+    const { data: existingTier } = await supabase
+      .from('subscription_tiers')
+      .select('id')
+      .eq('name', 'Free Trial')
+      .single();
+
+    if (!existingTier) {
+      // Create the free trial tier with all free tier features
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .insert({
+          name: 'Get Started Free',
+          description: 'Perfect for trying out M-Leja with basic features',
+          price: 0,
+          currency: 'KES',
+          period: 'monthly',
+          max_users: 1,
+          max_stk_pushes: 3,
+          features: [
+            'Basic Analytics',
+            'Real-time Dashboard',
+            'Transaction History',
+            'Receipt Generation',
+            'SMS Notifications',
+            'Email Notifications',
+          ],
+          icon_name: 'Zap',
+          is_active: true,
+          is_period_enabled: false,
+          show_on_landing: true,
+        });
+
+      if (!error) {
+        toast({
+          title: 'Free Trial Tier Created',
+          description: 'The Get Started Free tier has been automatically created.',
+        });
+        fetchTiers();
+      }
+    }
+  };
 
   const fetchTiers = async () => {
     const { data, error } = await supabase
