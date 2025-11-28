@@ -4,8 +4,8 @@
 // - Runtime cache for other GET requests
 // - Fast activation via skipWaiting + clients.claim
 
-const APP_CACHE = 'm-leja-app-v2';
-const ASSET_CACHE = 'm-leja-assets-v2';
+const APP_CACHE = 'm-leja-app-v3';
+const ASSET_CACHE = 'm-leja-assets-v3';
 const CACHE_WHITELIST = [APP_CACHE, ASSET_CACHE];
 
 self.addEventListener('install', (event) => {
@@ -76,7 +76,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: stale-while-revalidate for speed + freshness
+  // JS chunks: always fetch fresh to avoid stale chunk errors
+  if (url.pathname.endsWith('.js')) {
+    event.respondWith(
+      (async () => {
+        try {
+          return await fetch(req, { cache: 'no-cache' });
+        } catch (e) {
+          // If network fails, try one more time
+          try {
+            return await fetch(req, { cache: 'reload' });
+          } catch (e2) {
+            // Last resort: return cached or navigate to index
+            const cached = await caches.match(req);
+            return cached || (await caches.match('/index.html'));
+          }
+        }
+      })()
+    );
+    return;
+  }
+
+  // Other static assets (CSS, fonts, images): stale-while-revalidate
   const isAsset = ASSET_EXTENSIONS.some((ext) => url.pathname.endsWith(ext));
   if (isAsset) {
     event.respondWith(
