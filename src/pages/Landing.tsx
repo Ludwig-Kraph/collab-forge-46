@@ -9,10 +9,14 @@ import {
   TrendingUp, 
   Users, 
   Building2,
-  Check
+  Check,
+  Calendar,
+  CalendarDays,
+  CalendarClock
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
 import logo from '@/assets/m-leja-logo.png';
 import { getCopyrightText } from '@/utils/copyright';
 import { supabase } from '@/integrations/supabase/client';
@@ -217,59 +221,98 @@ export default function Landing() {
           
           {/* Billing Period Switcher */}
           <div className="flex justify-center mt-8">
-            <div className="inline-flex rounded-lg border border-border bg-muted p-1">
+            <div className="relative inline-flex rounded-xl border-2 border-primary/20 bg-gradient-to-br from-background to-muted/50 p-1.5 shadow-lg backdrop-blur-sm">
               <button
                 onClick={() => setSelectedPeriod('daily')}
                 className={cn(
-                  'px-6 py-2 rounded-md text-sm font-medium transition-all',
+                  'group relative px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2',
                   selectedPeriod === 'daily'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-elegant scale-105'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                 )}
               >
-                Daily
+                <Calendar className={cn(
+                  "h-4 w-4 transition-transform duration-300",
+                  selectedPeriod === 'daily' ? 'scale-110' : 'group-hover:scale-110'
+                )} />
+                <span>Daily</span>
               </button>
               <button
                 onClick={() => setSelectedPeriod('monthly')}
                 className={cn(
-                  'px-6 py-2 rounded-md text-sm font-medium transition-all',
+                  'group relative px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2',
                   selectedPeriod === 'monthly'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-elegant scale-105'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                 )}
               >
-                Monthly
+                <CalendarDays className={cn(
+                  "h-4 w-4 transition-transform duration-300",
+                  selectedPeriod === 'monthly' ? 'scale-110' : 'group-hover:scale-110'
+                )} />
+                <span>Monthly</span>
               </button>
               <button
                 onClick={() => setSelectedPeriod('annual')}
                 className={cn(
-                  'px-6 py-2 rounded-md text-sm font-medium transition-all',
+                  'group relative px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2',
                   selectedPeriod === 'annual'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-elegant scale-105'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                 )}
               >
-                Annual
+                <CalendarClock className={cn(
+                  "h-4 w-4 transition-transform duration-300",
+                  selectedPeriod === 'annual' ? 'scale-110' : 'group-hover:scale-110'
+                )} />
+                <span>Annual</span>
+                <Badge className="ml-1 bg-accent text-accent-foreground shadow-glow text-xs px-1.5 py-0.5 animate-pulse">
+                  Save 20%
+                </Badge>
               </button>
             </div>
           </div>
+          
+          <p className="text-center mt-4 text-sm text-muted-foreground animate-fade-in">
+            {selectedPeriod === 'daily' && '💡 Perfect for testing and short-term needs'}
+            {selectedPeriod === 'monthly' && '⭐ Most popular billing option'}
+            {selectedPeriod === 'annual' && '🎉 Best value - save over 20% compared to monthly!'}
+          </p>
         </div>
 
         {loadingTiers ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 animate-pulse">
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-primary/20"></div>
+            </div>
             <p className="text-muted-foreground">Loading pricing plans...</p>
           </div>
         ) : tiers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No pricing plans available at the moment.</p>
+          <div className="text-center py-12 animate-fade-in">
+            <div className="flex justify-center mb-4">
+              <AlertCircle className="h-12 w-12 text-muted-foreground/50" />
+            </div>
+            <p className="text-muted-foreground">No {selectedPeriod} plans available yet.</p>
+            <Button 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => setSelectedPeriod('monthly')}
+            >
+              View Monthly Plans
+            </Button>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {tiers.map((tier) => (
-              <Card key={tier.name} className={cn(
-                'relative',
-                tier.popular && 'border-primary shadow-elegant scale-105'
-              )}>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto animate-fade-in">
+            {tiers.map((tier, index) => (
+              <Card 
+                key={tier.name} 
+                className={cn(
+                  'relative transition-all duration-300 hover-scale',
+                  tier.popular && 'border-primary shadow-elegant scale-105',
+                  'animate-fade-in'
+                )}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
                 <CardHeader>
                   {tier.popular && (
                     <Badge className="w-fit mb-2 shadow-glow">⭐ Most Popular</Badge>
