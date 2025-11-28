@@ -48,7 +48,7 @@ export default function SubscriptionControl() {
     const { data: existingTier } = await supabase
       .from('subscription_tiers')
       .select('id')
-      .eq('name', 'Free Trial')
+      .eq('name', 'Get Started Free')
       .single();
 
     if (!existingTier) {
