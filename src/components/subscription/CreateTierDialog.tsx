@@ -20,6 +20,29 @@ const ICON_OPTIONS = [
   { value: 'DollarSign', label: 'Dollar', icon: DollarSign },
 ];
 
+const AVAILABLE_FEATURES = [
+  'Multi-Outlet Management',
+  'Basic Analytics',
+  'Advanced Analytics & Reports',
+  'Department Management',
+  'RBAC User Management',
+  'API Access',
+  'Priority Support',
+  'Custom Branding',
+  'Data Export (CSV/PDF)',
+  'Workflow Automations',
+  'Real-time Dashboard',
+  'SMS Notifications',
+  'Email Notifications',
+  'Transaction History',
+  'Receipt Generation',
+  'Team Collaboration',
+  'Audit Logs',
+  'Security Features',
+  'Mobile App Access',
+  'Offline Mode',
+];
+
 interface CreateTierDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,20 +63,22 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
     is_active: true,
     is_period_enabled: true,
   });
-  const [features, setFeatures] = useState<string[]>(['']);
+  const [features, setFeatures] = useState<string[]>([]);
+  const [selectedFeature, setSelectedFeature] = useState<string>('');
+
+  const availableFeatures = AVAILABLE_FEATURES.filter(
+    feature => !features.includes(feature)
+  );
 
   const handleAddFeature = () => {
-    setFeatures([...features, '']);
+    if (selectedFeature && !features.includes(selectedFeature)) {
+      setFeatures([...features, selectedFeature]);
+      setSelectedFeature('');
+    }
   };
 
   const handleRemoveFeature = (index: number) => {
     setFeatures(features.filter((_, i) => i !== index));
-  };
-
-  const handleFeatureChange = (index: number, value: string) => {
-    const newFeatures = [...features];
-    newFeatures[index] = value;
-    setFeatures(newFeatures);
   };
 
   const handleSubmit = async () => {
@@ -62,15 +87,18 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
       return;
     }
 
-    setLoading(true);
+    if (features.length === 0) {
+      toast.error('Please add at least one feature');
+      return;
+    }
 
-    const filteredFeatures = features.filter(f => f.trim() !== '');
+    setLoading(true);
 
     const { error } = await supabase
       .from('subscription_tiers')
       .insert({
         ...tierData,
-        features: filteredFeatures,
+        features: features,
       });
 
     setLoading(false);
@@ -98,7 +126,8 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
       is_active: true,
       is_period_enabled: true,
     });
-    setFeatures(['']);
+    setFeatures([]);
+    setSelectedFeature('');
   };
 
   const SelectedIcon = ICON_OPTIONS.find(opt => opt.value === tierData.icon_name)?.icon || Building2;
@@ -227,37 +256,57 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
             </FormField>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>Features</Label>
-            {features.map((feature, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={feature}
-                  onChange={(e) => handleFeatureChange(index, e.target.value)}
-                  placeholder="Enter feature"
-                />
-                {features.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleRemoveFeature(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
+            
+            {/* Selected Features List */}
+            {features.length > 0 && (
+              <div className="space-y-2 border rounded-md p-3 bg-muted/30">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-center justify-between gap-2 bg-background rounded-md p-2">
+                    <span className="text-sm">{feature}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleRemoveFeature(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddFeature}
-              className="w-full"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Feature
-            </Button>
+            )}
+
+            {/* Feature Selection Dropdown */}
+            <div className="flex gap-2">
+              <Select
+                value={selectedFeature}
+                onValueChange={setSelectedFeature}
+                disabled={availableFeatures.length === 0}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder={availableFeatures.length === 0 ? "All features added" : "Select a feature to add"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableFeatures.map((feature) => (
+                    <SelectItem key={feature} value={feature}>
+                      {feature}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleAddFeature}
+                disabled={!selectedFeature || availableFeatures.length === 0}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t">
