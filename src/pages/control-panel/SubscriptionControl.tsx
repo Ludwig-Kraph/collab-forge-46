@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
-import { AdminCard } from '@/components/admin/AdminCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,9 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, Users, Zap, Crown, Building2, Landmark, Save, Plus, Upload, Download } from 'lucide-react';
+import { Save, Plus, Upload, Download, Star, Building2 } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { CreateTierDialog } from '@/components/subscription/CreateTierDialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface SubscriptionTier {
   id: string;
@@ -22,110 +24,32 @@ interface SubscriptionTier {
   maxStkPushes: number | null;
   features: string[];
   terms: string;
-  icon: any;
+  period: string;
+  isPeriodEnabled: boolean;
   showOnLanding?: boolean;
-  isCustom?: boolean;
+  isRecommended?: boolean;
 }
-
-const defaultTiers: SubscriptionTier[] = [
-  {
-    id: 'free_trial',
-    name: 'Free Trial',
-    price: 0,
-    currency: 'KES',
-    maxUsers: 1,
-    maxStkPushes: 3,
-    features: ['3 free STK pushes', 'Single user', 'Basic support', '30 days trial'],
-    terms: 'Free trial for 30 days. Limited to 3 STK push payments.',
-    icon: Zap
-  },
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: 1500,
-    currency: 'KES',
-    maxUsers: 3,
-    maxStkPushes: 100,
-    features: ['Up to 3 users', '100 STK pushes/month', 'Email support', 'Basic analytics'],
-    terms: 'Monthly subscription. Billed monthly. Cancel anytime.',
-    icon: Users
-  },
-  {
-    id: 'standard',
-    name: 'Standard',
-    price: 5000,
-    currency: 'KES',
-    maxUsers: 10,
-    maxStkPushes: 500,
-    features: ['Up to 10 users', '500 STK pushes/month', 'Priority support', 'Advanced analytics', 'Multi-outlet support'],
-    terms: 'Monthly subscription. Billed monthly. Cancel anytime.',
-    icon: Building2
-  },
-  {
-    id: 'professional',
-    name: 'Professional',
-    price: 15000,
-    currency: 'KES',
-    maxUsers: 50,
-    maxStkPushes: 2000,
-    features: ['Up to 50 users', '2000 STK pushes/month', '24/7 support', 'Custom reports', 'API access', 'Department management'],
-    terms: 'Monthly subscription. Billed monthly. Cancel anytime.',
-    icon: Crown
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 50000,
-    currency: 'KES',
-    maxUsers: 200,
-    maxStkPushes: null,
-    features: ['Up to 200 users', 'Unlimited STK pushes', 'Dedicated support', 'Custom integration', 'SLA guarantee', 'Advanced RBAC'],
-    terms: 'Annual contract. Custom pricing available for larger organizations.',
-    icon: Building2
-  },
-  {
-    id: 'corporate',
-    name: 'Corporate',
-    price: 100000,
-    currency: 'KES',
-    maxUsers: 1000,
-    maxStkPushes: null,
-    features: ['Unlimited users', 'Unlimited STK pushes', 'White-label option', 'Dedicated account manager', 'Custom development', 'Multi-tenant support'],
-    terms: 'Annual contract. Customizable to business needs.',
-    icon: Building2
-  },
-  {
-    id: 'government',
-    name: 'Government',
-    price: 0,
-    currency: 'KES',
-    maxUsers: 10000,
-    maxStkPushes: null,
-    features: ['Unlimited users', 'Unlimited STK pushes', 'Government-grade security', 'Compliance reporting', 'Inter-governmental integration', 'Audit trails'],
-    terms: 'Special government pricing. Subject to approval and verification.',
-    icon: Landmark
-  }
-];
 
 export default function SubscriptionControl() {
   const { toast } = useToast();
-  const [tiers, setTiers] = useState<SubscriptionTier[]>(defaultTiers);
+  const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null);
   const [saving, setSaving] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('monthly');
 
   useEffect(() => {
-    fetchCustomTiers();
+    fetchTiers();
   }, []);
 
-  const fetchCustomTiers = async () => {
+  const fetchTiers = async () => {
     const { data, error } = await supabase
       .from('subscription_tiers')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('price', { ascending: true });
 
-    if (data) {
-      const customTiers: SubscriptionTier[] = data.map(tier => ({
+    if (data && !error) {
+      const formattedTiers: SubscriptionTier[] = data.map(tier => ({
         id: tier.id,
         name: tier.name,
         price: tier.price,
@@ -134,57 +58,59 @@ export default function SubscriptionControl() {
         maxStkPushes: tier.max_stk_pushes,
         features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
         terms: tier.description || '',
-        icon: Building2,
+        period: tier.period || 'monthly',
+        isPeriodEnabled: tier.is_period_enabled ?? true,
         showOnLanding: tier.show_on_landing || false,
-        isCustom: true,
+        isRecommended: tier.is_recommended || false,
       }));
-      setTiers([...defaultTiers, ...customTiers]);
+      setTiers(formattedTiers);
     }
   };
 
-  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean, tier?: SubscriptionTier) => {
+  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean) => {
     try {
-      // Check if tier exists in database
-      const { data: existingTier } = await supabase
+      const { error } = await supabase
         .from('subscription_tiers')
-        .select('id')
-        .eq('id', tierId)
-        .single();
+        .update({ 
+          show_on_landing: !currentStatus,
+          period: selectedPeriod,
+        })
+        .eq('id', tierId);
 
-      if (!existingTier && tier) {
-        // Create the tier first if it doesn't exist (for default tiers)
-        const { error: insertError } = await supabase
-          .from('subscription_tiers')
-          .insert({
-            id: tierId,
-            name: tier.name,
-            price: tier.price,
-            currency: tier.currency,
-            max_users: tier.maxUsers,
-            max_stk_pushes: tier.maxStkPushes,
-            features: tier.features,
-            description: tier.terms,
-            show_on_landing: !currentStatus,
-            is_active: true,
-          });
-
-        if (insertError) throw insertError;
-      } else {
-        // Update existing tier
-        const { error } = await supabase
-          .from('subscription_tiers')
-          .update({ show_on_landing: !currentStatus })
-          .eq('id', tierId);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: currentStatus ? 'Pulled from Landing Page' : 'Pushed to Landing Page',
-        description: `${tier?.name || 'Subscription tier'} is now ${!currentStatus ? 'visible' : 'hidden'} on the landing page.`,
+        description: `Subscription tier is now ${!currentStatus ? 'visible' : 'hidden'} on the landing page with ${selectedPeriod} billing.`,
       });
 
-      fetchCustomTiers();
+      fetchTiers();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleToggleRecommended = async (tierId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .update({ is_recommended: !currentStatus })
+        .eq('id', tierId);
+
+      if (error) throw error;
+
+      toast({
+        title: currentStatus ? 'Removed Recommended Flag' : 'Set as Recommended',
+        description: currentStatus 
+          ? 'This tier is no longer marked as recommended.' 
+          : 'This tier is now marked as recommended. All other tiers have been unmarked.',
+      });
+
+      fetchTiers();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -199,15 +125,30 @@ export default function SubscriptionControl() {
 
     setSaving(true);
     try {
-      // In a real implementation, this would save to a subscription_tiers table
-      // For now, we'll just show a success message
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .update({
+          name: selectedTier.name,
+          price: selectedTier.price,
+          currency: selectedTier.currency,
+          max_users: selectedTier.maxUsers,
+          max_stk_pushes: selectedTier.maxStkPushes,
+          features: selectedTier.features,
+          description: selectedTier.terms,
+          period: selectedTier.period,
+          is_period_enabled: selectedTier.isPeriodEnabled,
+        })
+        .eq('id', selectedTier.id);
+
+      if (error) throw error;
+
       toast({
         title: 'Subscription Updated',
         description: `${selectedTier.name} tier has been updated successfully.`,
       });
 
-      // Update local state
-      setTiers(prev => prev.map(t => t.id === selectedTier.id ? selectedTier : t));
+      fetchTiers();
+      setSelectedTier(null);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -243,7 +184,7 @@ export default function SubscriptionControl() {
         <CreateTierDialog 
           open={showCreateDialog} 
           onOpenChange={setShowCreateDialog}
-          onSuccess={fetchCustomTiers}
+          onSuccess={fetchTiers}
         />
 
         <Tabs defaultValue="overview" className="space-y-4">
@@ -254,28 +195,64 @@ export default function SubscriptionControl() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {tiers.map((tier) => {
-                const Icon = tier.icon;
-                return (
-                  <Card key={tier.id}>
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Billing Period for Go-Live</CardTitle>
+                <CardDescription>
+                  Select the billing period before pushing a tier to the landing page
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                  <SelectTrigger className="w-full md:w-64">
+                    <SelectValue placeholder="Select billing period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="annual">Annual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+
+            {tiers.length === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <p className="text-center text-muted-foreground">
+                    No subscription tiers found. Create one to get started.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {tiers.map((tier) => (
+                  <Card key={tier.id} className={tier.isRecommended ? 'border-2 border-primary' : ''}>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <Icon className="h-8 w-8 text-primary" />
-                        <Badge variant={tier.id === 'free_trial' ? 'secondary' : 'default'}>
-                          {tier.id === 'government' ? 'Special' : 'Active'}
-                        </Badge>
+                        <Building2 className="h-8 w-8 text-primary" />
+                        <div className="flex gap-1">
+                          {tier.isRecommended && (
+                            <Badge variant="default" className="gap-1">
+                              <Star className="h-3 w-3 fill-current" />
+                              Recommended
+                            </Badge>
+                          )}
+                          <Badge variant={tier.showOnLanding ? 'default' : 'secondary'}>
+                            {tier.showOnLanding ? 'Live' : 'Hidden'}
+                          </Badge>
+                        </div>
                       </div>
                       <CardTitle>{tier.name}</CardTitle>
                       <CardDescription>
-                        {tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}/month`}
+                        {tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}/${tier.period}`}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Max Users:</span>
-                          <span className="font-medium">{tier.maxUsers}</span>
+                          <span className="font-medium">{tier.maxUsers || 'Unlimited'}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">STK Pushes:</span>
@@ -284,10 +261,16 @@ export default function SubscriptionControl() {
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Landing Page:</span>
-                          <Badge variant={tier.showOnLanding ? 'default' : 'secondary'}>
-                            {tier.showOnLanding ? 'Live' : 'Hidden'}
-                          </Badge>
+                          <span className="text-muted-foreground">Period:</span>
+                          <span className="font-medium capitalize">{tier.period}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-2">
+                          <Label htmlFor={`recommended-${tier.id}`} className="text-sm">Recommended</Label>
+                          <Switch
+                            id={`recommended-${tier.id}`}
+                            checked={tier.isRecommended}
+                            onCheckedChange={() => handleToggleRecommended(tier.id, tier.isRecommended || false)}
+                          />
                         </div>
                         <div className="flex gap-2 mt-4">
                           <Button 
@@ -295,13 +278,13 @@ export default function SubscriptionControl() {
                             className="flex-1"
                             onClick={() => setSelectedTier(tier)}
                           >
-                            Edit Tier
+                            Edit
                           </Button>
                           <Button
                             size="icon"
                             variant={tier.showOnLanding ? 'destructive' : 'default'}
-                            onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false, tier)}
-                            title={tier.showOnLanding ? 'Pull from Landing Page (Hide)' : 'Push to Landing Page (Go Live)'}
+                            onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false)}
+                            title={tier.showOnLanding ? 'Pull from Landing Page (Hide)' : `Push to Landing Page (Go Live as ${selectedPeriod})`}
                           >
                             {tier.showOnLanding ? <Download className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
                           </Button>
@@ -309,9 +292,9 @@ export default function SubscriptionControl() {
                       </div>
                     </CardContent>
                   </Card>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="edit" className="space-y-4">
@@ -332,7 +315,7 @@ export default function SubscriptionControl() {
                       />
                     </FormField>
 
-                    <FormField label="Price (KES)" required>
+                    <FormField label="Price" required>
                       <Input 
                         type="number"
                         value={selectedTier.price}
@@ -340,7 +323,30 @@ export default function SubscriptionControl() {
                       />
                     </FormField>
 
-                    <FormField label="Max Users" required>
+                    <FormField label="Currency" required>
+                      <Input 
+                        value={selectedTier.currency}
+                        onChange={(e) => handleUpdateField('currency', e.target.value)}
+                      />
+                    </FormField>
+
+                    <FormField label="Billing Period" required>
+                      <Select
+                        value={selectedTier.period}
+                        onValueChange={(value) => handleUpdateField('period', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="annual">Annual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Max Users" hint="0 for unlimited">
                       <Input 
                         type="number"
                         value={selectedTier.maxUsers}
@@ -356,6 +362,18 @@ export default function SubscriptionControl() {
                         placeholder="Unlimited"
                       />
                     </FormField>
+                  </div>
+
+                  <div className="flex items-center justify-between border rounded-lg p-4">
+                    <div>
+                      <Label htmlFor="period-enabled">Enable Period Display</Label>
+                      <p className="text-sm text-muted-foreground">Show billing period on landing page</p>
+                    </div>
+                    <Switch
+                      id="period-enabled"
+                      checked={selectedTier.isPeriodEnabled}
+                      onCheckedChange={(checked) => handleUpdateField('isPeriodEnabled', checked)}
+                    />
                   </div>
 
                   <FormField label="Features" hint="One feature per line">

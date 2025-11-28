@@ -52,7 +52,7 @@ export default function Landing() {
             period: tier.is_period_enabled ? `/${tier.period}` : undefined,
             description: tier.description || '',
             features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
-            popular: false,
+            popular: tier.is_recommended || false,
           }));
           setTiers(formattedTiers);
         }
