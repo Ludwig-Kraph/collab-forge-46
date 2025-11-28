@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -18,6 +18,7 @@ interface Subscription {
 export function useRealtimeSubscription(userId: string | undefined) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const updateTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (!userId) {
@@ -42,7 +43,7 @@ export function useRealtimeSubscription(userId: string | undefined) {
 
     fetchSubscription();
 
-    // Set up realtime listener
+    // Set up realtime listener with throttling (1 second)
     const channel: RealtimeChannel = supabase
       .channel('subscription-changes')
       .on(
@@ -54,17 +55,26 @@ export function useRealtimeSubscription(userId: string | undefined) {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('Subscription update:', payload);
-          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            setSubscription(payload.new as Subscription);
-          } else if (payload.eventType === 'DELETE') {
-            setSubscription(null);
+          // Throttle updates to prevent excessive re-renders
+          if (updateTimeoutRef.current) {
+            clearTimeout(updateTimeoutRef.current);
           }
+          
+          updateTimeoutRef.current = setTimeout(() => {
+            if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+              setSubscription(payload.new as Subscription);
+            } else if (payload.eventType === 'DELETE') {
+              setSubscription(null);
+            }
+          }, 1000);
         }
       )
       .subscribe();
 
     return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
       supabase.removeChannel(channel);
     };
   }, [userId]);

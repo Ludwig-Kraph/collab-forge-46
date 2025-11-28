@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Layout from "@/components/layout/Layout";
 import FloatingActionButton from "@/components/layout/FloatingActionButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
+import { useQuery } from "@tanstack/react-query";
 
 interface Transaction {
   id: string;
@@ -38,7 +39,6 @@ const Index = () => {
   // Prefetch likely next pages for instant navigation
   usePrefetch(user?.id);
   
-  const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
@@ -55,40 +55,31 @@ const Index = () => {
     systemAlerts: 0,
   });
 
-  useEffect(() => {
-    if (user) {
-      if (isSuperAdmin) {
-        fetchSuperAdminDashboard();
-      } else {
-        fetchDashboardData();
-      }
-    }
-  }, [user, isSuperAdmin]);
-
   const fetchSuperAdminDashboard = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch all counts in parallel for better performance
-      const [usersCount, subsCount, transCount, regCount, ticketsCount, alertsCount] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('transactions').select('*', { count: 'exact', head: true }),
-        supabase.from('registration_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
-        supabase.from('system_alerts').select('*', { count: 'exact', head: true }).eq('is_resolved', false)
-      ]);
-
-      // Fetch revenue separately (aggregation)
-      const { data: revenueData } = await supabase
+    // Fetch all counts in parallel
+    const [usersCount, subsCount, transCount, regCount, ticketsCount, alertsCount, revenueData, recentActivity] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('transactions').select('*', { count: 'exact', head: true }),
+      supabase.from('registration_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('support_tickets').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
+      supabase.from('system_alerts').select('*', { count: 'exact', head: true }).eq('is_resolved', false),
+      supabase
         .from('transactions')
         .select('amount')
         .eq('transaction_type', 'received')
-        .eq('status', 'completed');
+        .eq('status', 'completed'),
+      supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10)
+    ]);
 
-      const totalRevenue = revenueData?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+    const totalRevenue = revenueData.data?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-      setPlatformStats({
+    return {
+      platformStats: {
         totalUsers: usersCount.count || 0,
         totalTransactions: transCount.count || 0,
         totalRevenue,
@@ -96,92 +87,84 @@ const Index = () => {
         pendingRegistrations: regCount.count || 0,
         openTickets: ticketsCount.count || 0,
         systemAlerts: alertsCount.count || 0,
-      });
-
-      // Fetch recent system activity (latest transactions across all users)
-      const { data: recentActivity, error: activityError } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      setRecentTransactions(recentActivity || []);
-
-    } catch (error: any) {
-      console.error('Error fetching super admin dashboard:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard data",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+      },
+      recentTransactions: recentActivity.data || []
+    };
   };
 
   const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
+    // Calculate monthly revenue start date
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-      // Calculate monthly revenue start date
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
+    // Fetch all data in parallel with optimized queries
+    const [subResult, transResult, monthlyResult] = await Promise.all([
+      supabase
+        .from('subscriptions')
+        .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
+        .eq('user_id', user?.id)
+        .eq('is_active', true)
+        .maybeSingle(),
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('transactions')
+        .select('amount, transaction_type')
+        .eq('user_id', user?.id)
+        .eq('status', 'completed')
+        .gte('created_at', startOfMonth.toISOString())
+    ]);
 
-      // Fetch all data in parallel for better performance
-      const [subResult, transResult, monthlyResult] = await Promise.all([
-        supabase
-          .from('subscriptions')
-          .select('tier, free_stk_pushes_remaining, used_stk_pushes, max_stk_pushes')
-          .eq('user_id', user?.id)
-          .eq('is_active', true)
-          .maybeSingle(),
-        supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', user?.id)
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('transactions')
-          .select('amount, transaction_type')
-          .eq('user_id', user?.id)
-          .eq('status', 'completed')
-          .gte('created_at', startOfMonth.toISOString())
-      ]);
+    // Calculate balance from latest transaction
+    const balance = transResult.data?.[0]?.balance_after || 0;
 
-      // Process subscription data
-      if (subResult.error && subResult.error.code !== 'PGRST116') throw subResult.error;
-      setSubscription(subResult.data);
+    // Calculate monthly revenue
+    const revenue = monthlyResult.data
+      ?.filter(t => t.transaction_type === 'received')
+      .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-      // Process transactions
-      if (transResult.error) throw transResult.error;
-      setRecentTransactions(transResult.data || []);
-
-      // Calculate current balance from latest transaction
-      if (transResult.data && transResult.data.length > 0 && transResult.data[0].balance_after !== null) {
-        setBalance(transResult.data[0].balance_after);
-      }
-
-      // Calculate monthly revenue
-      if (!monthlyResult.error && monthlyResult.data) {
-        const revenue = monthlyResult.data
-          .filter(t => t.transaction_type === 'received')
-          .reduce((sum, t) => sum + Number(t.amount), 0);
-        setMonthlyRevenue(revenue);
-      }
-
-    } catch (error: any) {
-      console.error('Error fetching dashboard data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard data",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    return {
+      balance,
+      subscription: subResult.data,
+      recentTransactions: transResult.data || [],
+      monthlyRevenue: revenue
+    };
   };
+
+  // Use React Query for automatic caching and background refetching
+  const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({
+    queryKey: ['dashboard', user?.id, isSuperAdmin],
+    queryFn: async () => {
+      if (isSuperAdmin) {
+        return await fetchSuperAdminDashboard();
+      } else {
+        return await fetchDashboardData();
+      }
+    },
+    enabled: !!user,
+    staleTime: 30000, // Data is fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+  });
+
+  useEffect(() => {
+    if (dashboardData && !isSuperAdmin) {
+      const data = dashboardData as Awaited<ReturnType<typeof fetchDashboardData>>;
+      setBalance(data.balance);
+      setSubscription(data.subscription);
+      setRecentTransactions(data.recentTransactions);
+      setMonthlyRevenue(data.monthlyRevenue);
+    } else if (dashboardData && isSuperAdmin) {
+      const data = dashboardData as Awaited<ReturnType<typeof fetchSuperAdminDashboard>>;
+      setPlatformStats(data.platformStats);
+      setRecentTransactions(data.recentTransactions);
+    }
+  }, [dashboardData, isSuperAdmin]);
 
   const freePushes = subscription?.free_stk_pushes_remaining;
   
@@ -202,7 +185,7 @@ const Index = () => {
   );
 
   // Super Admin Dashboard Render
-  if (isSuperAdmin && !loading) {
+  if (isSuperAdmin && !isDashboardLoading) {
     return (
       <Layout>
         <div className="container px-4 py-6 max-w-7xl mx-auto">
@@ -414,7 +397,7 @@ const Index = () => {
   }
 
   // Show skeleton while loading
-  if (loading) {
+  if (isDashboardLoading) {
     return (
       <Layout>
         <DashboardSkeleton />
@@ -526,7 +509,7 @@ const Index = () => {
             <CardDescription>Your latest payment activities</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {isDashboardLoading ? (
               <div className="text-center text-muted-foreground py-8">Loading...</div>
             ) : recentTransactions.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">

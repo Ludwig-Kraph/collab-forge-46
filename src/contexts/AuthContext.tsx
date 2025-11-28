@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -99,9 +99,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // Cache for user role data to prevent redundant fetches
+  const userRoleCache = useRef<{
+    userId: string;
+    data: any;
+    timestamp: number;
+  } | null>(null);
+
   const fetchUserRole = async (userId: string): Promise<void> => {
     try {
-      // Fetch all user data in parallel for better performance
+      // Check cache first (5 second TTL)
+      const now = Date.now();
+      if (userRoleCache.current?.userId === userId && 
+          now - userRoleCache.current.timestamp < 5000) {
+        const cached = userRoleCache.current.data;
+        setIsBlocked(cached.isBlocked);
+        setUserRole(cached.role);
+        setIsAdmin(cached.isAdmin);
+        setIsSuperAdmin(cached.isSuperAdmin);
+        setIsExpired(cached.isExpired);
+        return;
+      }
+
+      // Fetch all user data in parallel with optimized query
       const [profileResult, roleResult, subscriptionResult] = await Promise.all([
         supabase
           .from('profiles')
@@ -118,43 +138,58 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .select('expires_at, is_active')
           .eq('user_id', userId)
           .eq('is_active', true)
-          .maybeSingle() // Use maybeSingle to avoid error if no subscription exists
+          .maybeSingle()
       ]);
 
       const profile = profileResult.data;
       const role = roleResult.data;
       const subscription = subscriptionResult.data;
       
-      // Check if account is blocked
-      setIsBlocked(profile?.is_blocked || false);
+      const isBlocked = profile?.is_blocked || false;
+      const isAdmin = role?.role === 'admin' || role?.role === 'super_admin' || role?.role === 'corporate_admin';
+      const isSuperAdmin = role?.role === 'super_admin';
       
-      if (profile?.is_blocked) {
+      let isExpired = false;
+      if (subscription?.expires_at) {
+        const expiryDate = new Date(subscription.expires_at);
+        isExpired = expiryDate < new Date();
+      }
+
+      // Update cache
+      userRoleCache.current = {
+        userId,
+        data: {
+          isBlocked,
+          role: role?.role,
+          isAdmin,
+          isSuperAdmin,
+          isExpired
+        },
+        timestamp: now
+      };
+
+      // Update state
+      setIsBlocked(isBlocked);
+      setUserRole(role?.role || null);
+      setIsAdmin(isAdmin);
+      setIsSuperAdmin(isSuperAdmin);
+      setIsExpired(isExpired);
+      
+      // Only show toasts on actual changes, not on every fetch
+      if (isBlocked && !userRoleCache.current) {
         toast({
           title: "Account Blocked",
           description: "Your account has been blocked. Please contact support.",
           variant: "destructive"
         });
       }
-
-      if (roleResult.error) throw roleResult.error;
-
-      setUserRole(role.role);
-      setIsAdmin(role.role === 'admin' || role.role === 'super_admin' || role.role === 'corporate_admin');
-      setIsSuperAdmin(role.role === 'super_admin');
       
-      // Check subscription expiry
-      if (subscription?.expires_at) {
-        const expiryDate = new Date(subscription.expires_at);
-        const expired = expiryDate < new Date();
-        setIsExpired(expired);
-        
-        if (expired) {
-          toast({
-            title: "Subscription Expired",
-            description: "Your subscription has expired. Please renew to continue using all features.",
-            variant: "destructive"
-          });
-        }
+      if (isExpired && !userRoleCache.current) {
+        toast({
+          title: "Subscription Expired",
+          description: "Your subscription has expired. Please renew to continue using all features.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error fetching user role:', error);
