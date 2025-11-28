@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -17,6 +17,7 @@ interface Profile {
 export function useRealtimeProfile(userId: string | undefined) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const updateTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (!userId) {
@@ -40,7 +41,7 @@ export function useRealtimeProfile(userId: string | undefined) {
 
     fetchProfile();
 
-    // Set up realtime listener
+    // Set up realtime listener with throttling (1 second)
     const channel: RealtimeChannel = supabase
       .channel('profile-changes')
       .on(
@@ -52,15 +53,24 @@ export function useRealtimeProfile(userId: string | undefined) {
           filter: `id=eq.${userId}`,
         },
         (payload) => {
-          console.log('Profile update:', payload);
-          if (payload.eventType === 'UPDATE') {
-            setProfile(payload.new as Profile);
+          // Throttle updates to prevent excessive re-renders
+          if (updateTimeoutRef.current) {
+            clearTimeout(updateTimeoutRef.current);
           }
+          
+          updateTimeoutRef.current = setTimeout(() => {
+            if (payload.eventType === 'UPDATE') {
+              setProfile(payload.new as Profile);
+            }
+          }, 1000);
         }
       )
       .subscribe();
 
     return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
       supabase.removeChannel(channel);
     };
   }, [userId]);
