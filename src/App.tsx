@@ -28,6 +28,8 @@ const Subscription = lazy(() => import("./pages/Subscription"));
 const Help = lazy(() => import("./pages/Help"));
 const HowTo = lazy(() => import("./pages/HowTo"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Heavy components - lazy load
@@ -117,6 +119,8 @@ const App = () => (
             <Route path="/mpesa-daraja" element={<ProtectedRoute><MpesaDarajaSettings /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/how-to" element={<ProtectedRoute><HowTo /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
