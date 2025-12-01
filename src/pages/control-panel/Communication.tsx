@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import Layout from "@/components/layout/Layout";
+import { ControlPanelLayout } from "@/components/layout/ControlPanelLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -218,8 +218,8 @@ export default function Communication() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 h-[calc(100vh-100px)]">
+    <ControlPanelLayout>
+      <div className="h-[calc(100vh-200px)]">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Inter-Team Communication</h1>
@@ -382,6 +382,6 @@ export default function Communication() {
           </Card>
         </div>
       </div>
-    </Layout>
+    </ControlPanelLayout>
   );
 }

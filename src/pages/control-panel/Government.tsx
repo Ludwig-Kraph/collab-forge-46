@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/layout/Layout";
+import { ControlPanelLayout } from "@/components/layout/ControlPanelLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,8 +132,8 @@ export default function Government() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
+    <ControlPanelLayout>
+      <div className="space-y-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -338,6 +338,6 @@ export default function Government() {
           </div>
         )}
       </div>
-    </Layout>
+    </ControlPanelLayout>
   );
 }

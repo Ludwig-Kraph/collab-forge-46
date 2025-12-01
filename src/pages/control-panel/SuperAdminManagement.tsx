@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "@/components/layout/Layout";
+import { ControlPanelLayout } from "@/components/layout/ControlPanelLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,8 +86,8 @@ export default function SuperAdminManagement() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 max-w-4xl space-y-6">
+    <ControlPanelLayout>
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -224,6 +224,6 @@ export default function SuperAdminManagement() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </ControlPanelLayout>
   );
 }

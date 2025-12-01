@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import Layout from "@/components/layout/Layout";
+import { ControlPanelLayout } from "@/components/layout/ControlPanelLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminCard } from "@/components/admin/AdminCard";
@@ -178,11 +178,11 @@ export default function ControlPanel() {
   };
 
   return (
-    <Layout>
+    <ControlPanelLayout>
       {loading ? (
         <DashboardSkeleton />
       ) : (
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -397,6 +397,6 @@ export default function ControlPanel() {
         </Tabs>
       </div>
       )}
-    </Layout>
+    </ControlPanelLayout>
   );
 }
