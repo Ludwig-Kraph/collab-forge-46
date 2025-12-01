@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import Layout from "@/components/layout/Layout";
+import { ControlPanelLayout } from "@/components/layout/ControlPanelLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -221,8 +221,8 @@ export default function Onboarding() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+    <ControlPanelLayout>
+      <div className="space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold">Client Onboarding</h1>
@@ -430,6 +430,6 @@ export default function Onboarding() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
+    </ControlPanelLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
+import { ControlPanelLayout } from '@/components/layout/ControlPanelLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -195,7 +195,7 @@ export default function LandingPageBuilder() {
   };
 
   return (
-    <Layout>
+    <ControlPanelLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -399,6 +399,6 @@ export default function LandingPageBuilder() {
           </Card>
         </div>
       </div>
-    </Layout>
+    </ControlPanelLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/layout/Layout";
+import { ControlPanelLayout } from "@/components/layout/ControlPanelLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,8 +113,8 @@ export default function SystemSettings() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <ControlPanelLayout>
+      <div className="max-w-5xl mx-auto space-y-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Server className="h-8 w-8" />
@@ -413,6 +413,6 @@ export default function SystemSettings() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </ControlPanelLayout>
   );
 }

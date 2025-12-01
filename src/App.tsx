@@ -57,6 +57,7 @@ const InterGovernmental = lazyWithRetry(() => import('@/pages/government/InterGo
 const MpesaDarajaSettings = lazyWithRetry(() => import('@/pages/MpesaDarajaSettings'));
 const SubscriptionAnalytics = lazyWithRetry(() => import('@/pages/analytics/SubscriptionAnalytics'));
 const SubscriptionCMS = lazyWithRetry(() => import('@/pages/cms/SubscriptionCMS'));
+const ControlPanelCMS = lazyWithRetry(() => import('@/pages/control-panel/ControlPanelCMS'));
 
 // Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
@@ -100,15 +101,16 @@ const App = () => (
             <Route path="/more" element={<ProtectedRoute><More /></ProtectedRoute>} />
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/control-panel" element={<SuperAdminRoute><ControlPanel /></SuperAdminRoute>} />
+            <Route path="/control-panel/cms" element={<SuperAdminRoute><ControlPanelCMS /></SuperAdminRoute>} />
             <Route path="/control-panel/accounts" element={<SuperAdminRoute><Accounts /></SuperAdminRoute>} />
             <Route path="/control-panel/onboarding" element={<SuperAdminRoute><Onboarding /></SuperAdminRoute>} />
             <Route path="/control-panel/support" element={<SuperAdminRoute><Support /></SuperAdminRoute>} />
             <Route path="/control-panel/communication" element={<SuperAdminRoute><Communication /></SuperAdminRoute>} />
-            <Route path="/control-panel/subscriptions" element={<SuperAdminRoute><SubscriptionControl /></SuperAdminRoute>} />
-            <Route path="/control-panel/landing-builder" element={<SuperAdminRoute><LandingPageBuilder /></SuperAdminRoute>} />
-            <Route path="/control-panel/settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
+            <Route path="/control-panel/subscription-control" element={<SuperAdminRoute><SubscriptionControl /></SuperAdminRoute>} />
+            <Route path="/control-panel/landing-page-builder" element={<SuperAdminRoute><LandingPageBuilder /></SuperAdminRoute>} />
+            <Route path="/control-panel/system-settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/control-panel/government" element={<SuperAdminRoute><Government /></SuperAdminRoute>} />
-            <Route path="/control-panel/super-admins" element={<SuperAdminRoute><SuperAdminManagement /></SuperAdminRoute>} />
+            <Route path="/control-panel/super-admin-management" element={<SuperAdminRoute><SuperAdminManagement /></SuperAdminRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
             <Route path="/subscription/staff" element={<AdminRoute><SubscriptionStaff /></AdminRoute>} />
             <Route path="/subscription/departments" element={<AdminRoute><SubscriptionDepartments /></AdminRoute>} />
