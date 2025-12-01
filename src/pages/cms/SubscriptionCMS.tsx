@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import Layout from '@/components/layout/Layout';
+import CMSLayout from '@/components/layout/CMSLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -25,7 +25,7 @@ const SubscriptionCMS = () => {
 
   if (!isAdmin && !isSuperAdmin) {
     return (
-      <Layout>
+      <CMSLayout>
         <div className="flex items-center justify-center min-h-screen">
           <Card className="max-w-md">
             <CardHeader>
@@ -34,7 +34,7 @@ const SubscriptionCMS = () => {
             </CardHeader>
           </Card>
         </div>
-      </Layout>
+      </CMSLayout>
     );
   }
 
@@ -106,7 +106,7 @@ const SubscriptionCMS = () => {
   ];
 
   return (
-    <Layout>
+    <CMSLayout>
       <div className="container px-4 py-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -196,7 +196,7 @@ const SubscriptionCMS = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </CMSLayout>
   );
 };
 

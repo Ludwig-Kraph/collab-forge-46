@@ -6,55 +6,57 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { SuperAdminRoute } from '@/components/auth/SuperAdminRoute';
 import { ThemeProvider } from "next-themes";
+import { lazyWithRetry } from "@/components/LazyLoadRetry";
+import LazyLoadErrorBoundary from "@/components/LazyLoadRetry";
 
-// Lazy load pages for better performance
-const Landing = lazy(() => import("./pages/Landing"));
-const Index = lazy(() => import("./pages/Index"));
-const Auth = lazy(() => import("./pages/Auth"));
-const Payment = lazy(() => import("./pages/Payment"));
-const Transactions = lazy(() => import("./pages/Transactions"));
-const Ledger = lazy(() => import("./pages/Ledger"));
-const Analytics = lazy(() => import("./pages/Analytics"));
-const More = lazy(() => import("./pages/More"));
-const Settings = lazy(() => import("./pages/Settings"));
-const Subscription = lazy(() => import("./pages/Subscription"));
-const Help = lazy(() => import("./pages/Help"));
-const HowTo = lazy(() => import("./pages/HowTo"));
-const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
-const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+// Lazy load pages with retry logic to prevent chunk loading errors
+const Landing = lazyWithRetry(() => import("./pages/Landing"));
+const Index = lazyWithRetry(() => import("./pages/Index"));
+const Auth = lazyWithRetry(() => import("./pages/Auth"));
+const Payment = lazyWithRetry(() => import("./pages/Payment"));
+const Transactions = lazyWithRetry(() => import("./pages/Transactions"));
+const Ledger = lazyWithRetry(() => import("./pages/Ledger"));
+const Analytics = lazyWithRetry(() => import("./pages/Analytics"));
+const More = lazyWithRetry(() => import("./pages/More"));
+const Settings = lazyWithRetry(() => import("./pages/Settings"));
+const Subscription = lazyWithRetry(() => import("./pages/Subscription"));
+const Help = lazyWithRetry(() => import("./pages/Help"));
+const HowTo = lazyWithRetry(() => import("./pages/HowTo"));
+const CookiePolicy = lazyWithRetry(() => import("./pages/CookiePolicy"));
+const TermsAndConditions = lazyWithRetry(() => import("./pages/TermsAndConditions"));
+const PrivacyPolicy = lazyWithRetry(() => import("./pages/PrivacyPolicy"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 
-// Heavy components - lazy load
-const Users = lazy(() => import('@/pages/Users'));
-const ControlPanel = lazy(() => import('@/pages/ControlPanel'));
-const Accounts = lazy(() => import('@/pages/control-panel/Accounts'));
-const Onboarding = lazy(() => import('@/pages/control-panel/Onboarding'));
-const Support = lazy(() => import('@/pages/control-panel/Support'));
-const Communication = lazy(() => import('@/pages/control-panel/Communication'));
-const SystemSettings = lazy(() => import('@/pages/control-panel/SystemSettings'));
-const Government = lazy(() => import('@/pages/control-panel/Government'));
-const SubscriptionControl = lazy(() => import('@/pages/control-panel/SubscriptionControl'));
-const LandingPageBuilder = lazy(() => import('@/pages/control-panel/LandingPageBuilder'));
-const SuperAdminManagement = lazy(() => import('@/pages/control-panel/SuperAdminManagement'));
-const SubscriptionOutlets = lazy(() => import('@/pages/subscription/Outlets'));
-const SubscriptionStaff = lazy(() => import('@/pages/subscription/Staff'));
-const SubscriptionDepartments = lazy(() => import('@/pages/subscription/Departments'));
-const CashierDashboard = lazy(() => import('@/pages/CashierDashboard'));
-const GovLanding = lazy(() => import('@/pages/government/GovLanding'));
-const NationalDashboard = lazy(() => import('@/pages/government/NationalDashboard'));
-const CountyDashboard = lazy(() => import('@/pages/government/CountyDashboard'));
-const InterGovernmental = lazy(() => import('@/pages/government/InterGovernmental'));
-const MpesaDarajaSettings = lazy(() => import('@/pages/MpesaDarajaSettings'));
-const SubscriptionAnalytics = lazy(() => import('@/pages/analytics/SubscriptionAnalytics'));
-const SubscriptionCMS = lazy(() => import('@/pages/cms/SubscriptionCMS'));
+// Heavy components - lazy load with retry
+const Users = lazyWithRetry(() => import('@/pages/Users'));
+const ControlPanel = lazyWithRetry(() => import('@/pages/ControlPanel'));
+const Accounts = lazyWithRetry(() => import('@/pages/control-panel/Accounts'));
+const Onboarding = lazyWithRetry(() => import('@/pages/control-panel/Onboarding'));
+const Support = lazyWithRetry(() => import('@/pages/control-panel/Support'));
+const Communication = lazyWithRetry(() => import('@/pages/control-panel/Communication'));
+const SystemSettings = lazyWithRetry(() => import('@/pages/control-panel/SystemSettings'));
+const Government = lazyWithRetry(() => import('@/pages/control-panel/Government'));
+const SubscriptionControl = lazyWithRetry(() => import('@/pages/control-panel/SubscriptionControl'));
+const LandingPageBuilder = lazyWithRetry(() => import('@/pages/control-panel/LandingPageBuilder'));
+const SuperAdminManagement = lazyWithRetry(() => import('@/pages/control-panel/SuperAdminManagement'));
+const SubscriptionOutlets = lazyWithRetry(() => import('@/pages/subscription/Outlets'));
+const SubscriptionStaff = lazyWithRetry(() => import('@/pages/subscription/Staff'));
+const SubscriptionDepartments = lazyWithRetry(() => import('@/pages/subscription/Departments'));
+const CashierDashboard = lazyWithRetry(() => import('@/pages/CashierDashboard'));
+const GovLanding = lazyWithRetry(() => import('@/pages/government/GovLanding'));
+const NationalDashboard = lazyWithRetry(() => import('@/pages/government/NationalDashboard'));
+const CountyDashboard = lazyWithRetry(() => import('@/pages/government/CountyDashboard'));
+const InterGovernmental = lazyWithRetry(() => import('@/pages/government/InterGovernmental'));
+const MpesaDarajaSettings = lazyWithRetry(() => import('@/pages/MpesaDarajaSettings'));
+const SubscriptionAnalytics = lazyWithRetry(() => import('@/pages/analytics/SubscriptionAnalytics'));
+const SubscriptionCMS = lazyWithRetry(() => import('@/pages/cms/SubscriptionCMS'));
 
 // Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
@@ -79,12 +81,13 @@ const App = () => (
               <Toaster />
               <Sonner />
               <CookieConsent />
-              <Suspense fallback={
-                <div className="flex items-center justify-center min-h-screen">
-                  <LoadingSpinner />
-                </div>
-              }>
-              <Routes>
+              <LazyLoadErrorBoundary>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-screen">
+                    <LoadingSpinner />
+                  </div>
+                }>
+                <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -126,6 +129,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
             </Routes>
               </Suspense>
+              </LazyLoadErrorBoundary>
             </NotificationProvider>
           </AuthProvider>
         </BrowserRouter>

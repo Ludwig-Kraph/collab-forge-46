@@ -4,8 +4,8 @@
 // - Runtime cache for other GET requests
 // - Fast activation via skipWaiting + clients.claim
 
-const APP_CACHE = 'm-leja-app-v3';
-const ASSET_CACHE = 'm-leja-assets-v3';
+const APP_CACHE = 'm-leja-app-v4';
+const ASSET_CACHE = 'm-leja-assets-v4';
 const CACHE_WHITELIST = [APP_CACHE, ASSET_CACHE];
 
 self.addEventListener('install', (event) => {
