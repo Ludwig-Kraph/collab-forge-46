@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/layout/Layout";
+import CMSLayout from "@/components/layout/CMSLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -137,16 +137,16 @@ export default function Outlets() {
 
   if (loading) {
     return (
-      <Layout>
+      <CMSLayout>
         <div className="flex items-center justify-center h-screen">
           <LoadingSpinner />
         </div>
-      </Layout>
+      </CMSLayout>
     );
   }
 
   return (
-    <Layout>
+    <CMSLayout>
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -281,6 +281,6 @@ export default function Outlets() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
+    </CMSLayout>
   );
 }

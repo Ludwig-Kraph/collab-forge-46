@@ -28,6 +28,28 @@ const Analytics = () => {
   useEffect(() => {
     if (user) {
       fetchAnalyticsData();
+
+      // Set up realtime subscription for transactions
+      const channel = supabase
+        .channel('analytics-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'transactions',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            // Refetch analytics on any transaction change
+            fetchAnalyticsData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user, period]);
 
@@ -258,66 +280,56 @@ const Analytics = () => {
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Performing Hours</CardTitle>
-                  <CardDescription>Peak transaction times</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { time: "12:00 PM - 1:00 PM", transactions: 142, percent: 85 },
-                      { time: "2:00 PM - 3:00 PM", transactions: 128, percent: 75 },
-                      { time: "5:00 PM - 6:00 PM", transactions: 115, percent: 68 },
-                      { time: "10:00 AM - 11:00 AM", transactions: 98, percent: 58 },
-                    ].map((hour) => (
-                      <div key={hour.time} className="space-y-1">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium">{hour.time}</span>
-                          <span className="text-muted-foreground">{hour.transactions} transactions</span>
-                        </div>
-                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary"
-                            style={{ width: `${hour.percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Summary</CardTitle>
+                <CardDescription>Real-time business performance metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="p-4 border rounded-lg bg-muted/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Success Rate</span>
+                      <span className="text-2xl font-bold text-green-500">
+                        {metrics.successRate.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-green-500 transition-all" 
+                        style={{ width: `${metrics.successRate}%` }}
+                      />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Methods</CardTitle>
-                  <CardDescription>Distribution by account type</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { type: "Till Number", count: 456, percent: 49 },
-                      { type: "Paybill", count: 312, percent: 33 },
-                      { type: "Pochi la Biashara", count: 170, percent: 18 },
-                    ].map((method) => (
-                      <div key={method.type} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{method.type}</span>
-                          <span className="text-sm text-muted-foreground">{method.count} ({method.percent}%)</span>
-                        </div>
-                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-accent"
-                            style={{ width: `${method.percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Total Transactions</p>
+                      <p className="text-2xl font-bold">{metrics.totalTransactions}</p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Average Value</p>
+                      <p className="text-2xl font-bold font-mono">KES {Math.round(metrics.avgTransaction).toLocaleString()}</p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Active Customers</p>
+                      <p className="text-2xl font-bold">{metrics.activeCustomers}</p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
+                      <p className="text-2xl font-bold font-mono">KES {metrics.totalRevenue.toLocaleString()}</p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+
+                  <div className="p-4 border rounded-lg bg-primary/5">
+                    <p className="text-sm text-muted-foreground mb-2">📊 All data is fetched in real-time</p>
+                    <p className="text-xs text-muted-foreground">
+                      Analytics update automatically as new transactions are processed
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

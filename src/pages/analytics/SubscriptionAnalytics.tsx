@@ -29,6 +29,7 @@ const SubscriptionAnalytics = () => {
     peakHour: "",
     topPaymentMethod: "",
     growthRate: 0,
+    customerRetention: 0,
   });
   const [chartData, setChartData] = useState<any>({
     revenue: [],
@@ -39,7 +40,31 @@ const SubscriptionAnalytics = () => {
   });
 
   useEffect(() => {
-    if (user) fetchAnalytics();
+    if (user) {
+      fetchAnalytics();
+      
+      // Set up realtime subscription for transactions
+      const channel = supabase
+        .channel('analytics-transactions')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'transactions',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            // Refetch analytics on any transaction change
+            fetchAnalytics();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user, period]);
 
   const fetchAnalytics = async () => {
@@ -82,6 +107,30 @@ const SubscriptionAnalytics = () => {
         return acc;
       }, {} as Record<string, number>);
 
+      // Calculate customer retention (returning customers vs new)
+      const phoneFrequency = transactions.reduce((acc, t) => {
+        acc[t.phone_number] = (acc[t.phone_number] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const returningCustomers = Object.values(phoneFrequency).filter(count => count > 1).length;
+      const customerRetention = uniqueCustomers > 0 ? (returningCustomers / uniqueCustomers) * 100 : 0;
+
+      // Calculate growth rate from previous period
+      const previousPeriodStart = subDays(startDate, days);
+      const { data: previousTransactions } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('user_id', user?.id)
+        .eq('transaction_type', 'received')
+        .gte('created_at', previousPeriodStart.toISOString())
+        .lt('created_at', startDate.toISOString());
+
+      const previousRevenue = previousTransactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const growthRate = previousRevenue > 0 
+        ? ((totalRev - previousRevenue) / previousRevenue) * 100 
+        : totalRev > 0 ? 100 : 0;
+
       setMetrics({
         totalRevenue: totalRev,
         totalTransactions: transactions.length,
@@ -90,7 +139,8 @@ const SubscriptionAnalytics = () => {
         activeCustomers: uniqueCustomers,
         peakHour: peakHour ? `${peakHour}:00` : "N/A",
         topPaymentMethod: Object.keys(methodCounts || {})[0] || "Till",
-        growthRate: 12.5, // Calculate from comparison period
+        growthRate: growthRate,
+        customerRetention: customerRetention,
       });
 
       // Revenue trend (daily)
@@ -444,7 +494,7 @@ const SubscriptionAnalytics = () => {
                       <Users className="h-5 w-5 text-primary" />
                       <span className="font-medium">Customer Retention</span>
                     </div>
-                    <span className="font-bold text-primary">85%</span>
+                    <span className="font-bold text-primary">{metrics.customerRetention.toFixed(1)}%</span>
                   </div>
                 </CardContent>
               </Card>
