@@ -115,6 +115,33 @@ npm run build
 - **Process Manager**: PM2 or systemd for Node.js processes
 - **Firewall Management**: Allow ports 80, 443, and application port
 
+### 7. **Any WHM/WHMCS Platform**
+
+M-Leja is compatible with ANY web hosting platform running WHM/WHMCS. The key requirement is Node.js v18+ support.
+
+**Universal WHM Installation Steps:**
+1. Access your hosting control panel (cPanel/Plesk/DirectAdmin/etc.)
+2. Enable Node.js v18 or higher (via Node.js selector or package manager)
+3. Upload M-Leja files to your web directory
+4. Configure reverse proxy (Apache/Nginx) to route traffic to Node.js app
+5. Set up SSL certificate (Let's Encrypt recommended)
+6. Configure environment variables for Supabase and MPESA
+7. Start application using PM2 or control panel's process manager
+
+**For Shared Hosting Without Shell Access:**
+```bash
+# Build locally first
+npm install
+npm run build
+
+# Upload only the 'dist' folder contents to your hosting
+# Configure web server to serve static files from 'dist'
+# Ensure .htaccess or nginx.conf is properly configured for SPA routing
+```
+
+**For VPS/Dedicated Servers:**
+Follow the complete installation guide below with full server access.
+
 ---
 
 ## Supabase Setup

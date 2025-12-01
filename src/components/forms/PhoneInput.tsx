@@ -25,6 +25,8 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
             ref={ref}
             type="tel"
             placeholder="+254712345678"
+            inputMode="tel"
+            autoComplete="tel"
             className={cn(
               showIcon && "pl-10",
               error && "border-destructive focus-visible:ring-destructive",

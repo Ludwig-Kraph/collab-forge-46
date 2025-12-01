@@ -41,7 +41,23 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     
-    const { error } = await signIn(loginPhone, loginPassword);
+    // Normalize phone number for Supabase auth
+    // Supabase stores phone numbers in international format without +
+    let normalizedPhone = loginPhone.trim();
+    
+    // Remove any spaces, dashes, or parentheses
+    normalizedPhone = normalizedPhone.replace(/[\s\-()]/g, '');
+    
+    // Normalize to format Supabase expects: 254XXXXXXXXX (no + prefix)
+    if (normalizedPhone.startsWith('+254')) {
+      normalizedPhone = normalizedPhone.slice(1); // Remove +
+    } else if (normalizedPhone.startsWith('0')) {
+      normalizedPhone = '254' + normalizedPhone.slice(1); // Convert 07... to 2547...
+    } else if (!normalizedPhone.startsWith('254')) {
+      normalizedPhone = '254' + normalizedPhone; // Add 254 prefix if missing
+    }
+    
+    const { error } = await signIn(normalizedPhone, loginPassword);
     
     // Don't manually navigate - let useEffect handle it after user state updates
     

@@ -75,9 +75,21 @@ netlify deploy --prod
 
 ---
 
-### 4. Traditional Web Hosting (cPanel/FTP)
+### 4. Traditional Web Hosting (cPanel/FTP/WHM/WHMCS)
 
-**Perfect for shared hosting, GoDaddy, Bluehost, Hostinger, etc.**
+**Perfect for ANY web hosting platform: cPanel, WHM, WHMCS, Plesk, DirectAdmin, Shared Hosting, VPS**
+
+M-Leja is fully compatible with all WHM-based hosting platforms including:
+- ✅ cPanel/WHM
+- ✅ Plesk
+- ✅ DirectAdmin  
+- ✅ Virtualmin/Webmin
+- ✅ CyberPanel
+- ✅ ISPConfig
+- ✅ GoDaddy, Bluehost, Hostinger, SiteGround, HostGator
+- ✅ Any hosting platform with File Manager or FTP access
+
+**Method 1: Static Build (Recommended for Shared Hosting)**
 
 **Step 1: Build locally**
 ```bash
@@ -86,27 +98,80 @@ npm run build
 ```
 
 **Step 2: Upload `dist/` contents to server**
-- Via FTP: Upload all files from `dist/` to `public_html` or `www`
-- Via cPanel File Manager: Upload and extract zip of `dist/`
+- **Via cPanel File Manager**: 
+  1. Compress `dist/` folder to `dist.zip`
+  2. Upload to `public_html` or `www`
+  3. Extract zip file
+  4. Move all files from `dist/` subdirectory to root
+  
+- **Via FTP**: 
+  1. Connect via FileZilla or similar
+  2. Upload all files from `dist/` to `public_html` or `www`
+  
+- **Via WHM/WHMCS File Manager**: Same as cPanel
 
 **Step 3: Configure Apache (included)**
-- `.htaccess` file is already in the project
-- If not present, create one with the provided config
-- Ensures SPA routing works correctly
+- `.htaccess` file is already included in the build
+- Automatically handles SPA routing
+- If missing, create `.htaccess` with this content:
 
-**Step 4: Set environment variables**
-Create `config.js` in `public_html`:
-```javascript
-window.ENV = {
-  VITE_SUPABASE_URL: 'your_url',
-  VITE_SUPABASE_ANON_KEY: 'your_key'
-};
+```apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Enable Gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
 ```
 
-Then load before main script in `index.html`:
-```html
-<script src="/config.js"></script>
+**Step 4: No environment variables needed**
+The Supabase URL and keys are already configured in the code. For production deployments with custom Supabase instances, use the in-app Supabase connection settings (Settings → Supabase Connection).
+
+**Method 2: Node.js App (For VPS/Dedicated Servers with Shell Access)**
+
+If your hosting supports Node.js (cPanel Node.js Selector, Plesk Node.js, etc.):
+
+```bash
+# Via cPanel Terminal or SSH
+cd public_html
+git clone https://github.com/your-repo/m-leja.git
+cd m-leja
+npm install
+npm run build
+
+# Serve using Node.js
+npm install -g pm2
+pm2 start npm --name "m-leja" -- start
+pm2 save
 ```
+
+**Method 3: Subdomain/Subdirectory Installation**
+
+For installing in a subdirectory or subdomain:
+
+1. Upload to `/public_html/subdirectory/` or `/subdomains/subdomain/public_html/`
+2. Ensure `.htaccess` is present in the root of your installation
+3. Access via `yourdomain.com/subdirectory/` or `subdomain.yourdomain.com`
 
 ---
 
