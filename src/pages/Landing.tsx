@@ -51,8 +51,13 @@ export default function Landing() {
           .eq('period', selectedPeriod)
           .order('price', { ascending: true });
 
-        if (mounted && data && !error) {
-          const formattedTiers: Tier[] = data.map(tier => ({
+        // Filter out government tiers on client side as extra safety
+        const filteredData = data?.filter(tier => 
+          !tier.name.toLowerCase().includes('government')
+        );
+
+        if (mounted && filteredData && !error) {
+          const formattedTiers: Tier[] = filteredData.map(tier => ({
             name: tier.name,
             price: tier.price === 0 ? 'Free' : `${tier.currency} ${tier.price.toLocaleString()}`,
             period: tier.is_period_enabled ? `/${tier.period}` : undefined,
