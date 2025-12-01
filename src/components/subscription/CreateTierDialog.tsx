@@ -70,6 +70,8 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
     feature => !features.includes(feature)
   );
 
+  const isGovernmentTier = tierData.name.toLowerCase().includes('government');
+
   const handleAddFeature = () => {
     if (selectedFeature && !features.includes(selectedFeature)) {
       setFeatures([...features, selectedFeature]);
@@ -92,6 +94,14 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
       return;
     }
 
+    // Government tier validations
+    if (isGovernmentTier) {
+      if (tierData.period !== 'annual') {
+        toast.error('Government subscriptions must be annual only');
+        return;
+      }
+    }
+
     setLoading(true);
 
     const { error } = await supabase
@@ -99,6 +109,8 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
       .insert({
         ...tierData,
         features: features,
+        // Government tiers never show on landing page
+        show_on_landing: !isGovernmentTier,
       });
 
     setLoading(false);
@@ -130,6 +142,15 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
     setSelectedFeature('');
   };
 
+  // Auto-set period to annual when government tier is detected
+  const handleNameChange = (name: string) => {
+    setTierData(prev => ({
+      ...prev,
+      name,
+      period: name.toLowerCase().includes('government') ? 'annual' : prev.period,
+    }));
+  };
+
   const SelectedIcon = ICON_OPTIONS.find(opt => opt.value === tierData.icon_name)?.icon || Building2;
 
   return (
@@ -144,10 +165,10 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
 
         <div className="space-y-4 py-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Tier Name" required>
+            <FormField label="Tier Name" required hint={isGovernmentTier ? "⚠️ Government tier detected - will be annual only and hidden from landing page" : undefined}>
               <Input
                 value={tierData.name}
-                onChange={(e) => setTierData({ ...tierData, name: e.target.value })}
+                onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g., Professional"
               />
             </FormField>
@@ -215,18 +236,19 @@ export function CreateTierDialog({ open, onOpenChange, onSuccess }: CreateTierDi
               </Select>
             </FormField>
 
-            <FormField label="Subscription Period" required>
+            <FormField label="Subscription Period" required hint={isGovernmentTier ? "Government subscriptions are annual only" : undefined}>
               <Select
                 value={tierData.period}
                 onValueChange={(value) => setTierData({ ...tierData, period: value })}
+                disabled={isGovernmentTier}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
+                  {!isGovernmentTier && <SelectItem value="daily">Daily</SelectItem>}
+                  {!isGovernmentTier && <SelectItem value="weekly">Weekly</SelectItem>}
+                  {!isGovernmentTier && <SelectItem value="monthly">Monthly</SelectItem>}
                   <SelectItem value="annual">Annual</SelectItem>
                 </SelectContent>
               </Select>

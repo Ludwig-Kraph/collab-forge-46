@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Save, Plus, Upload, Download, Star, Building2 } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { CreateTierDialog } from '@/components/subscription/CreateTierDialog';
+import { SubscriptionTemplates } from '@/components/subscription/SubscriptionTemplates';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -112,8 +113,18 @@ export default function SubscriptionControl() {
     }
   };
 
-  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean) => {
+  const handleToggleLandingPage = async (tierId: string, currentStatus: boolean, tierName: string) => {
     try {
+      // Prevent government tiers from being shown on landing page
+      if (tierName.toLowerCase().includes('government') && !currentStatus) {
+        toast({
+          title: 'Not Allowed',
+          description: 'Government subscriptions cannot be shown on the landing page',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('subscription_tiers')
         .update({ 
@@ -235,9 +246,15 @@ export default function SubscriptionControl() {
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="edit">Edit Tiers</TabsTrigger>
             <TabsTrigger value="policies">Policies</TabsTrigger>
           </TabsList>
+
+          {/* Templates Tab */}
+          <TabsContent value="templates" className="space-y-4">
+            <SubscriptionTemplates />
+          </TabsContent>
 
           <TabsContent value="overview" className="space-y-4">
             <Card className="mb-4">
@@ -328,8 +345,15 @@ export default function SubscriptionControl() {
                           <Button
                             size="icon"
                             variant={tier.showOnLanding ? 'destructive' : 'default'}
-                            onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false)}
-                            title={tier.showOnLanding ? 'Pull from Landing Page (Hide)' : `Push to Landing Page (Go Live as ${selectedPeriod})`}
+                            onClick={() => handleToggleLandingPage(tier.id, tier.showOnLanding || false, tier.name)}
+                            disabled={tier.name.toLowerCase().includes('government')}
+                            title={
+                              tier.name.toLowerCase().includes('government') 
+                                ? 'Government tiers cannot be shown on landing page'
+                                : tier.showOnLanding 
+                                  ? 'Pull from Landing Page (Hide)' 
+                                  : `Push to Landing Page (Go Live as ${selectedPeriod})`
+                            }
                           >
                             {tier.showOnLanding ? <Download className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
                           </Button>
