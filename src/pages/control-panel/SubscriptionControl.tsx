@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
 import { ControlPanelLayout } from '@/components/layout/ControlPanelLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
