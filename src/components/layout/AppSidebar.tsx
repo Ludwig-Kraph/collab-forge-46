@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { 
-  Home, 
-  CreditCard, 
-  Receipt, 
-  BookOpen, 
-  BarChart3, 
-  Users, 
-  Settings, 
+import {
+  Home,
+  CreditCard,
+  Receipt,
+  BookOpen,
+  BarChart3,
+  Users,
+  Settings,
   HelpCircle,
   Shield,
   CreditCard as Subscription,
@@ -17,7 +17,9 @@ import {
   MessageSquare,
   Wrench,
   DollarSign,
-  Key
+  Key,
+  FileText,
+  Building2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -52,15 +54,16 @@ const mainItems = [
 ];
 
 const controlPanelItems = [
-  { title: "Dashboard", url: "/control-panel", icon: Home },
+  { title: "Overview", url: "/control-panel", icon: Home },
   { title: "Accounts", url: "/control-panel/accounts", icon: UserCog },
   { title: "Onboarding", url: "/control-panel/onboarding", icon: UserPlus },
   { title: "Support", url: "/control-panel/support", icon: MessageSquare },
-  { title: "Government", url: "/control-panel/government", icon: Shield },
+  { title: "Government", url: "/control-panel/government", icon: Building2 },
   { title: "Subscriptions", url: "/control-panel/subscriptions", icon: DollarSign },
+  { title: "CMS", url: "/control-panel/cms", icon: FileText },
   { title: "M-Pesa Daraja", url: "/mpesa-daraja", icon: Key },
-  { title: "System Settings", url: "/control-panel/settings", icon: Wrench },
-  { title: "Communication", url: "/control-panel/communication", icon: MessageSquare },
+  { title: "System", url: "/control-panel/settings", icon: Wrench },
+  { title: "Comms", url: "/control-panel/communication", icon: MessageSquare },
 ];
 
 const settingsItems = [
@@ -68,7 +71,7 @@ const settingsItems = [
   { title: "M-Pesa Daraja", url: "/mpesa-daraja", icon: Key },
   { title: "Subscription", url: "/subscription", icon: Subscription },
   { title: "Help", url: "/help", icon: HelpCircle },
-  { title: "How To Guide", url: "/how-to", icon: BookMarked },
+  { title: "How To", url: "/how-to", icon: BookMarked },
 ];
 
 export function AppSidebar() {
@@ -89,26 +92,26 @@ export function AppSidebar() {
   }, [isControlPanelActive]);
 
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar collapsible="icon">
+      <SidebarContent className="py-2">
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-            Main Menu
+            Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      className="hover:bg-muted/50" 
-                      activeClassName="bg-muted text-primary font-medium"
+                    <NavLink
+                      to={item.url}
+                      end
+                      className="hover:bg-sidebar-accent/60 rounded-lg transition-colors"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
-                      <item.icon className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!isCollapsed && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -128,13 +131,13 @@ export function AppSidebar() {
                 {isAdmin && !isSuperAdmin && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/cms")}>
-                      <NavLink 
-                        to="/cms" 
-                        className="hover:bg-muted/50" 
-                        activeClassName="bg-muted text-primary font-medium"
+                      <NavLink
+                        to="/cms"
+                        className="hover:bg-sidebar-accent/60 rounded-lg"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                       >
-                        <Settings className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                        {!isCollapsed && <span>CMS</span>}
+                        <FileText className="h-4 w-4 shrink-0" />
+                        {!isCollapsed && <span className="ml-3">CMS</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -142,13 +145,13 @@ export function AppSidebar() {
                 {isAdmin && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/users")}>
-                      <NavLink 
-                        to="/users" 
-                        className="hover:bg-muted/50" 
-                        activeClassName="bg-muted text-primary font-medium"
+                      <NavLink
+                        to="/users"
+                        className="hover:bg-sidebar-accent/60 rounded-lg"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                       >
-                        <Users className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                        {!isCollapsed && <span>Users</span>}
+                        <Users className="h-4 w-4 shrink-0" />
+                        {!isCollapsed && <span className="ml-3">Users</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -158,12 +161,12 @@ export function AppSidebar() {
                     {isCollapsed ? (
                       <SidebarMenuItem>
                         <SidebarMenuButton asChild isActive={isControlPanelActive}>
-                          <NavLink 
-                            to="/control-panel" 
-                            className="hover:bg-muted/50" 
-                            activeClassName="bg-muted text-primary font-medium"
+                          <NavLink
+                            to="/control-panel"
+                            className="hover:bg-sidebar-accent/60 rounded-lg"
+                            activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                           >
-                            <Shield className="h-5 w-5 text-primary" />
+                            <Shield className="h-4 w-4 shrink-0 text-primary" />
                           </NavLink>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -175,25 +178,31 @@ export function AppSidebar() {
                       >
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuButton isActive={isControlPanelActive} className="bg-primary/5 hover:bg-primary/10 data-[state=open]:bg-primary/10">
-                              <Shield className="mr-3 h-5 w-5 text-primary" />
-                              <span className="font-medium">Control Panel</span>
-                              <ChevronDown className="ml-auto h-4 w-4 text-primary transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                            <SidebarMenuButton
+                              isActive={isControlPanelActive}
+                              className="bg-primary/5 hover:bg-primary/10 rounded-lg"
+                            >
+                              <Shield className="h-4 w-4 shrink-0 text-primary" />
+                              <span className="ml-3 font-medium">Control Panel</span>
+                              <ChevronDown className="ml-auto h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
                             <SidebarMenuSub>
                               {controlPanelItems.map((item) => (
                                 <SidebarMenuSubItem key={item.title}>
-                                  <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
-                                    <NavLink 
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isActive(item.url)}
+                                  >
+                                    <NavLink
                                       to={item.url}
                                       end
-                                      className="hover:bg-muted/50" 
-                                      activeClassName="bg-muted text-primary font-medium"
+                                      className="hover:bg-sidebar-accent/60 rounded-md"
+                                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                                     >
-                                      <item.icon className="mr-2 h-4 w-4" />
-                                      {!isCollapsed && <span>{item.title}</span>}
+                                      <item.icon className="mr-2 h-3.5 w-3.5" />
+                                      <span>{item.title}</span>
                                     </NavLink>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
@@ -213,20 +222,20 @@ export function AppSidebar() {
         {/* Settings Section */}
         <SidebarGroup>
           <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-            Settings
+            Account
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <NavLink 
-                      to={item.url} 
-                      className="hover:bg-muted/50" 
-                      activeClassName="bg-muted text-primary font-medium"
+                    <NavLink
+                      to={item.url}
+                      className="hover:bg-sidebar-accent/60 rounded-lg"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
-                      <item.icon className={isCollapsed ? "h-5 w-5" : "mr-3 h-5 w-5"} />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!isCollapsed && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
