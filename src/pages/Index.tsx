@@ -407,154 +407,159 @@ const Index = () => {
 
   return (
     <Layout>
-      <div className="container px-4 py-6">
-        <div className="mb-6">
-          <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's your business overview</p>
+      <div className="container px-4 py-6 max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="mb-1">Dashboard</h1>
+          <p className="text-muted-foreground text-sm">Welcome back! Here's your business overview</p>
         </div>
 
+        {/* Free trial banner */}
         {!isSuperAdmin && subscription && subscription.tier === 'free_trial' && (
-          <Card className="mb-6 border-accent/50 bg-accent/5">
-            <CardContent className="flex items-start gap-3 pt-6">
-              <AlertCircle className="h-5 w-5 text-accent" />
-              <div className="flex-1">
-                <p className="font-medium">Free Trial Active</p>
-                <p className="text-sm text-muted-foreground">
-                  You have {freePushes} free STK pushes remaining. Upgrade to unlock unlimited transactions.
+          <Card className="border-warning/30 bg-warning/5">
+            <CardContent className="flex items-center gap-3 py-3 px-4">
+              <AlertCircle className="h-4 w-4 text-warning shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">Free Trial Active</p>
+                <p className="text-xs text-muted-foreground">
+                  {freePushes} free STK pushes remaining
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => navigate("/subscription")}>
+              <Button variant="outline" size="sm" onClick={() => navigate("/subscription")} className="shrink-0 text-xs h-8">
                 Upgrade
               </Button>
             </CardContent>
           </Card>
         )}
 
-        <div className="mb-6 grid gap-4 md:grid-cols-3">
-          <Card className="border-primary/20 shadow-elegant">
-            <CardHeader className="pb-3">
-              <CardDescription>Available Balance</CardDescription>
+        {/* Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-3 stagger-children">
+          <Card className="hover-lift">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs">Available Balance</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-mono-numbers text-3xl font-bold text-primary">
+                  <p className="font-mono-numbers text-2xl font-bold text-primary">
                     KES {balance.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">Last updated: Just now</p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">Updated just now</p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Wallet className="h-6 w-6 text-primary" />
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Wallet className="h-5 w-5 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-secondary/20 shadow-elegant">
-            <CardHeader className="pb-3">
-              <CardDescription>This Month</CardDescription>
+          <Card className="hover-lift">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs">This Month</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-mono-numbers text-3xl font-bold text-secondary">
+                  <p className="font-mono-numbers text-2xl font-bold text-secondary">
                     KES {monthlyRevenue.toLocaleString()}
                   </p>
-                  <p className="mt-1 flex items-center text-xs text-muted-foreground">
-                    <TrendingUp className="mr-1 h-3 w-3" />
-                    Total revenue this month
+                  <p className="mt-0.5 flex items-center text-[10px] text-muted-foreground">
+                    <TrendingUp className="mr-0.5 h-3 w-3" />
+                    Total revenue
                   </p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
-                  <ArrowDownLeft className="h-6 w-6 text-secondary" />
+                <div className="h-10 w-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                  <ArrowDownLeft className="h-5 w-5 text-secondary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {!isSuperAdmin && (
-            <Card className="border-accent/20 shadow-elegant">
-              <CardHeader className="pb-3">
-                <CardDescription>Subscription</CardDescription>
+            <Card className="hover-lift">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-xs">Subscription</CardDescription>
               </CardHeader>
               <CardContent>
-                <div>
-                  <p className="mb-1 text-2xl font-bold">{tierName}</p>
-                  {isUnlimited ? (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Wallet className="h-4 w-4" />
-                      ∞ Unlimited Access
+                <p className="text-lg font-bold mb-1">{tierName}</p>
+                {isUnlimited ? (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Wallet className="h-3 w-3" /> ∞ Unlimited
+                  </p>
+                ) : subscription?.max_stk_pushes ? (
+                  <>
+                    <p className="mb-1.5 text-xs text-muted-foreground">
+                      {subscription.used_stk_pushes} / {subscription.max_stk_pushes} used
                     </p>
-                  ) : subscription && subscription.max_stk_pushes ? (
-                    <>
-                      <p className="mb-2 text-sm text-muted-foreground">
-                        {subscription.used_stk_pushes} / {subscription.max_stk_pushes} used
-                      </p>
-                      <Progress value={usagePercent} className="h-2" />
-                    </>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {freePushes || 0} free pushes remaining
-                    </p>
-                  )}
-                </div>
+                    <Progress value={usagePercent} className="h-1.5" />
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {freePushes || 0} free pushes left
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
         </div>
 
-        <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Your latest payment activities</CardDescription>
+        {/* Recent Transactions */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Recent Transactions</CardTitle>
+                <CardDescription className="text-xs">Latest payment activities</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => navigate("/transactions")}>
+                View All
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            {isDashboardLoading ? (
-              <div className="text-center text-muted-foreground py-8">Loading...</div>
-            ) : recentTransactions.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                No transactions yet. Start by making your first payment!
+            {recentTransactions.length === 0 ? (
+              <div className="text-center text-muted-foreground py-10">
+                <Activity className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No transactions yet</p>
+                <p className="text-xs mt-1">Start by making your first payment!</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-1">
                 {recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                  <div key={transaction.id} className="flex items-center justify-between py-2.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                        transaction.transaction_type === "received" 
-                          ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400" 
-                          : "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-400"
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${
+                        transaction.transaction_type === "received"
+                          ? "bg-success/10 text-success"
+                          : "bg-accent/10 text-accent"
                       }`}>
                         {transaction.transaction_type === "received" ? (
-                          <ArrowDownLeft className="h-5 w-5" />
+                          <ArrowDownLeft className="h-4 w-4" />
                         ) : (
-                          <ArrowUpRight className="h-5 w-5" />
+                          <ArrowUpRight className="h-4 w-4" />
                         )}
                       </div>
                       <div>
-                        <p className="font-medium">
-                          {transaction.transaction_type === "received" ? "Received from" : "Sent to"}
+                        <p className="text-sm font-medium">
+                          {transaction.transaction_type === "received" ? "Received" : "Sent"}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground font-mono">
                           {transaction.phone_number}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-mono-numbers font-semibold ${
-                        transaction.transaction_type === "received" ? "text-green-600" : "text-orange-600"
+                      <p className={`font-mono-numbers text-sm font-semibold ${
+                        transaction.transaction_type === "received" ? "text-success" : "text-accent"
                       }`}>
                         {transaction.transaction_type === "received" ? "+" : "-"}KES {Number(transaction.amount).toLocaleString()}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground">
                         {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
                       </p>
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" onClick={() => navigate("/transactions")}>
-                  View All Transactions
-                </Button>
               </div>
             )}
           </CardContent>

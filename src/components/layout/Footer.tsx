@@ -3,19 +3,19 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="border-t bg-card mt-auto">
-      <div className="container py-6 md:py-8">
-        <div className="flex flex-col items-center justify-center gap-3">
-          <p className="text-sm text-muted-foreground">
-            {getCopyrightText()}
-          </p>
-          <div className="flex gap-4 text-xs text-muted-foreground">
-            <Link to="/terms" className="hover:text-primary transition-colors">
-              Terms & Conditions
+    <footer className="border-t bg-muted/30 mt-auto">
+      <div className="container py-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+          <p>{getCopyrightText()}</p>
+          <div className="flex gap-3">
+            <Link to="/terms" className="hover:text-foreground transition-colors">
+              Terms
             </Link>
-            <span>•</span>
-            <Link to="/privacy" className="hover:text-primary transition-colors">
-              Privacy Policy
+            <Link to="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
+            <Link to="/help" className="hover:text-foreground transition-colors">
+              Help
             </Link>
           </div>
         </div>
