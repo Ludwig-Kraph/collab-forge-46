@@ -60,6 +60,7 @@ const SubscriptionCMS = lazyWithRetry(() => import('@/pages/cms/SubscriptionCMS'
 const ControlPanelCMS = lazyWithRetry(() => import('@/pages/control-panel/ControlPanelCMS'));
 const TokenStore = lazyWithRetry(() => import('@/pages/TokenStore'));
 const TokenManagement = lazyWithRetry(() => import('@/pages/control-panel/TokenManagement'));
+const Receipts = lazyWithRetry(() => import('@/pages/Receipts'));
 
 // Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
@@ -115,6 +116,7 @@ const App = () => (
             <Route path="/control-panel/super-admin-management" element={<SuperAdminRoute><SuperAdminManagement /></SuperAdminRoute>} />
             <Route path="/control-panel/tokens" element={<SuperAdminRoute><TokenManagement /></SuperAdminRoute>} />
             <Route path="/tokens" element={<ProtectedRoute><TokenStore /></ProtectedRoute>} />
+            <Route path="/receipts" element={<ProtectedRoute><Receipts /></ProtectedRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
             <Route path="/subscription/staff" element={<AdminRoute><SubscriptionStaff /></AdminRoute>} />
             <Route path="/subscription/departments" element={<AdminRoute><SubscriptionDepartments /></AdminRoute>} />
