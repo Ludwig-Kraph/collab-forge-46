@@ -99,6 +99,43 @@ serve(async (req) => {
       if (txError) {
         console.error('Failed to create transaction:', txError);
       }
+
+      // Generate payment receipt
+      try {
+        // Get user's subscription tier and mpesa account number
+        const { data: userSub } = await supabaseClient
+          .from('subscriptions')
+          .select('tier')
+          .eq('user_id', paymentRequest.user_id)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        const { data: mpesaAccount } = await supabaseClient
+          .from('mpesa_accounts')
+          .select('account_number')
+          .eq('id', paymentRequest.mpesa_account_id)
+          .maybeSingle();
+
+        const { data: receiptNumber, error: receiptError } = await supabaseClient
+          .rpc('create_payment_receipt', {
+            _user_id: paymentRequest.user_id,
+            _receipt_type: 'subscription',
+            _amount: transactionAmount || paymentRequest.amount,
+            _description: paymentRequest.description || 'MPESA Payment',
+            _payment_reference: merchantRequestId,
+            _mpesa_receipt_number: mpesaReceiptNumber,
+            _subscription_tier: userSub?.tier || 'free_trial',
+            _account_number: mpesaAccount?.account_number || '',
+          });
+
+        if (receiptError) {
+          console.error('Failed to generate receipt:', receiptError);
+        } else {
+          console.log('Receipt generated:', receiptNumber);
+        }
+      } catch (receiptErr) {
+        console.error('Receipt generation error:', receiptErr);
+      }
     }
 
     // Update payment request

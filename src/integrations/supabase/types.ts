@@ -807,6 +807,60 @@ export type Database = {
           },
         ]
       }
+      payment_receipts: {
+        Row: {
+          account_number: string | null
+          amount: number
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          mpesa_receipt_number: string | null
+          payment_reference: string | null
+          receipt_number: string
+          receipt_type: string
+          subscription_tier: string | null
+          token_count: number | null
+          token_package_name: string | null
+          token_serial: string | null
+          user_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          amount: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          mpesa_receipt_number?: string | null
+          payment_reference?: string | null
+          receipt_number: string
+          receipt_type: string
+          subscription_tier?: string | null
+          token_count?: number | null
+          token_package_name?: string | null
+          token_serial?: string | null
+          user_id: string
+        }
+        Update: {
+          account_number?: string | null
+          amount?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          mpesa_receipt_number?: string | null
+          payment_reference?: string | null
+          receipt_number?: string
+          receipt_type?: string
+          subscription_tier?: string | null
+          token_count?: number | null
+          token_package_name?: string | null
+          token_serial?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           amount: number
@@ -960,6 +1014,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      receipt_counters: {
+        Row: {
+          counter_key: string
+          current_value: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          counter_key: string
+          current_value?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          counter_key?: string
+          current_value?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       registration_requests: {
         Row: {
@@ -1629,7 +1704,31 @@ export type Database = {
         Args: { _count?: number; _user_id: string }
         Returns: boolean
       }
+      create_payment_receipt: {
+        Args: {
+          _account_number?: string
+          _amount: number
+          _description?: string
+          _mpesa_receipt_number?: string
+          _payment_reference?: string
+          _receipt_type: string
+          _subscription_tier?: string
+          _token_count?: number
+          _token_package_name?: string
+          _user_id: string
+        }
+        Returns: string
+      }
       decrement_stk_pushes: { Args: { _user_id: string }; Returns: undefined }
+      generate_receipt_number: {
+        Args: {
+          _account_number?: string
+          _receipt_type: string
+          _subscription_tier?: string
+          _token_serial?: string
+        }
+        Returns: string
+      }
       get_user_account_context: {
         Args: { _user_id: string }
         Returns: {
