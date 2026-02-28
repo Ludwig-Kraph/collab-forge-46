@@ -70,6 +70,7 @@ const settingsItems = [
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "M-Pesa Daraja", url: "/mpesa-daraja", icon: Key },
   { title: "Subscription", url: "/subscription", icon: Subscription },
+  { title: "M-Leja Credits", url: "/tokens", icon: DollarSign },
   { title: "Help", url: "/help", icon: HelpCircle },
   { title: "How To", url: "/how-to", icon: BookMarked },
 ];
