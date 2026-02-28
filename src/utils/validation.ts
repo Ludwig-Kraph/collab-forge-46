@@ -35,8 +35,8 @@ export const mpesaAccountSchema = z.object({
     .regex(/^\d{5,10}$/, {
       message: 'Account number must be 5-10 digits',
     }),
-  account_type: z.enum(['till', 'paybill', 'pochi'], {
-    errorMap: () => ({ message: 'Invalid account type' }),
+  account_type: z.enum(['till', 'paybill', 'pochi'] as const, {
+    message: 'Invalid account type',
   }),
 });
 

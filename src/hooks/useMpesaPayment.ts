@@ -31,6 +31,35 @@ export const useMpesaPayment = () => {
         throw new Error('Minimum payment amount is KES 10');
       }
 
+      // Check subscription STK push availability
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session?.session?.user?.id;
+      
+      if (userId) {
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('free_stk_pushes_remaining, max_stk_pushes, used_stk_pushes')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        const hasSubscriptionPushes = subscription && (
+          subscription.free_stk_pushes_remaining === null || // unlimited
+          (subscription.free_stk_pushes_remaining !== null && subscription.free_stk_pushes_remaining > 0)
+        );
+
+        if (!hasSubscriptionPushes) {
+          // Try to consume a token instead
+          const { data: tokenResult, error: tokenError } = await supabase
+            .rpc('consume_token', { _user_id: userId, _count: 1 });
+
+          if (tokenError || tokenResult === false) {
+            throw new Error('No STK pushes or tokens remaining. Please upgrade your subscription or purchase M-Leja Credits.');
+          }
+          // Token consumed successfully, proceed without decrementing subscription
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('mpesa-stk-push', {
         body: params,
       });

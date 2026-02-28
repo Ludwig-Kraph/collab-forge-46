@@ -8,7 +8,8 @@ import {
   Package,
   Layout as LayoutIcon,
   Shield,
-  Monitor
+  Monitor,
+  Coins
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -79,6 +80,11 @@ const navigationItems = [
     title: 'Super Admins',
     url: '/control-panel/super-admin-management',
     icon: Shield,
+  },
+  {
+    title: 'Token Management',
+    url: '/control-panel/tokens',
+    icon: Coins,
   },
 ];
 
