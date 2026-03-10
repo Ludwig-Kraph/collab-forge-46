@@ -185,19 +185,23 @@ export default function SubscriptionControl() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('subscription_tiers')
-        .update({
+      const updateData: any = {
           name: selectedTier.name,
           price: selectedTier.price,
           currency: selectedTier.currency,
           max_users: selectedTier.maxUsers,
           max_stk_pushes: selectedTier.maxStkPushes,
+          max_paybill_accounts: selectedTier.maxPaybillAccounts,
+          max_till_accounts: selectedTier.maxTillAccounts,
           features: selectedTier.features,
           description: selectedTier.terms,
           period: selectedTier.period,
           is_period_enabled: selectedTier.isPeriodEnabled,
-        })
+      };
+
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .update(updateData)
         .eq('id', selectedTier.id);
 
       if (error) throw error;
