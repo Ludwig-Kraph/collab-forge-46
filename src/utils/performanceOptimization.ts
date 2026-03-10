@@ -111,7 +111,7 @@ export const clearAppCache = () => {
 
 // Monitor cache size in development
 export const monitorCacheSize = () => {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     const size = getCacheSize();
     const sizeKb = (size / 1024).toFixed(2);
     console.log(`[Cache Monitor] Current size: ${sizeKb} KB / ${(MAX_CACHE_SIZE / 1024).toFixed(0)} KB`);

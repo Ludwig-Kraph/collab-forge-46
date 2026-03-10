@@ -248,7 +248,7 @@ export function optimizedRealtimeChannel(
 ) {
   const { throttleMs = 100, batchUpdates = true } = config;
   
-  let throttleTimer: NodeJS.Timeout | null = null;
+  let throttleTimer: ReturnType<typeof setTimeout> | null = null;
   let batchedUpdates: any[] = [];
 
   return {

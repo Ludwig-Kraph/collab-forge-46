@@ -17,7 +17,7 @@ interface Profile {
 export function useRealtimeProfile(userId: string | undefined) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const updateTimeoutRef = useRef<NodeJS.Timeout>();
+  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!userId) {
