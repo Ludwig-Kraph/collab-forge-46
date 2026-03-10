@@ -451,6 +451,24 @@ export default function SubscriptionControl() {
                         placeholder="Unlimited"
                       />
                     </FormField>
+
+                    <FormField label="Max Paybill Accounts" hint="Leave empty for unlimited">
+                      <Input 
+                        type="number"
+                        value={selectedTier.maxPaybillAccounts ?? ''}
+                        onChange={(e) => handleUpdateField('maxPaybillAccounts', e.target.value ? parseInt(e.target.value) : null)}
+                        placeholder="Unlimited"
+                      />
+                    </FormField>
+
+                    <FormField label="Max Till Accounts" hint="Leave empty for unlimited">
+                      <Input 
+                        type="number"
+                        value={selectedTier.maxTillAccounts ?? ''}
+                        onChange={(e) => handleUpdateField('maxTillAccounts', e.target.value ? parseInt(e.target.value) : null)}
+                        placeholder="Unlimited"
+                      />
+                    </FormField>
                   </div>
 
                   <div className="flex items-center justify-between border rounded-lg p-4">
