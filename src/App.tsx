@@ -61,6 +61,7 @@ const ControlPanelCMS = lazyWithRetry(() => import('@/pages/control-panel/Contro
 const TokenStore = lazyWithRetry(() => import('@/pages/TokenStore'));
 const TokenManagement = lazyWithRetry(() => import('@/pages/control-panel/TokenManagement'));
 const Receipts = lazyWithRetry(() => import('@/pages/Receipts'));
+const ResetPassword = lazyWithRetry(() => import('@/pages/ResetPassword'));
 
 // Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
