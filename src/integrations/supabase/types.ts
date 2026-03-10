@@ -1162,7 +1162,9 @@ export type Database = {
           is_active: boolean | null
           is_period_enabled: boolean | null
           is_recommended: boolean | null
+          max_paybill_accounts: number | null
           max_stk_pushes: number | null
+          max_till_accounts: number | null
           max_users: number | null
           name: string
           period: string
@@ -1180,7 +1182,9 @@ export type Database = {
           is_active?: boolean | null
           is_period_enabled?: boolean | null
           is_recommended?: boolean | null
+          max_paybill_accounts?: number | null
           max_stk_pushes?: number | null
+          max_till_accounts?: number | null
           max_users?: number | null
           name: string
           period?: string
@@ -1198,7 +1202,9 @@ export type Database = {
           is_active?: boolean | null
           is_period_enabled?: boolean | null
           is_recommended?: boolean | null
+          max_paybill_accounts?: number | null
           max_stk_pushes?: number | null
+          max_till_accounts?: number | null
           max_users?: number | null
           name?: string
           period?: string
