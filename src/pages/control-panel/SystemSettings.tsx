@@ -124,9 +124,10 @@ export default function SystemSettings() {
         </div>
 
         <Tabs defaultValue="mpesa" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="mpesa">MPESA Credentials</TabsTrigger>
             <TabsTrigger value="daraja">Daraja API Secrets</TabsTrigger>
+            <TabsTrigger value="email">Email & Recovery</TabsTrigger>
             <TabsTrigger value="api">API Settings</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
@@ -376,6 +377,95 @@ export default function SystemSettings() {
                     </ol>
                   </AlertDescription>
                 </Alert>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="email" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  Email & Password Recovery Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure email delivery for password reset and account recovery
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Password reset emails</strong> are sent by Supabase's built-in auth system. 
+                    To ensure reliable delivery, you must configure a custom SMTP provider in the Supabase Dashboard.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm">Setup Instructions</h4>
+                  <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
+                    <li>
+                      Go to{' '}
+                      <a 
+                        href="https://supabase.com/dashboard/project/cfuolhkzxsxfovalswhp/auth/providers" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-primary underline"
+                      >
+                        Supabase Dashboard → Authentication → Providers
+                      </a>
+                    </li>
+                    <li>Ensure <strong>Email</strong> provider is enabled</li>
+                    <li>
+                      Go to{' '}
+                      <a
+                        href="https://supabase.com/dashboard/project/cfuolhkzxsxfovalswhp/settings/auth"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                      >
+                        Project Settings → Authentication → SMTP Settings
+                      </a>
+                    </li>
+                    <li>Enable <strong>Custom SMTP</strong> and configure your provider (e.g., Resend, SendGrid, Mailgun)</li>
+                    <li>Set the <strong>Sender email</strong> (e.g., <code className="bg-muted px-1 rounded text-xs">noreply@yourdomain.com</code>)</li>
+                    <li>Test by using the "Forgot Password" flow on the login page</li>
+                  </ol>
+                </div>
+
+                <div className="border rounded-lg p-4 space-y-3">
+                  <h4 className="font-semibold text-sm">Recommended SMTP Providers</h4>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    <div className="p-3 border rounded-md">
+                      <p className="font-medium text-sm">Resend</p>
+                      <p className="text-xs text-muted-foreground">Free tier: 3,000 emails/month</p>
+                    </div>
+                    <div className="p-3 border rounded-md">
+                      <p className="font-medium text-sm">SendGrid</p>
+                      <p className="text-xs text-muted-foreground">Free tier: 100 emails/day</p>
+                    </div>
+                    <div className="p-3 border rounded-md">
+                      <p className="font-medium text-sm">Mailgun</p>
+                      <p className="text-xs text-muted-foreground">Free tier: 5,000 emails/month</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4 space-y-2">
+                  <h4 className="font-semibold text-sm">Current Status</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Password Reset Flow</span>
+                    <Badge variant="outline" className="bg-green-500/10 text-green-600">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Reset Redirect URL</span>
+                    <code className="text-xs bg-muted px-2 py-0.5 rounded">{window.location.origin}/reset-password</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Custom SMTP</span>
+                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600">Configure in Supabase</Badge>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

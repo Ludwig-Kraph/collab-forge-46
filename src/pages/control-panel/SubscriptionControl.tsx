@@ -23,6 +23,8 @@ interface SubscriptionTier {
   currency: string;
   maxUsers: number;
   maxStkPushes: number | null;
+  maxPaybillAccounts: number | null;
+  maxTillAccounts: number | null;
   features: string[];
   terms: string;
   period: string;
@@ -102,6 +104,8 @@ export default function SubscriptionControl() {
         currency: tier.currency,
         maxUsers: tier.max_users || 0,
         maxStkPushes: tier.max_stk_pushes,
+        maxPaybillAccounts: (tier as any).max_paybill_accounts ?? null,
+        maxTillAccounts: (tier as any).max_till_accounts ?? null,
         features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
         terms: tier.description || '',
         period: tier.period || 'monthly',
@@ -181,19 +185,23 @@ export default function SubscriptionControl() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('subscription_tiers')
-        .update({
+      const updateData: any = {
           name: selectedTier.name,
           price: selectedTier.price,
           currency: selectedTier.currency,
           max_users: selectedTier.maxUsers,
           max_stk_pushes: selectedTier.maxStkPushes,
+          max_paybill_accounts: selectedTier.maxPaybillAccounts,
+          max_till_accounts: selectedTier.maxTillAccounts,
           features: selectedTier.features,
           description: selectedTier.terms,
           period: selectedTier.period,
           is_period_enabled: selectedTier.isPeriodEnabled,
-        })
+      };
+
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .update(updateData)
         .eq('id', selectedTier.id);
 
       if (error) throw error;
@@ -326,6 +334,18 @@ export default function SubscriptionControl() {
                           <span className="text-muted-foreground">Period:</span>
                           <span className="font-medium capitalize">{tier.period}</span>
                         </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Paybill Accounts:</span>
+                          <span className="font-medium">
+                            {tier.maxPaybillAccounts === null ? 'Unlimited' : tier.maxPaybillAccounts}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Till Accounts:</span>
+                          <span className="font-medium">
+                            {tier.maxTillAccounts === null ? 'Unlimited' : tier.maxTillAccounts}
+                          </span>
+                        </div>
                         <div className="flex items-center justify-between pt-2">
                           <Label htmlFor={`recommended-${tier.id}`} className="text-sm">Recommended</Label>
                           <Switch
@@ -428,6 +448,24 @@ export default function SubscriptionControl() {
                         type="number"
                         value={selectedTier.maxStkPushes || ''}
                         onChange={(e) => handleUpdateField('maxStkPushes', e.target.value ? parseInt(e.target.value) : null)}
+                        placeholder="Unlimited"
+                      />
+                    </FormField>
+
+                    <FormField label="Max Paybill Accounts" hint="Leave empty for unlimited">
+                      <Input 
+                        type="number"
+                        value={selectedTier.maxPaybillAccounts ?? ''}
+                        onChange={(e) => handleUpdateField('maxPaybillAccounts', e.target.value ? parseInt(e.target.value) : null)}
+                        placeholder="Unlimited"
+                      />
+                    </FormField>
+
+                    <FormField label="Max Till Accounts" hint="Leave empty for unlimited">
+                      <Input 
+                        type="number"
+                        value={selectedTier.maxTillAccounts ?? ''}
+                        onChange={(e) => handleUpdateField('maxTillAccounts', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="Unlimited"
                       />
                     </FormField>
