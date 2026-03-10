@@ -334,6 +334,18 @@ export default function SubscriptionControl() {
                           <span className="text-muted-foreground">Period:</span>
                           <span className="font-medium capitalize">{tier.period}</span>
                         </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Paybill Accounts:</span>
+                          <span className="font-medium">
+                            {tier.maxPaybillAccounts === null ? 'Unlimited' : tier.maxPaybillAccounts}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Till Accounts:</span>
+                          <span className="font-medium">
+                            {tier.maxTillAccounts === null ? 'Unlimited' : tier.maxTillAccounts}
+                          </span>
+                        </div>
                         <div className="flex items-center justify-between pt-2">
                           <Label htmlFor={`recommended-${tier.id}`} className="text-sm">Recommended</Label>
                           <Switch
