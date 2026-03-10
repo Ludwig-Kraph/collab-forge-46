@@ -104,6 +104,8 @@ export default function SubscriptionControl() {
         currency: tier.currency,
         maxUsers: tier.max_users || 0,
         maxStkPushes: tier.max_stk_pushes,
+        maxPaybillAccounts: (tier as any).max_paybill_accounts ?? null,
+        maxTillAccounts: (tier as any).max_till_accounts ?? null,
         features: (Array.isArray(tier.features) ? tier.features : []).filter((f): f is string => typeof f === 'string'),
         terms: tier.description || '',
         period: tier.period || 'monthly',
