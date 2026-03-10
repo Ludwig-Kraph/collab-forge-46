@@ -23,6 +23,8 @@ interface SubscriptionTier {
   currency: string;
   maxUsers: number;
   maxStkPushes: number | null;
+  maxPaybillAccounts: number | null;
+  maxTillAccounts: number | null;
   features: string[];
   terms: string;
   period: string;
