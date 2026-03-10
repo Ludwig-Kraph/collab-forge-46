@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Smartphone, Shield, Zap, ArrowLeft, Home, ArrowRight } from "lucide-react";
 import { RegistrationWizard } from "@/components/auth/RegistrationWizard";
 import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
+import { ForgotPassword } from "@/components/auth/ForgotPassword";
 import logo from "@/assets/m-leja-logo.png";
 
 export default function Auth() {
@@ -22,6 +23,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [userName, setUserName] = useState("");
 
@@ -70,6 +72,17 @@ export default function Auth() {
     );
   }
 
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-secondary/3" />
+        <div className="relative">
+          <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+        </div>
+      </div>
+    );
+  }
+
   const highlights = [
     {
       icon: Smartphone,
@@ -91,7 +104,6 @@ export default function Auth() {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-background relative">
-        {/* Subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-secondary/3" />
 
         <Button
@@ -153,9 +165,18 @@ export default function Auth() {
                 />
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-password" className="text-sm">
-                    Password
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password" className="text-sm">
+                      Password
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-xs text-primary hover:text-primary/80 hover:underline transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                   <Input
                     id="login-password"
                     type="password"

@@ -18,7 +18,7 @@ export function useThrottledRealtime<T>(
 ) {
   const { throttleMs = 1000, batchUpdates = true } = config;
   const pendingUpdates = useRef<any[]>([]);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const flushUpdates = useCallback(() => {
     if (pendingUpdates.current.length > 0) {

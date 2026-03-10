@@ -61,6 +61,7 @@ const ControlPanelCMS = lazyWithRetry(() => import('@/pages/control-panel/Contro
 const TokenStore = lazyWithRetry(() => import('@/pages/TokenStore'));
 const TokenManagement = lazyWithRetry(() => import('@/pages/control-panel/TokenManagement'));
 const Receipts = lazyWithRetry(() => import('@/pages/Receipts'));
+const ResetPassword = lazyWithRetry(() => import('@/pages/ResetPassword'));
 
 // Initialize QueryClient with aggressive caching for millisecond load times
 const queryClient = new QueryClient({
@@ -94,6 +95,7 @@ const App = () => (
                 <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
             <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
