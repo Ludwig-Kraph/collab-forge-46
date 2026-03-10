@@ -124,9 +124,10 @@ export default function SystemSettings() {
         </div>
 
         <Tabs defaultValue="mpesa" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="mpesa">MPESA Credentials</TabsTrigger>
             <TabsTrigger value="daraja">Daraja API Secrets</TabsTrigger>
+            <TabsTrigger value="email">Email & Recovery</TabsTrigger>
             <TabsTrigger value="api">API Settings</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
