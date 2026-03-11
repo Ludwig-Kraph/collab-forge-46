@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { CookieConsent } from "@/components/CookieConsent";
+import { DataConsentBanner } from "@/components/consent/DataConsentBanner";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
@@ -85,7 +85,7 @@ const App = () => (
             <NotificationProvider>
               <Toaster />
               <Sonner />
-              <CookieConsent />
+              <DataConsentBanner />
               <LazyLoadErrorBoundary>
                 <Suspense fallback={
                   <div className="flex items-center justify-center min-h-screen">
