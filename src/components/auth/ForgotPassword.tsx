@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { OTPInput } from "@/components/forms/OTPInput";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Phone, Mail, CheckCircle, Shield, KeyRound } from "lucide-react";
+import { ArrowLeft, Phone, Mail, CheckCircle, Shield, KeyRound, Loader2 } from "lucide-react";
 import logo from "@/assets/m-leja-logo.png";
 
 interface ForgotPasswordProps {
@@ -60,10 +60,24 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
           setLoading(false);
           return;
         }
-        const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-          redirectTo: `${window.location.origin}/reset-password`,
+
+        // Use the edge function for reliable email delivery
+        const { data, error } = await supabase.functions.invoke('send-recovery-email', {
+          body: { 
+            email: trimmedEmail,
+            redirectUrl: `${window.location.origin}/reset-password`
+          }
         });
-        if (error) throw error;
+
+        if (error) {
+          // Fallback to standard Supabase method
+          console.warn('Edge function failed, falling back to standard method:', error);
+          const { error: fallbackError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+            redirectTo: `${window.location.origin}/reset-password`,
+          });
+          if (fallbackError) throw fallbackError;
+        }
+
         setEmailSent(true);
         toast({ title: "Reset email sent", description: "Check your email for the password reset link." });
       }
@@ -95,8 +109,8 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      toast({ title: "Password too short", description: "Password must be at least 6 characters.", variant: "destructive" });
+    if (newPassword.length < 8) {
+      toast({ title: "Password too short", description: "Password must be at least 8 characters.", variant: "destructive" });
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -123,6 +137,29 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
       const { error } = await supabase.auth.signInWithOtp({ phone });
       if (error) throw error;
       toast({ title: "Code Resent", description: "A new verification code has been sent." });
+    } catch (error: any) {
+      toast({ title: "Resend Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-recovery-email', {
+        body: { 
+          email: email.trim(),
+          redirectUrl: `${window.location.origin}/reset-password`
+        }
+      });
+      if (error) {
+        const { error: fallbackError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (fallbackError) throw fallbackError;
+      }
+      toast({ title: "Email Resent", description: "A new reset link has been sent to your email." });
     } catch (error: any) {
       toast({ title: "Resend Failed", description: error.message, variant: "destructive" });
     } finally {
@@ -169,9 +206,13 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-xs text-muted-foreground text-center">
-            Didn't receive the email? Check your spam folder or try again.
+            Didn't receive the email? Check your spam/junk folder or try resending.
           </p>
-          <Button variant="outline" className="w-full" onClick={() => { setEmailSent(false); setEmail(""); }}>
+          <Button variant="outline" className="w-full" onClick={handleResendEmail} disabled={loading}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Resend Reset Email
+          </Button>
+          <Button variant="ghost" className="w-full" onClick={() => { setEmailSent(false); setEmail(""); }}>
             Try another email
           </Button>
           <Button variant="ghost" className="w-full" onClick={() => { setStep("method"); setEmailSent(false); setEmail(""); }}>
@@ -203,7 +244,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
         <CardContent className="space-y-4">
           <OTPInput value={otpCode} onChange={setOtpCode} length={6} />
           <Button className="w-full h-10" onClick={handleVerifyOTP} disabled={loading || otpCode.length !== 6}>
-            {loading ? "Verifying..." : "Verify & Continue"}
+            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : "Verify & Continue"}
           </Button>
           <Button variant="ghost" className="w-full" onClick={handleResendOTP} disabled={loading}>
             Didn't receive code? Resend
@@ -227,20 +268,20 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
             <KeyRound className="h-6 w-6 text-primary" />
           </div>
           <CardTitle className="text-xl">Set New Password</CardTitle>
-          <CardDescription>Enter your new password. Must be at least 6 characters.</CardDescription>
+          <CardDescription>Enter your new password. Must be at least 8 characters.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="new-password" className="text-sm">New Password</Label>
-              <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} placeholder="Enter new password" className="h-10" />
+              <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} placeholder="Enter new password" className="h-10" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="confirm-password" className="text-sm">Confirm Password</Label>
-              <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} placeholder="Confirm new password" className="h-10" />
+              <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} placeholder="Confirm new password" className="h-10" />
             </div>
             <Button type="submit" className="w-full h-10" disabled={loading}>
-              {loading ? "Resetting..." : "Reset Password"}
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Resetting...</> : "Reset Password"}
             </Button>
           </form>
         </CardContent>
@@ -262,8 +303,8 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
           </CardTitle>
           <CardDescription className="text-center">
             {method === "phone"
-              ? "Enter your phone number. We'll send a verification code via SMS."
-              : "Enter your email address. We'll send a password reset link."}
+              ? "Enter your registered phone number. We'll send a verification code via SMS."
+              : "Enter your registered email address. We'll send a password reset link."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -292,7 +333,7 @@ export const ForgotPassword = ({ onBack }: ForgotPasswordProps) => {
             )}
 
             <Button type="submit" className="w-full h-10" disabled={loading}>
-              {loading ? "Sending..." : method === "phone" ? "Send Verification Code" : "Send Reset Link"}
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</> : method === "phone" ? "Send Verification Code" : "Send Reset Link"}
             </Button>
 
             <Button type="button" variant="outline" className="w-full" onClick={() => setStep("method")}>
