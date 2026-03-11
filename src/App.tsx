@@ -85,7 +85,7 @@ const App = () => (
             <NotificationProvider>
               <Toaster />
               <Sonner />
-              <CookieConsent />
+              <DataConsentBanner />
               <LazyLoadErrorBoundary>
                 <Suspense fallback={
                   <div className="flex items-center justify-center min-h-screen">
