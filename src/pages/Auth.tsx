@@ -219,6 +219,15 @@ export default function Auth() {
                 <p className="text-xs text-center text-muted-foreground pt-1">
                   New users get 3 free STK pushes to try M-Leja 🎉
                 </p>
+
+                <div className="rounded-lg border border-border bg-muted/50 p-3 mt-2">
+                  <p className="text-xs font-medium text-foreground">
+                    🔐 KYC Verification Required
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    All accounts require identity verification (ID/Passport &amp; photo) before activation. This ensures platform security and compliance.
+                  </p>
+                </div>
               </form>
             </CardContent>
           </Card>

@@ -124,6 +124,14 @@ export function RegistrationWizard({ onComplete, onCancel }: RegistrationWizardP
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* KYC Notice Banner */}
+        <div className="rounded-lg border border-border bg-muted/50 p-3">
+          <p className="text-xs font-medium text-foreground">🔐 Identity Verification Required</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            After registration, you'll need to complete KYC verification (ID/Passport &amp; photo upload) before your account is activated.
+          </p>
+        </div>
+
         {/* Step 1: Account Details */}
         {currentStep === 1 && (
           <div className="space-y-4 animate-in fade-in duration-300">
