@@ -117,8 +117,11 @@ const App = () => (
             <Route path="/control-panel/landing-page-builder" element={<SuperAdminRoute><LandingPageBuilder /></SuperAdminRoute>} />
             <Route path="/control-panel/system-settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/control-panel/government" element={<SuperAdminRoute><Government /></SuperAdminRoute>} />
+            <Route path="/control-panel/diplomatics" element={<SuperAdminRoute><Diplomatics /></SuperAdminRoute>} />
+            <Route path="/control-panel/diplomatics/*" element={<SuperAdminRoute><Diplomatics /></SuperAdminRoute>} />
             <Route path="/control-panel/super-admin-management" element={<SuperAdminRoute><SuperAdminManagement /></SuperAdminRoute>} />
             <Route path="/control-panel/tokens" element={<SuperAdminRoute><TokenManagement /></SuperAdminRoute>} />
+            <Route path="/gov-secure-portal" element={<GovSecurePortal />} />
             <Route path="/tokens" element={<ProtectedRoute><TokenStore /></ProtectedRoute>} />
             <Route path="/receipts" element={<ProtectedRoute><Receipts /></ProtectedRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />
