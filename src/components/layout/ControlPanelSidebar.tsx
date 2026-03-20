@@ -1,25 +1,8 @@
 import { useState } from 'react';
 import { 
-  LayoutDashboard,
-  Users,
-  UserPlus,
-  MessageSquare,
-  Settings,
-  Landmark,
-  Package,
-  Layout as LayoutIcon,
-  Shield,
-  Monitor,
-  Coins,
-  ChevronDown,
-  ChevronRight,
-  Mail,
-  Bell,
-  Database,
-  BarChart3,
-  FileText,
-  Headphones,
-  Globe
+  LayoutDashboard, Users, MessageSquare, Settings, Landmark,
+  Package, Shield, Monitor, ChevronDown, ChevronRight,
+  Globe, Headphones, UserPlus, Coins, BarChart3, FileText
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -30,7 +13,7 @@ interface NavItem {
   title: string;
   url?: string;
   icon: any;
-  children?: { title: string; url: string; icon?: any }[];
+  children?: { title: string; url: string }[];
 }
 
 const navigationGroups: { label: string; items: NavItem[] }[] = [
@@ -38,7 +21,6 @@ const navigationGroups: { label: string; items: NavItem[] }[] = [
     label: 'Main',
     items: [
       { title: 'Dashboard', url: '/control-panel', icon: LayoutDashboard },
-      { title: 'CMS', url: '/control-panel/cms', icon: Monitor },
     ],
   },
   {
@@ -69,6 +51,13 @@ const navigationGroups: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
+    label: 'Content',
+    items: [
+      { title: 'CMS', url: '/control-panel/cms', icon: Monitor },
+      { title: 'Landing Page', url: '/control-panel/landing-page-builder', icon: Globe },
+    ],
+  },
+  {
     label: 'Communication',
     items: [
       { title: 'Support Tickets', url: '/control-panel/support', icon: Headphones },
@@ -79,7 +68,6 @@ const navigationGroups: { label: string; items: NavItem[] }[] = [
     label: 'Platform',
     items: [
       { title: 'Government', url: '/control-panel/government', icon: Landmark },
-      { title: 'Landing Page', url: '/control-panel/landing-page-builder', icon: Globe },
     ],
   },
   {
@@ -161,7 +149,7 @@ export function ControlPanelSidebar() {
         <img src={logo} alt="M-Leja" className="h-7 w-auto" />
         <div>
           <span className="font-bold text-sm tracking-wide">M-Leja</span>
-          <span className="block text-[10px] text-slate-400 -mt-0.5">Control Panel</span>
+          <span className="block text-[10px] text-slate-400 -mt-0.5">Super Admin CMS</span>
         </div>
       </div>
 
@@ -184,7 +172,7 @@ export function ControlPanelSidebar() {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-slate-800">
         <p className="text-[10px] text-slate-500 text-center">
-          M-Leja Admin v2.0
+          M-Leja Super Admin v2.0
         </p>
       </div>
     </aside>
