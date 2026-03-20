@@ -43,6 +43,8 @@ const Support = lazyWithRetry(() => import('@/pages/control-panel/Support'));
 const Communication = lazyWithRetry(() => import('@/pages/control-panel/Communication'));
 const SystemSettings = lazyWithRetry(() => import('@/pages/control-panel/SystemSettings'));
 const Government = lazyWithRetry(() => import('@/pages/control-panel/Government'));
+const Diplomatics = lazyWithRetry(() => import('@/pages/control-panel/Diplomatics'));
+const GovSecurePortal = lazyWithRetry(() => import('@/pages/government/GovSecurePortal'));
 const SubscriptionControl = lazyWithRetry(() => import('@/pages/control-panel/SubscriptionControl'));
 const LandingPageBuilder = lazyWithRetry(() => import('@/pages/control-panel/LandingPageBuilder'));
 const SuperAdminManagement = lazyWithRetry(() => import('@/pages/control-panel/SuperAdminManagement'));
