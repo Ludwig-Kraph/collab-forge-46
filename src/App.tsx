@@ -43,6 +43,8 @@ const Support = lazyWithRetry(() => import('@/pages/control-panel/Support'));
 const Communication = lazyWithRetry(() => import('@/pages/control-panel/Communication'));
 const SystemSettings = lazyWithRetry(() => import('@/pages/control-panel/SystemSettings'));
 const Government = lazyWithRetry(() => import('@/pages/control-panel/Government'));
+const Diplomatics = lazyWithRetry(() => import('@/pages/control-panel/Diplomatics'));
+const GovSecurePortal = lazyWithRetry(() => import('@/pages/government/GovSecurePortal'));
 const SubscriptionControl = lazyWithRetry(() => import('@/pages/control-panel/SubscriptionControl'));
 const LandingPageBuilder = lazyWithRetry(() => import('@/pages/control-panel/LandingPageBuilder'));
 const SuperAdminManagement = lazyWithRetry(() => import('@/pages/control-panel/SuperAdminManagement'));
@@ -115,8 +117,11 @@ const App = () => (
             <Route path="/control-panel/landing-page-builder" element={<SuperAdminRoute><LandingPageBuilder /></SuperAdminRoute>} />
             <Route path="/control-panel/system-settings" element={<SuperAdminRoute><SystemSettings /></SuperAdminRoute>} />
             <Route path="/control-panel/government" element={<SuperAdminRoute><Government /></SuperAdminRoute>} />
+            <Route path="/control-panel/diplomatics" element={<SuperAdminRoute><Diplomatics /></SuperAdminRoute>} />
+            <Route path="/control-panel/diplomatics/*" element={<SuperAdminRoute><Diplomatics /></SuperAdminRoute>} />
             <Route path="/control-panel/super-admin-management" element={<SuperAdminRoute><SuperAdminManagement /></SuperAdminRoute>} />
             <Route path="/control-panel/tokens" element={<SuperAdminRoute><TokenManagement /></SuperAdminRoute>} />
+            <Route path="/gov-secure-portal" element={<GovSecurePortal />} />
             <Route path="/tokens" element={<ProtectedRoute><TokenStore /></ProtectedRoute>} />
             <Route path="/receipts" element={<ProtectedRoute><Receipts /></ProtectedRoute>} />
             <Route path="/subscription/outlets" element={<AdminRoute><SubscriptionOutlets /></AdminRoute>} />

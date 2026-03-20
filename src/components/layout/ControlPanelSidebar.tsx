@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { 
   LayoutDashboard, Users, MessageSquare, Settings, Landmark,
   Package, Shield, Monitor, ChevronDown, ChevronRight,
-  Globe, Headphones, UserPlus, Coins, BarChart3, FileText
+  Globe, Headphones, UserPlus, Coins, BarChart3, FileText,
+  User, Lock, Bell, Palette, Image, Upload, Key,
+  Building2, ScrollText, TicketCheck, Database
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -18,28 +20,22 @@ interface NavItem {
 
 const navigationGroups: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Main',
+    label: 'Dashboard',
     items: [
-      { title: 'Dashboard', url: '/control-panel', icon: LayoutDashboard },
+      { title: 'Dashboard', url: '/control-panel/cms', icon: LayoutDashboard },
     ],
   },
   {
-    label: 'User Management',
+    label: 'Administration — M-Leja Centre',
     items: [
       {
         title: 'Accounts',
         icon: Users,
         children: [
           { title: 'All Accounts', url: '/control-panel/accounts' },
-          { title: 'Super Admins', url: '/control-panel/super-admin-management' },
           { title: 'Onboarding', url: '/control-panel/onboarding' },
         ],
       },
-    ],
-  },
-  {
-    label: 'Subscriptions',
-    items: [
       {
         title: 'Subscriptions',
         icon: Package,
@@ -48,32 +44,57 @@ const navigationGroups: { label: string; items: NavItem[] }[] = [
           { title: 'Token Management', url: '/control-panel/tokens' },
         ],
       },
-    ],
-  },
-  {
-    label: 'Content',
-    items: [
-      { title: 'CMS', url: '/control-panel/cms', icon: Monitor },
-      { title: 'Landing Page', url: '/control-panel/landing-page-builder', icon: Globe },
-    ],
-  },
-  {
-    label: 'Communication',
-    items: [
-      { title: 'Support Tickets', url: '/control-panel/support', icon: Headphones },
-      { title: 'Messaging', url: '/control-panel/communication', icon: MessageSquare },
-    ],
-  },
-  {
-    label: 'Platform',
-    items: [
-      { title: 'Government', url: '/control-panel/government', icon: Landmark },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
+      {
+        title: 'Content',
+        icon: Monitor,
+        children: [
+          { title: 'CMS Pages', url: '/control-panel/content' },
+          { title: 'Landing Page', url: '/control-panel/landing-page-builder' },
+          { title: 'Media Library', url: '/control-panel/media' },
+        ],
+      },
+      {
+        title: 'Communication',
+        icon: MessageSquare,
+        children: [
+          { title: 'Support Tickets', url: '/control-panel/support' },
+          { title: 'Messaging', url: '/control-panel/communication' },
+        ],
+      },
+      {
+        title: 'Diplomatics',
+        icon: Landmark,
+        children: [
+          { title: 'Government Entities', url: '/control-panel/diplomatics' },
+          { title: 'Officials Management', url: '/control-panel/diplomatics/officials' },
+          { title: 'Diplomatic Tickets', url: '/control-panel/diplomatics/tickets' },
+          { title: 'Access & Security', url: '/control-panel/diplomatics/security' },
+        ],
+      },
       { title: 'System Settings', url: '/control-panel/system-settings', icon: Settings },
+    ],
+  },
+  {
+    label: 'Super Admin Account',
+    items: [
+      {
+        title: 'Account',
+        icon: User,
+        children: [
+          { title: 'Profile', url: '/control-panel/account/profile' },
+          { title: 'Super Admins', url: '/control-panel/super-admin-management' },
+          { title: 'Security & MFA', url: '/control-panel/account/security' },
+        ],
+      },
+      {
+        title: 'Navigation',
+        icon: Globe,
+        children: [
+          { title: 'Theme & Design', url: '/control-panel/account/theme' },
+          { title: 'Audit Logs', url: '/control-panel/account/audit' },
+          { title: 'Activity Feed', url: '/control-panel/account/activity' },
+        ],
+      },
     ],
   },
 ];
@@ -131,7 +152,7 @@ function SidebarMenuItem({ item }: { item: NavItem }) {
   return (
     <NavLink
       to={item.url!}
-      end={item.url === '/control-panel'}
+      end={item.url === '/control-panel/cms'}
       className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
       activeClassName="bg-primary/30 text-white font-medium"
     >
