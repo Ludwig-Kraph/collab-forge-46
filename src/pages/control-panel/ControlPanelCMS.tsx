@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import { ControlPanelLayout } from '@/components/layout/ControlPanelLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { MetricWidget } from '@/components/admin/MetricWidget';
 import { StatusIndicator } from '@/components/admin/StatusIndicator';
 import { AlertBanner } from '@/components/admin/AlertBanner';
-import { QuickActionPanel } from '@/components/admin/QuickActionPanel';
 import { SystemHealthMonitor } from '@/components/admin/SystemHealthMonitor';
 import { PlatformInsights } from '@/components/admin/PlatformInsights';
 import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
@@ -18,8 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   Users, Activity, Shield, TrendingUp, Clock, Building2,
   AlertTriangle, UserPlus, MessageSquare, Settings,
-  FileText, Image, Globe, Palette, Layout as LayoutIcon,
-  Upload, Eye, Edit3
+  Package, Landmark, BarChart3, Globe
 } from 'lucide-react';
 
 interface SystemAlert {
@@ -28,14 +25,6 @@ interface SystemAlert {
   message: string;
   severity: "info" | "warning" | "error" | "critical";
   is_resolved: boolean;
-  created_at: string;
-}
-
-interface AuditLog {
-  id: string;
-  user_id: string;
-  action: string;
-  entity_type: string;
   created_at: string;
 }
 
@@ -54,7 +43,6 @@ interface PlatformStats {
 export default function ControlPanelCMS() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<PlatformStats>({
     totalUsers: 0, activeSubscriptions: 0, totalTransactions: 0,
@@ -62,7 +50,6 @@ export default function ControlPanelCMS() {
     systemHealth: "healthy", rbacUsers: 0, governmentEntities: 0
   });
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
-  const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -103,11 +90,6 @@ export default function ControlPanelCMS() {
         .from('system_alerts').select('*')
         .eq('is_resolved', false).order('created_at', { ascending: false }).limit(5);
       if (alertsData) setAlerts(alertsData as SystemAlert[]);
-
-      const { data: logsData } = await supabase
-        .from('audit_logs').select('*')
-        .order('created_at', { ascending: false }).limit(10);
-      if (logsData) setRecentLogs(logsData);
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to load dashboard data", variant: "destructive" });
     } finally {
@@ -123,9 +105,9 @@ export default function ControlPanelCMS() {
         .eq('id', alertId);
       if (error) throw error;
       setAlerts(alerts.filter(a => a.id !== alertId));
-      toast({ title: "Alert Resolved", description: "The alert has been marked as resolved." });
+      toast({ title: "Alert Resolved" });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to resolve alert", variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
@@ -138,8 +120,8 @@ export default function ControlPanelCMS() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">M-Leja Super Admin CMS</h1>
-              <p className="text-sm text-muted-foreground">Master administration &amp; content management</p>
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Platform overview &amp; real-time monitoring</p>
             </div>
             <StatusIndicator status={stats.systemHealth} label="System Status" />
           </div>
@@ -159,242 +141,59 @@ export default function ControlPanelCMS() {
             </div>
           )}
 
-          {/* Main CMS Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="flex-wrap h-auto gap-1">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
-              <TabsTrigger value="design">Design</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-            </TabsList>
+          {/* Key Metrics */}
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+            <MetricWidget title="Total Users" value={stats.totalUsers} icon={Users} trend={{ value: 12, label: "from last month" }} />
+            <MetricWidget title="Active Subscriptions" value={stats.activeSubscriptions} icon={Package} trend={{ value: 8, label: "from last month" }} />
+            <MetricWidget title="Transactions" value={stats.totalTransactions.toLocaleString()} icon={Activity} trend={{ value: 23, label: "from last week" }} />
+            <MetricWidget title="Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={TrendingUp} trend={{ value: 22, label: "from last month" }} />
+          </div>
 
-            {/* Dashboard Tab */}
-            <TabsContent value="dashboard" className="space-y-4">
-              {/* Key Metrics */}
-              <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                <MetricWidget title="Total Users" value={stats.totalUsers} icon={Users} trend={{ value: 12, label: "from last month" }} />
-                <MetricWidget title="Active Subscriptions" value={stats.activeSubscriptions} icon={TrendingUp} trend={{ value: 8, label: "from last month" }} />
-                <MetricWidget title="Total Transactions" value={stats.totalTransactions.toLocaleString()} icon={Activity} trend={{ value: 23, label: "from last week" }} />
-                <MetricWidget title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={TrendingUp} trend={{ value: 22, label: "from last month" }} />
-              </div>
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+            <MetricWidget title="RBAC Users" value={stats.rbacUsers} icon={Shield} className="border-primary/20" />
+            <MetricWidget title="Gov. Entities" value={stats.governmentEntities} icon={Landmark} className="border-primary/20" />
+            <MetricWidget title="Pending Registrations" value={stats.pendingRegistrations} icon={Clock} className="border-orange-500/20" />
+            <MetricWidget title="Open Tickets" value={stats.openTickets} icon={AlertTriangle} className="border-yellow-500/20" />
+          </div>
 
-              <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                <MetricWidget title="RBAC Users" value={stats.rbacUsers} icon={Shield} className="border-primary/20" />
-                <MetricWidget title="Government Entities" value={stats.governmentEntities} icon={Building2} className="border-primary/20" />
-                <MetricWidget title="Pending Registrations" value={stats.pendingRegistrations} icon={Clock} className="border-orange-500/20" />
-                <MetricWidget title="Open Tickets" value={stats.openTickets} icon={AlertTriangle} className="border-yellow-500/20" />
-              </div>
+          {/* Quick Actions + Health */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-2 grid-cols-2">
+                {[
+                  { title: "Onboarding", icon: UserPlus, path: "/control-panel/onboarding", badge: stats.pendingRegistrations },
+                  { title: "Support", icon: MessageSquare, path: "/control-panel/support", badge: stats.openTickets },
+                  { title: "Subscriptions", icon: Package, path: "/control-panel/subscription-control" },
+                  { title: "Accounts", icon: Shield, path: "/control-panel/accounts" },
+                  { title: "Diplomatics", icon: Landmark, path: "/control-panel/diplomatics" },
+                  { title: "Settings", icon: Settings, path: "/control-panel/system-settings" },
+                  { title: "Landing Page", icon: Globe, path: "/control-panel/landing-page-builder" },
+                  { title: "Analytics", icon: BarChart3, path: "/control-panel/account/activity" },
+                ].map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <Button
+                      key={action.title}
+                      variant="outline"
+                      size="sm"
+                      className="justify-start gap-2 h-auto py-2.5"
+                      onClick={() => window.location.href = action.path}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="flex-1 text-left">{action.title}</span>
+                      {action.badge ? <Badge variant="destructive" className="text-[10px] h-5">{action.badge}</Badge> : null}
+                    </Button>
+                  );
+                })}
+              </CardContent>
+            </Card>
+            <SystemHealthMonitor />
+          </div>
 
-              <div className="grid gap-4 lg:grid-cols-2">
-                <QuickActionPanel
-                  actions={[
-                    { title: "Create Super Admin", description: "Register new Super Admin accounts", icon: Shield, path: "/control-panel/super-admin-management", variant: "outline" },
-                    { title: "Review Registrations", description: "Approve or reject new registrations", icon: UserPlus, path: "/control-panel/onboarding", badge: stats.pendingRegistrations, variant: stats.pendingRegistrations > 0 ? "default" : "outline" },
-                    { title: "Support Tickets", description: "Respond to support requests", icon: MessageSquare, path: "/control-panel/support", badge: stats.openTickets, variant: stats.openTickets > 0 ? "default" : "outline" },
-                    { title: "RBAC Management", description: "Manage role-based accounts", icon: Shield, path: "/control-panel/accounts" },
-                    { title: "System Settings", description: "Platform configuration", icon: Settings, path: "/control-panel/system-settings" },
-                    { title: "Landing Page Builder", description: "Customize landing page", icon: Globe, path: "/control-panel/landing-page-builder" },
-                    { title: "Subscription Tiers", description: "Manage plans & pricing", icon: Settings, path: "/control-panel/subscription-control" },
-                    { title: "Token Management", description: "Manage token packages", icon: Settings, path: "/control-panel/tokens" },
-                  ]}
-                />
-                <SystemHealthMonitor />
-              </div>
-
-              <PlatformInsights />
-            </TabsContent>
-
-            {/* Activity Tab */}
-            <TabsContent value="activity" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Audit Logs</CardTitle>
-                  <CardDescription>Latest system activities and changes</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentLogs.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No recent activity</p>
-                    ) : (
-                      recentLogs.map((log) => (
-                        <div key={log.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                          <div>
-                            <p className="text-sm font-medium">{log.action}</p>
-                            <p className="text-xs text-muted-foreground">{log.entity_type}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Content Tab */}
-            <TabsContent value="content" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold">Content Management</h2>
-                  <p className="text-sm text-muted-foreground">Manage pages, posts, and sections</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm"><Eye className="h-4 w-4 mr-2" />Preview</Button>
-                  <Button size="sm"><Upload className="h-4 w-4 mr-2" />Publish</Button>
-                </div>
-              </div>
-
-              <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Pages</CardTitle>
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent><div className="text-2xl font-bold">12</div></CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Media Assets</CardTitle>
-                    <Image className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent><div className="text-2xl font-bold">248</div></CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Site Visitors</CardTitle>
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent><div className="text-2xl font-bold">12.5K</div></CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Last Updated</CardTitle>
-                    <Settings className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent><div className="text-2xl font-bold">2h</div></CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pages</CardTitle>
-                  <CardDescription>Manage site pages and content</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {[
-                      { title: 'Landing Page', icon: LayoutIcon, status: 'published', lastEdit: '2h ago' },
-                      { title: 'About Us', icon: FileText, status: 'published', lastEdit: '1d ago' },
-                      { title: 'Services', icon: FileText, status: 'published', lastEdit: '3d ago' },
-                      { title: 'Blog Posts', icon: FileText, status: 'draft', lastEdit: '5d ago' },
-                      { title: 'FAQ', icon: FileText, status: 'published', lastEdit: '1w ago' },
-                      { title: 'Contact', icon: FileText, status: 'published', lastEdit: '2w ago' },
-                    ].map((page, index) => {
-                      const Icon = page.icon;
-                      return (
-                        <Card key={index} className="hover:border-primary/50 transition-colors cursor-pointer">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                              <Icon className="h-8 w-8 text-primary" />
-                              <Badge variant={page.status === 'published' ? 'default' : 'secondary'}>{page.status}</Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="space-y-2">
-                            <h3 className="font-semibold">{page.title}</h3>
-                            <p className="text-xs text-muted-foreground">Last edited {page.lastEdit}</p>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" className="w-full"><Edit3 className="h-3 w-3 mr-1" />Edit</Button>
-                              <Button size="sm" variant="ghost" className="w-full"><Eye className="h-3 w-3 mr-1" />View</Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Media Tab */}
-            <TabsContent value="media" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Media Library</CardTitle>
-                  <CardDescription>Manage images, videos, and documents</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                    <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Upload Media</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Drag and drop files here or click to browse</p>
-                    <Button><Upload className="h-4 w-4 mr-2" />Choose Files</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Design Tab */}
-            <TabsContent value="design" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Theme &amp; Design</CardTitle>
-                  <CardDescription>Customize the look and feel of M-Leja</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="border-2 border-primary">
-                      <CardHeader><Palette className="h-8 w-8 text-primary mb-2" /><CardTitle className="text-base">Current Theme</CardTitle></CardHeader>
-                      <CardContent><p className="text-sm text-muted-foreground">Professional Green</p><Button size="sm" variant="outline" className="w-full mt-3">Customize</Button></CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader><Palette className="h-8 w-8 text-muted-foreground mb-2" /><CardTitle className="text-base">Alternative Theme</CardTitle></CardHeader>
-                      <CardContent><p className="text-sm text-muted-foreground">Modern Blue</p><Button size="sm" variant="outline" className="w-full mt-3">Apply</Button></CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader><Palette className="h-8 w-8 text-muted-foreground mb-2" /><CardTitle className="text-base">Custom Theme</CardTitle></CardHeader>
-                      <CardContent><p className="text-sm text-muted-foreground">Create Your Own</p><Button size="sm" variant="outline" className="w-full mt-3">Create</Button></CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Security Tab */}
-            <TabsContent value="security" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Security Overview</CardTitle>
-                  <CardDescription>System security status and monitoring</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { label: 'Multi-Factor Authentication', status: 'Active' },
-                      { label: 'Row Level Security', status: 'Enabled' },
-                      { label: 'Audit Logging', status: 'Active' },
-                      { label: 'Data Encryption', status: 'Enabled' },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{item.label}</span>
-                        <Badge variant="outline" className="bg-green-500/10 text-green-600">{item.status}</Badge>
-                      </div>
-                    ))}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Failed Login Attempts (24h)</span>
-                      <Badge variant="outline">0</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <PlatformInsights />
         </div>
       )}
     </ControlPanelLayout>
