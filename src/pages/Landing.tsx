@@ -1,414 +1,214 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Shield,
-  Zap,
-  TrendingUp,
-  Users,
-  Building2,
-  Check,
-  Calendar,
-  CalendarDays,
-  CalendarClock,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { AlertCircle } from "lucide-react";
+import { ArrowRight, Check, Smartphone, BookOpen, ShieldCheck, Radio, Users, Receipt, Phone, Mail, Globe } from "lucide-react";
+import { NetworkCanvas } from "@/components/landing/NetworkCanvas";
 import logo from "@/assets/m-leja-logo.png";
+import mpesa from "@/assets/rails/mpesa.jpg";
+import airtel from "@/assets/rails/airtel.png";
+import mtn from "@/assets/rails/mtn.png";
+import tigo from "@/assets/rails/tigo.png";
 import { getCopyrightText } from "@/utils/copyright";
-import { supabase } from "@/integrations/supabase/client";
 
-interface Tier {
-  name: string;
-  price: string;
-  period?: string;
-  description: string;
-  features: string[];
-  popular?: boolean;
+const WORDS = ["payments", "ledgers", "receipts", "teams", "outlets"];
+
+function KineticWord() {
+  const [i, setI] = useState(0);
+  useEffect(() => { const id = setInterval(() => setI((v) => (v + 1) % WORDS.length), 2200); return () => clearInterval(id); }, []);
+  return (
+    <span className="relative inline-block min-w-[6ch] text-primary">
+      <span key={i} className="inline-block animate-fade-in">{WORDS[i]}</span>
+    </span>
+  );
 }
 
+function Simulator() {
+  const steps = [
+    { icon: Smartphone, label: "Cashier enters phone & amount", detail: "254 7•• ••• 012 · KES 1,250" },
+    { icon: Radio, label: "STK push sent to customer", detail: "Prompt delivered in < 2s" },
+    { icon: ShieldCheck, label: "Customer approves with PIN", detail: "Verified M-PESA sender only" },
+    { icon: BookOpen, label: "Ledger updated in real time", detail: "Balance +1,250.00" },
+    { icon: Receipt, label: "Receipt issued", detail: "MLJ-BTILL-00042-10-2026-…" },
+  ];
+  const [s, setS] = useState(0);
+  useEffect(() => { const id = setInterval(() => setS((v) => (v + 1) % (steps.length + 1)), 1600); return () => clearInterval(id); }, []);
+  return (
+    <div className="rounded-2xl border bg-card p-6 shadow-lg">
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm font-semibold">Live simulation</p>
+        <Badge variant="outline" className="gap-1.5"><span className="h-2 w-2 rounded-full bg-primary animate-pulse" />running</Badge>
+      </div>
+      <ol className="space-y-3">
+        {steps.map((st, idx) => {
+          const on = idx < s;
+          return (
+            <li key={st.label} className={`flex items-center gap-3 rounded-lg border p-3 transition-all duration-500 ${on ? "border-primary/40 bg-primary/5 translate-x-0 opacity-100" : "opacity-40 -translate-x-1"}`}>
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}><st.icon className="h-4 w-4" /></div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{st.label}</p>
+                <p className="text-xs text-muted-foreground font-mono truncate">{st.detail}</p>
+              </div>
+              {on && <Check className="ml-auto h-4 w-4 text-primary" />}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+const plans = [
+  { name: "Get Started Free", price: "KES 0", note: "3 trial STK pushes", users: "1 user" },
+  { name: "Raia Pochi", price: "KES 1,200/mo", note: "or 50/day · Pochi under consideration", users: "1 user" },
+  { name: "Raia Till", price: "KES 2,000/mo", note: "or 80/day · 5,000 pushes", users: "3 users" },
+  { name: "Business Till", price: "KES 3,500/mo", note: "35,000/yr · 12,000 pushes", users: "15 users", popular: true },
+  { name: "Business Paybill", price: "KES 5,000/mo", note: "50,000/yr · 20,000 pushes", users: "10 users" },
+  { name: "Corporate", price: "Custom", note: "Till or Paybill · unlimited pushes", users: "Up to 10,000 users" },
+];
+
 export default function Landing() {
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [tiers, setTiers] = useState<Tier[]>([]);
-  const [loadingTiers, setLoadingTiers] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState<
-    "daily" | "monthly" | "annual"
-  >("monthly");
-
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchTiers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("subscription_tiers")
-          .select("*")
-          .eq("show_on_landing", true)
-          .eq("is_active", true)
-          .eq("period", selectedPeriod)
-          .order("price", { ascending: true });
-
-        const filteredData = data?.filter(
-          (tier) => !tier.name.toLowerCase().includes("government")
-        );
-
-        if (mounted && filteredData && !error) {
-          const formattedTiers: Tier[] = filteredData.map((tier) => ({
-            name: tier.name,
-            price:
-              tier.price === 0
-                ? "Free"
-                : `${tier.currency} ${tier.price.toLocaleString()}`,
-            period: tier.is_period_enabled ? `/${tier.period}` : undefined,
-            description: tier.description || "",
-            features: (
-              Array.isArray(tier.features) ? tier.features : []
-            ).filter((f): f is string => typeof f === "string"),
-            popular: tier.is_recommended || false,
-          }));
-          setTiers(formattedTiers);
-        }
-      } catch (error) {
-        console.error("Error fetching tiers:", error);
-      } finally {
-        if (mounted) setLoadingTiers(false);
-      }
-    };
-
-    fetchTiers();
-    return () => { mounted = false; };
-  }, [selectedPeriod]);
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [user, loading, navigate]);
-
-  if (loading) return null;
-
-  const features = [
-    {
-      icon: Zap,
-      title: "STK Push Integration",
-      description:
-        "Trigger payment requests directly to Till, Paybill, or Pochi numbers",
-    },
-    {
-      icon: Shield,
-      title: "Secure & Encrypted",
-      description:
-        "End-to-end encryption ensures your payment data is always protected",
-    },
-    {
-      icon: Sparkles,
-      title: "Automatic Capture",
-      description:
-        "MPESA transaction messages are automatically parsed and recorded",
-    },
-    {
-      icon: TrendingUp,
-      title: "Digital Ledger",
-      description:
-        "Comprehensive transaction history with real-time balance tracking",
-    },
-    {
-      icon: Users,
-      title: "Multi-User Access",
-      description:
-        "Role-based permissions for team collaboration and management",
-    },
-    {
-      icon: Building2,
-      title: "Enterprise Ready",
-      description:
-        "Analytics and reporting for corporate and government agencies",
-    },
-  ];
-
-  const periods = [
-    { key: "daily" as const, label: "Daily", icon: Calendar, hint: "💡 Perfect for testing" },
-    { key: "monthly" as const, label: "Monthly", icon: CalendarDays, hint: "⭐ Most popular" },
-    { key: "annual" as const, label: "Annual", icon: CalendarClock, hint: "🎉 Save over 20%", badge: "Save 20%" },
-  ];
+  const { user } = useAuth();
+  const go = () => navigate(user ? "/dashboard" : "/auth");
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 glass border-b">
-        <div className="container flex h-14 items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
+        <div className="container flex h-16 items-center justify-between">
           <img src={logo} alt="M-Leja" className="h-8 w-auto" />
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}>
-              Pricing
-            </Button>
-            <Button size="sm" onClick={() => navigate("/auth")}>
-              Get Started
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Button>
-          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#how" className="hover:text-foreground">How it works</a>
+            <a href="#rails" className="hover:text-foreground">Networks</a>
+            <a href="#plans" className="hover:text-foreground">Plans</a>
+            <a href="#about" className="hover:text-foreground">About</a>
+          </nav>
+          <Button size="sm" onClick={go}>{user ? "Dashboard" : "Sign in"}</Button>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
-        <div className="container relative py-24 md:py-36">
-          <div className="mx-auto max-w-3xl text-center space-y-8">
-            <Badge variant="secondary" className="gap-1.5 px-3 py-1">
-              <Sparkles className="h-3 w-3" />
-              Trusted by 500+ businesses in Kenya
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.1]">
-              Streamline Your{" "}
-              <span className="bg-gradient-hero bg-clip-text text-transparent">
-                MPESA Payments
-              </span>
+      <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-foreground text-background">
+        <NetworkCanvas />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/80 to-transparent" />
+        <div className="container relative z-10 pt-24 pb-16">
+          <div className="max-w-2xl space-y-6 animate-fade-in">
+            <Badge className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/20">East Africa's payment ledger network</Badge>
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
+              One ledger for all your <KineticWord />
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Trigger STK push payments, automatically capture transactions, and
-              manage your digital ledger — all in one powerful platform.
+            <p className="text-lg text-background/70 leading-relaxed">
+              M-Leja turns every mobile-money payment into an organised, auditable record. Prompt customers with an STK push,
+              watch the money land in real time, and close each day with clean books, verified receipts and a team that works as one.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-              <Button
-                size="lg"
-                onClick={() => navigate("/auth")}
-                className="shadow-elegant text-base h-12 px-8"
-              >
-                Start Free Trial
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() =>
-                  document
-                    .getElementById("features")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-                className="text-base h-12 px-8"
-              >
-                Learn More
-              </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button size="lg" onClick={go} className="gap-2">Start free — 3 STK pushes <ArrowRight className="h-4 w-4" /></Button>
+              <Button size="lg" variant="outline" className="bg-transparent border-background/30 text-background hover:bg-background/10 hover:text-background" asChild><a href="#how">See it in motion</a></Button>
             </div>
-            <p className="text-sm text-muted-foreground">
-              ✨ No credit card required · 3 free STK pushes included
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-20 bg-muted/30">
-        <div className="container">
-          <div className="text-center mb-14">
-            <h2 className="mb-3">
-              Everything You Need to Manage MPESA Payments
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              M-Leja provides all the tools to streamline your payment operations
-            </p>
+      {/* How it works */}
+      <section id="how" className="py-24">
+        <div className="container grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">From prompt to receipt in seconds</h2>
+            <p className="text-muted-foreground leading-relaxed">Link your Till or Paybill, invite your cashiers and start collecting. Every confirmation is checked against the genuine M-PESA sender, spoofed messages are blocked and flagged, and your ledger stays honest.</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                [Radio, "STK push", "Request payment from any phone"],
+                [BookOpen, "Digital ledger", "Received, spent and balance"],
+                [Users, "Teams & outlets", "Roles for every cashier"],
+                [ShieldCheck, "Layered sign-in", "Puzzle, PIN & authenticator"],
+              ].map(([I, t, d]: any) => (
+                <div key={t} className="rounded-xl border p-4 hover:border-primary/40 transition-colors">
+                  <I className="h-5 w-5 text-primary mb-2" />
+                  <p className="font-medium text-sm">{t}</p>
+                  <p className="text-xs text-muted-foreground">{d}</p>
+                </div>
+              ))}
+            </div>
           </div>
+          <Simulator />
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-            {features.map((feature) => (
-              <Card
-                key={feature.title}
-                className="hover-lift border-border/60 bg-gradient-card"
-              >
-                <CardHeader className="pb-3">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-base">{feature.title}</CardTitle>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+      {/* Rails */}
+      <section id="rails" className="py-20 bg-muted/40 border-y">
+        <div className="container text-center space-y-10">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Payment networks</h2>
+            <p className="text-muted-foreground mt-2">Currently supporting M-PESA by Safaricom. More networks are on the way.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {[
+              { src: mpesa, name: "M-PESA · Safaricom", live: true },
+              { src: airtel, name: "Airtel Money" },
+              { src: mtn, name: "MTN MoMo" },
+              { src: tigo, name: "Tigo Pesa" },
+            ].map((r, i) => (
+              <div key={r.name} className="group rounded-2xl border bg-card p-6 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-lg animate-fade-in" style={{ animationDelay: `${i * 120}ms` }}>
+                <div className="h-20 flex items-center">
+                  <img src={r.src} alt={r.name} className={`max-h-20 max-w-[140px] object-contain transition ${r.live ? "" : "grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100"}`} />
+                </div>
+                <p className="text-sm font-medium">{r.name}</p>
+                {r.live ? <Badge>Live now</Badge> : <Badge variant="secondary">Coming soon</Badge>}
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20">
-        <div className="container">
-          <div className="text-center mb-10">
-            <h2 className="mb-3">Simple, Transparent Pricing</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Start with our free trial and upgrade as you grow. No hidden fees.
-            </p>
-
-            {/* Period Switcher */}
-            <div className="flex justify-center mt-8">
-              <div className="inline-flex rounded-xl border bg-muted/50 p-1 gap-1">
-                {periods.map((p) => (
-                  <button
-                    key={p.key}
-                    onClick={() => setSelectedPeriod(p.key)}
-                    className={cn(
-                      "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5",
-                      selectedPeriod === p.key
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <p.icon className="h-3.5 w-3.5" />
-                    {p.label}
-                    {p.badge && selectedPeriod !== p.key && (
-                      <Badge className="ml-1 text-[10px] px-1.5 py-0 bg-accent text-accent-foreground">
-                        {p.badge}
-                      </Badge>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <p className="mt-4 text-sm text-muted-foreground">
-              {periods.find((p) => p.key === selectedPeriod)?.hint}
-            </p>
+      {/* Plans */}
+      <section id="plans" className="py-24">
+        <div className="container space-y-10">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight">Plans that grow with you</h2>
+            <p className="text-muted-foreground mt-2">Top up anytime with M-Leja Credits when you need extra pushes.</p>
           </div>
-
-          {loadingTiers ? (
-            <div className="text-center py-16">
-              <div className="h-10 w-10 rounded-full bg-primary/20 animate-pulse-soft mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">Loading plans...</p>
-            </div>
-          ) : tiers.length === 0 ? (
-            <div className="text-center py-16 animate-fade-in">
-              <AlertCircle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-muted-foreground">
-                No {selectedPeriod} plans available yet.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                onClick={() => setSelectedPeriod("monthly")}
-              >
-                View Monthly Plans
-              </Button>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto stagger-children">
-              {tiers.map((tier) => (
-                <Card
-                  key={tier.name}
-                  className={cn(
-                    "relative hover-lift",
-                    tier.popular && "border-primary shadow-elegant ring-1 ring-primary/20"
-                  )}
-                >
-                  <CardHeader className="pb-4">
-                    {tier.popular && (
-                      <Badge className="w-fit mb-2 bg-primary/10 text-primary border-0 text-xs">
-                        ⭐ Most Popular
-                      </Badge>
-                    )}
-                    <CardTitle className="text-lg">{tier.name}</CardTitle>
-                    <div className="mt-3">
-                      <span className="text-3xl font-bold tracking-tight">
-                        {tier.price}
-                      </span>
-                      {tier.period && (
-                        <span className="text-muted-foreground text-sm">
-                          {tier.period}
-                        </span>
-                      )}
-                    </div>
-                    <CardDescription className="mt-2 text-xs leading-relaxed min-h-[2.5rem]">
-                      {tier.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2.5 mb-6">
-                      {tier.features.map((feature, i) => (
-                        <li
-                          key={`${tier.name}-${i}`}
-                          className="flex items-start gap-2"
-                        >
-                          <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      className="w-full"
-                      variant={tier.popular ? "default" : "outline"}
-                      onClick={() => navigate("/auth")}
-                    >
-                      Get Started
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {plans.map((p) => (
+              <div key={p.name} className={`rounded-2xl border p-6 space-y-3 ${p.popular ? "border-primary shadow-lg ring-1 ring-primary/30" : ""}`}>
+                <div className="flex items-center justify-between"><p className="font-semibold">{p.name}</p>{p.popular && <Badge>Popular</Badge>}</div>
+                <p className="text-2xl font-bold font-mono">{p.price}</p>
+                <p className="text-sm text-muted-foreground">{p.note}</p>
+                <p className="text-sm flex items-center gap-2"><Check className="h-4 w-4 text-primary" />{p.users}</p>
+                <Button variant={p.popular ? "default" : "outline"} className="w-full" onClick={go}>Choose</Button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20">
-        <div className="container">
-          <Card className="border-0 shadow-lg bg-gradient-hero text-primary-foreground overflow-hidden">
-            <CardContent className="p-10 md:p-16 text-center relative">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to Streamline Your Payments?
-              </h2>
-              <p className="text-lg mb-8 opacity-90 max-w-xl mx-auto">
-                Join businesses and organizations using M-Leja to manage their
-                MPESA operations
-              </p>
-              <Button
-                size="lg"
-                variant="secondary"
-                onClick={() => navigate("/auth")}
-                className="h-12 px-8 text-base"
-              >
-                Start Your Free Trial
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
+      {/* About */}
+      <section id="about" className="py-24 bg-foreground text-background">
+        <div className="container grid lg:grid-cols-2 gap-12">
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight">About M-Leja</h2>
+            <p className="text-background/70 leading-relaxed">
+              M-Leja was developed by Senior Developer and Al Yasir Bin Zayed Founder, <strong className="text-background">Mr. Timothy Ng'ang'a</strong>.
+              Built for merchants, enterprises and institutions across East Africa, it brings payment collection, record-keeping and team management into one secure workspace.
+            </p>
+            <p className="text-background/70 leading-relaxed">The project is developed, owned and maintained by <strong className="text-background">Al Yasir Bin Zayed</strong>.</p>
+          </div>
+          <div className="space-y-3 text-sm">
+            <p className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" />+254 717 227 012</p>
+            <p className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" />support@mleja.com · business@mleja.com</p>
+            <p className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" />support@mleja.yasirzayed.com · business@mleja.yasirzayed.com</p>
+            <p className="flex items-center gap-3"><Globe className="h-4 w-4 text-primary" />www.mleja.com · www.mleja.yasirzayed.com</p>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-8 bg-muted/30">
-        <div className="container">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-            <p>{getCopyrightText()}</p>
-            <div className="flex gap-4 text-xs">
-              <Link to="/help" className="hover:text-foreground transition-colors">
-                Help
-              </Link>
-              <Link to="/how-to" className="hover:text-foreground transition-colors">
-                How To
-              </Link>
-              <Link to="/cookie-policy" className="hover:text-foreground transition-colors">
-                Cookies
-              </Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">
-                Privacy
-              </Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">
-                Terms
-              </Link>
-            </div>
+      <footer className="border-t py-6">
+        <div className="container flex flex-col sm:flex-row justify-between gap-3 text-xs text-muted-foreground">
+          <p>{getCopyrightText()}</p>
+          <div className="flex gap-4">
+            <a href="/terms" className="hover:text-foreground">Terms</a>
+            <a href="/privacy" className="hover:text-foreground">Privacy</a>
+            <a href="/help" className="hover:text-foreground">Help</a>
           </div>
         </div>
       </footer>

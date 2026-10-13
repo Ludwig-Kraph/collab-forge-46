@@ -24,7 +24,7 @@ const HowTo = () => {
             </TabsTrigger>
             <TabsTrigger value="pochi" className="gap-2" disabled>
               <Wallet className="w-4 h-4" />
-              Pochi (Under Construction)
+              Pochi (Under Consideration)
             </TabsTrigger>
             <TabsTrigger value="till" className="gap-2">
               <Store className="w-4 h-4" />
@@ -241,7 +241,7 @@ const HowTo = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <Wallet className="w-6 h-6 text-primary" />
-                  Pochi la Biashara Integration (Under Construction)
+                  Pochi la Biashara Integration (Under Consideration)
                 </CardTitle>
                 <CardDescription>
                   This feature is currently under construction and will be available soon
@@ -250,7 +250,7 @@ const HowTo = () => {
               <CardContent className="space-y-6">
                 <div className="bg-muted rounded-lg p-6">
                   <p className="text-muted-foreground text-center">
-                    Pochi la Biashara integration is coming soon. Please use Till or Paybill in the meantime.
+                    Pochi la Biashara integration is under consideration. Please use Till or Paybill in the meantime.
                   </p>
                 </div>
               </CardContent>

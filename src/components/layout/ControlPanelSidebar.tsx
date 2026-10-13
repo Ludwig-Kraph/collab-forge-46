@@ -169,8 +169,8 @@ export function ControlPanelSidebar() {
       <div className="h-16 flex items-center gap-3 px-4 border-b border-slate-800">
         <img src={logo} alt="M-Leja" className="h-7 w-auto" />
         <div>
-          <span className="font-bold text-sm tracking-wide">M-Leja</span>
-          <span className="block text-[10px] text-slate-400 -mt-0.5">Super Admin CMS</span>
+          <span className="font-bold text-sm tracking-wide">Mleja Berkshire</span>
+          <span className="block text-[10px] text-slate-400 -mt-0.5">Berkshire Console</span>
         </div>
       </div>
 
@@ -193,7 +193,7 @@ export function ControlPanelSidebar() {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-slate-800">
         <p className="text-[10px] text-slate-500 text-center">
-          M-Leja Super Admin v2.0
+          Mleja Berkshire v3.0
         </p>
       </div>
     </aside>

@@ -30,7 +30,22 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
-    console.log('Processing SMS:', { userId, phoneNumber, messageBody });
+    // Anti-fraud: only genuine M-PESA sender IDs are accepted
+    const TRUSTED_SENDERS = ['MPESA', 'M-PESA', 'SAFARICOM'];
+    const senderId = String(phoneNumber).trim().toUpperCase();
+    if (!TRUSTED_SENDERS.includes(senderId)) {
+      await supabaseClient.from('system_alerts').insert({
+        title: 'Fraudulent M-PESA message blocked',
+        message: `Spoofed payment SMS from ${phoneNumber} (user ${userId}): ${String(messageBody).slice(0, 160)}`,
+        severity: 'critical',
+      });
+      return new Response(
+        JSON.stringify({ success: false, flagged: true, error: 'Message rejected: sender is not M-PESA' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
+
+    console.log('Processing SMS:', { userId, senderId });
 
     // Parse MPESA confirmation message
     // Example format: "RBK1ABC123 Confirmed. Ksh5,000.00 received from 254712345678 on 01/01/2024 at 10:30 AM"

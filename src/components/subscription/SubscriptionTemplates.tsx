@@ -30,7 +30,7 @@ const SUBSCRIPTION_TEMPLATES: TemplateFeatures[] = [
   },
   {
     name: 'Raia Pochi',
-    description: 'For individual Pochi la Biashara users',
+    description: 'For individual Pochi la Biashara users (Pochi under consideration)',
     period: 'monthly',
     features: ['1 User Account', '1,000 STK Pushes/month', 'Basic Analytics', 'Transaction History', 'Digital Ledger', 'Email Support', 'Mobile & Web Access'],
     pricing: { daily: 50, monthly: 1200 },

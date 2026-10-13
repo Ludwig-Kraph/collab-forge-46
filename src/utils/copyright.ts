@@ -3,5 +3,5 @@ export const getCurrentYear = (): number => {
 };
 
 export const getCopyrightText = (): string => {
-  return `© ${getCurrentYear()} M-Leja. All rights reserved.`;
+  return `© ${getCurrentYear()} Al Yasir Bin Zayed. M-Leja is developed and maintained by Al Yasir Bin Zayed.`;
 };

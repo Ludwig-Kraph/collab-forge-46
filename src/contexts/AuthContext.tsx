@@ -309,6 +309,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
+      try { sessionStorage.removeItem("mleja.rm"); } catch {}
       // Clear local state first
       setUser(null);
       setSession(null);
