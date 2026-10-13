@@ -391,7 +391,7 @@ const Settings = () => {
                           <SelectContent>
                             <SelectItem value="till">Till Number</SelectItem>
                             <SelectItem value="paybill">Paybill Number</SelectItem>
-                            <SelectItem value="pochi" disabled>Pochi la Biashara (Under Construction)</SelectItem>
+                            <SelectItem value="pochi" disabled>Pochi la Biashara (Under Consideration)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
