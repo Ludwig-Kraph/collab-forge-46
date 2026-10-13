@@ -17,6 +17,9 @@ import { RegistrationWizard } from "@/components/auth/RegistrationWizard";
 import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
 import { ForgotPassword } from "@/components/auth/ForgotPassword";
 import logo from "@/assets/m-leja-logo.png";
+import { SecurityPuzzle } from "@/components/security/SecurityPuzzle";
+import { getSecurity, verifyTotp, verifyPin } from "@/lib/totp";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Auth() {
   const { user, signIn } = useAuth();
@@ -29,6 +32,12 @@ export default function Auth() {
 
   const [loginPhone, setLoginPhone] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [puzzleOk, setPuzzleOk] = useState(false);
+  const [puzzleKey, setPuzzleKey] = useState(0);
+  const [needs, setNeeds] = useState<{ totp: boolean; pin: boolean } | null>(null);
+  const [totpCode, setTotpCode] = useState("");
+  const [pinCode, setPinCode] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) navigate("/dashboard", { replace: true });
@@ -43,8 +52,15 @@ export default function Auth() {
     else if (normalizedPhone.startsWith("0")) normalizedPhone = "254" + normalizedPhone.slice(1);
     else if (!normalizedPhone.startsWith("254")) normalizedPhone = "254" + normalizedPhone;
 
+    if (!puzzleOk) { setLoading(false); toast({ title: "Complete the verification puzzle", variant: "destructive" }); return; }
+    const sec = await getSecurity(normalizedPhone);
+    const req = { totp: !!sec.totp, pin: !!sec.pinHash };
+    if ((req.totp || req.pin) && !needs) { setNeeds(req); setLoading(false); return; }
+    if (req.pin && !(await verifyPin(normalizedPhone, pinCode))) { setLoading(false); toast({ title: "Incorrect PIN", variant: "destructive" }); return; }
+    if (req.totp && !(await verifyTotp(sec.totp!, totpCode))) { setLoading(false); toast({ title: "Invalid authenticator code", variant: "destructive" }); return; }
     await signIn(normalizedPhone, loginPassword);
     setLoading(false);
+    setPuzzleOk(false); setPuzzleKey((k) => k + 1); setNeeds(null); setTotpCode(""); setPinCode("");
   };
 
   if (showRegistration) {
@@ -186,6 +202,21 @@ export default function Auth() {
                     className="h-10"
                   />
                 </div>
+
+                <SecurityPuzzle key={puzzleKey} onSolved={setPuzzleOk} />
+
+                {needs?.pin && (
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">Login PIN</Label>
+                    <Input type="password" inputMode="numeric" maxLength={4} value={pinCode} onChange={(e) => setPinCode(e.target.value.replace(/\D/g, ""))} className="h-10 font-mono tracking-[0.5em] text-center" placeholder="••••" />
+                  </div>
+                )}
+                {needs?.totp && (
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">Google Authenticator code</Label>
+                    <Input inputMode="numeric" maxLength={6} value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))} className="h-10 font-mono tracking-[0.4em] text-center" placeholder="000000" />
+                  </div>
+                )}
 
                 <Button
                   type="submit"
